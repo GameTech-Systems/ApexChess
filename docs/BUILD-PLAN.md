@@ -9,7 +9,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. `/end-session` updates the st
 1. The owner opens a new Claude Code session on this repo (claude.ai/code), sets the model and effort the step recommends, and sends `/start-session S<n>`, optionally followed by a brief pasted from the ledger.
 2. Claude reads `docs/HANDOFF.md` (loaded automatically) and only this file's section for the step.
 3. Claude plans, writes failing tests, implements, and commits after each green task.
-4. `/end-session` runs the checks, rewrites the handoff, logs the session, ships the PR (opens, waits for CI, merges), and ends with the next-session recommendation and a `ledger-sync` block for the owner's ledger.
+4. `/end-session` runs the checks, rewrites the handoff, logs the session, ships the PR (opens, waits for CI, merges), and ends with the next session's step, model, and effort (with the `/model` and `/effort` commands to set) and a `ledger-sync` block for the owner's ledger.
 
 ## Model and effort guide (Pro plan)
 
@@ -23,7 +23,7 @@ Status values: `todo`, `doing`, `done`, `blocked`. `/end-session` updates the st
 
 Sonnet 5.5 is pinned as the project default in `.claude/settings.json`. Opus steps need `/model opus` at the start of the session. Fable is not used: it can bill usage credits. Avoid `max` effort except for a one-off hard bug.
 
-**Token habits.** One step per session; start a new session for the next step. Set model and effort before the first message, not mid-session. Read only the files the step needs. Run targeted tests while working and the full suite once at the end.
+**Token habits.** One step per session; start a new session for the next step. Set model and effort before the first message, not mid-session. Read only the files the step needs. Run targeted tests while working and the full suite once at the end. Keep replies and notes short: the full list is "Token efficiency" in `CLAUDE.md`.
 
 ## Phase 0: Foundation
 

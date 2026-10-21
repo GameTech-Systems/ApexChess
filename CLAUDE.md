@@ -9,7 +9,17 @@ Apex Chess is a chess variant: the standard pieces on a standard 8×8 board turn
 1. **Start** with `/start-session S<n>`. One build-plan step per session, one pull request per step. The step list is `docs/BUILD-PLAN.md`; read only your step's section.
 2. **Model and effort** come from the step (or the owner's pasted ledger brief). If the session runs on something else, give the owner the exact commands (`/model sonnet`, `/effort medium`) at the top of your first reply. Don't switch models mid-session yourself: it drops the prompt cache.
 3. **Plan** before any change that touches several files: write the plan in your reply and go ahead without waiting for approval. Don't use plan mode. **Write the failing test first.** Commit after every green task.
-4. **End** automatically with `/end-session` when the step is done. Keep replies brief: facts, plus problems the owner must resolve before the next session. If usage is running low, run it early; unfinished work stays on its branch.
+4. **End** automatically with `/end-session` when the step is done, or early if usage is running low (unfinished work stays on its branch). The last message always ends with the next session's step, model, and effort, in the exact format `/end-session` gives.
+
+## Token efficiency
+Short output is the default: every reply, note, and file is paid for again in later sessions.
+- **Replies:** facts and decisions only. No task recap, no narrating tool calls, no pasting files or diffs (cite `path:line`). Mid-session updates 1 to 3 lines; final report under 10 lines plus the closing block.
+- **Written notes:** handoff under 30 lines, a log note of 100 characters or fewer, PR "What and why" in 1 to 3 lines, one-line commit subjects, one short sentence per `ledger-sync` string. Don't create summary or notes files the step doesn't ask for.
+- **Reading:** grep or glob first, then read only the line range you need. Don't re-read a file you just wrote. Skip lockfiles, build output, and `node_modules`.
+- **Running:** targeted tests while working, the full suite once at the end. Cap noisy output (`| tail -n 40`, or the dot reporter) and report only failing test names and first error lines.
+- **Batching:** make independent tool calls in the same turn. Don't start subagents or web searches unless the step calls for them.
+- **Spend where it pays:** failing test first; a few-line plan before multi-file work. If the same fix fails twice, stop: record what you tried in the handoff, set the outcome `partial`, and recommend more effort (or Opus) for the next session instead of looping.
+- **Cache:** one step per session; don't change model or effort mid-session. If a session gets long or drifts, run `/end-session` early and continue in a fresh one.
 
 ## Decisions and defaults
 - Owner decisions are made in a private ledger. Public ones reach you through the owner's brief, the "Decision defaults" table in `docs/BUILD-PLAN.md`, and `docs/decisions/`.

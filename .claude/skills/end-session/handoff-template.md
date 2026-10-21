@@ -1,6 +1,6 @@
 # Handoff
 
-Updated <YYYY-MM-DD> by <step id> (<model> · <effort>). `/end-session` rewrites this file; keep it under 40 lines.
+Updated <YYYY-MM-DD> by <step id> (<model> · <effort>). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
 - Phase <n>. <What works now, in 1 to 3 bullets.>
@@ -8,6 +8,7 @@ Updated <YYYY-MM-DD> by <step id> (<model> · <effort>). `/end-session` rewrites
 
 ## Next session
 **<S#> — <title>** · <model> · effort <level>
+Set: `/model <sonnet|opus|haiku>` · `/effort <low|medium|high>`
 Why: <one line>
 Start with: `/start-session <S#>`
 
