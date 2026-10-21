@@ -30,7 +30,8 @@ describe("schedule", () => {
     expect(games.map((g) => g.index)).toEqual([...Array(18).keys()]);
     expect(games.map((g) => g.seed)).toEqual(games.map((g) => 100 + g.index));
     const pairs = new Map<string, number>();
-    for (const g of games) pairs.set(`${g.light}-${g.dark}`, (pairs.get(`${g.light}-${g.dark}`) ?? 0) + 1);
+    for (const g of games)
+      pairs.set(`${g.light}-${g.dark}`, (pairs.get(`${g.light}-${g.dark}`) ?? 0) + 1);
     expect(pairs.size).toBe(9);
     expect([...pairs.values()].every((n) => n === 2)).toBe(true);
   });

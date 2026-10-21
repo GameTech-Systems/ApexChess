@@ -14,7 +14,8 @@
     "test": "vitest run",
     "lint": "eslint . && prettier --check .",
     "typecheck": "pnpm -r typecheck && tsc -p tsconfig.json --noEmit",
-    "validate:rules": "node scripts/validate-rules.mjs"
+    "validate:rules": "node scripts/validate-rules.mjs",
+    "sim": "pnpm --filter @apexchess/sim sim"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
