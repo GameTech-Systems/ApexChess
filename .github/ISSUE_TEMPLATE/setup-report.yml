@@ -1,0 +1,41 @@
+name: Setup report
+description: Share a Player's Choice arrangement and how it played, or propose it as a preset.
+title: "[Setup] "
+labels: ["setup-report"]
+body:
+  - type: input
+    id: code
+    attributes:
+      label: Setup code or squares
+      description: The setup code from the game, or list the squares (for example K h1, Q g2, ...).
+    validations:
+      required: true
+  - type: input
+    id: ruleset
+    attributes:
+      label: Ruleset id and version
+      placeholder: standard 0.1.0
+    validations:
+      required: true
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Games played, wins, losses, and draws, and whether you played light or dark.
+  - type: textarea
+    id: notes
+    attributes:
+      label: What makes it work, or not
+  - type: checkboxes
+    id: preset
+    attributes:
+      label: Preset
+      options:
+        - label: I'd like this considered as a public preset.
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Contribution terms
+      options:
+        - label: I agree this report is a Contribution under the Apex Chess CLA, and the results are honest.
+          required: true

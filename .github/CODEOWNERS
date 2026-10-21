@@ -1,0 +1,10 @@
+# Owner review is required for legal files, governance, rules data, and automation.
+*                      @BetterToBest
+/LICENSE               @BetterToBest
+/NOTICE                @BetterToBest
+/CLA.md                @BetterToBest
+/TRADEMARKS.md         @BetterToBest
+/docs/GOVERNANCE.md    @BetterToBest
+/rules/                @BetterToBest
+/.github/              @BetterToBest
+/.claude/              @BetterToBest

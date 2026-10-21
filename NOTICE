@@ -1,0 +1,24 @@
+Apex Chess
+Required Notice: Copyright 2026 Duke Johnson and successors and assigns (https://apexchess.icu)
+Licensor Line of Business: Apex Chess, a chess variant game on a board turned 45 degrees, with player-chosen setups and selectable rule variants (https://apexchess.icu)
+
+LICENSED MATERIAL
+The source code, tests, tooling, rules text, rule data (rules/), and documentation
+(docs/) in this repository are licensed under the PolyForm Shield License 1.0.0.
+See the LICENSE file.
+
+NOT LICENSED -- ALL RIGHTS RESERVED
+The following are not covered by the LICENSE file. No license to them is granted,
+expressly or by implication:
+
+  - The name "Apex Chess", logos, and trade dress. See TRADEMARKS.md.
+  - Art, piece and board designs, illustrations, sound, animation, and any media,
+    including anything in the assets/ directory.
+  - Story, characters, books, video, and merchandise, and any derivative works of them.
+
+Anything in this repository that is not clearly code, rules text, rule data, or
+documentation should be treated as reserved unless the Owner states otherwise in writing.
+
+THIRD-PARTY COMPONENTS
+Third-party dependencies keep their own licenses. They will be listed here as they
+are added.

@@ -1,0 +1,42 @@
+{
+  "model": "sonnet",
+  "permissions": {
+    "allow": [
+      "Bash(pnpm *)",
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git fetch *)",
+      "Bash(git rebase origin/main)",
+      "Bash(git switch *)",
+      "Bash(scripts/claude/ship.sh *)"
+    ],
+    "deny": [
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Read(./private/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push origin main*)"
+    ]
+  },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "startup|resume",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/claude/session-start.sh",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
+  }
+}

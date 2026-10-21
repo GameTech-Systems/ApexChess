@@ -1,0 +1,27 @@
+name: Bug report
+description: Something is broken.
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: What did you expect?
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+  - type: input
+    id: ruleset
+    attributes:
+      label: Ruleset id and version
+  - type: input
+    id: env
+    attributes:
+      label: Browser and device

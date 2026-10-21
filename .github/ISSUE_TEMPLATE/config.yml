@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Discuss an idea
+    url: https://github.com/GameTech-Systems/ApexChess/discussions
+    about: Open-ended rule debate and questions belong in Discussions.
+  - name: Report a security problem privately
+    url: https://github.com/GameTech-Systems/ApexChess/security/advisories/new
+    about: Do not file vulnerabilities as public issues.

@@ -1,0 +1,45 @@
+name: Balance report
+description: Share playtest or simulation results for a ruleset or a group of setups.
+title: "[Balance] "
+labels: ["balance-report"]
+body:
+  - type: input
+    id: ruleset
+    attributes:
+      label: Ruleset id and version
+      placeholder: standard 0.1.0
+    validations:
+      required: true
+  - type: dropdown
+    id: method
+    attributes:
+      label: Method
+      options:
+        - Human games
+        - Bot self-play
+        - Mixed
+    validations:
+      required: true
+  - type: textarea
+    id: setups
+    attributes:
+      label: Setups
+      description: Which setups or setup families the games used.
+  - type: textarea
+    id: results
+    attributes:
+      label: Results
+      description: Number of games and outcomes for light and dark. Include draw rate and average length if you have them.
+    validations:
+      required: true
+  - type: textarea
+    id: observations
+    attributes:
+      label: Observations
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Contribution terms
+      options:
+        - label: I agree this report is a Contribution under the Apex Chess CLA, and the results are honest.
+          required: true

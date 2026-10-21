@@ -1,0 +1,43 @@
+name: Rule proposal
+description: Propose a new rule option, a new rule set, or a change to a default.
+title: "[Rule] "
+labels: ["rule-proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Rules are variables. Each has a default and options. See the [rules](https://github.com/GameTech-Systems/ApexChess/blob/main/docs/RULES.md).
+  - type: input
+    id: parameter
+    attributes:
+      label: Rule or parameter
+      description: An existing parameter id from rules/parameters.json, or a short name for a new one.
+      placeholder: pawn.firstMove
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed default and options
+      description: What should the default be, and which options should players be able to choose?
+    validations:
+      required: true
+  - type: textarea
+    id: fairness
+    attributes:
+      label: Fairness reasoning
+      description: Why is this fair to both sides, including the side that moves second?
+    validations:
+      required: true
+  - type: textarea
+    id: interactions
+    attributes:
+      label: Interactions with other rules and setups
+      description: Anything this changes indirectly, such as check, promotion, or which setups become stronger.
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: Contribution terms
+      options:
+        - label: I agree this proposal is a Contribution under the Apex Chess CLA.
+          required: true

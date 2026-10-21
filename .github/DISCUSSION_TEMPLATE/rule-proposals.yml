@@ -1,0 +1,20 @@
+title: "[Rule] "
+labels: ["rule-proposal"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Posting here means your proposal is a Contribution under the Apex Chess CLA (see CLA.md).
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: Which piece or rule, and what should change?
+    validations:
+      required: true
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is it fair or better?
+    validations:
+      required: true
