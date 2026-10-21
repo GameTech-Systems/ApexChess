@@ -1,0 +1,426 @@
+{
+  "notes": "Hand-worked pseudo-legal moves. Defaults: ply 10, no unmoved pieces, standard parameters. Notation: from-to, fromxto, =promotion.",
+  "positions": [
+    {
+      "name": "light pawn: one square along its ray",
+      "turn": "light",
+      "pieces": { "light": { "h5": "pawn" } },
+      "moves": ["h5-g6"]
+    },
+    {
+      "name": "light pawn: captures on the two edge-sharing forward squares, never head-on or backward",
+      "turn": "light",
+      "pieces": {
+        "light": { "e4": "pawn" },
+        "dark": { "d4": "knight", "e5": "knight", "d5": "bishop", "f4": "rook", "e3": "rook" }
+      },
+      "from": "e4",
+      "moves": ["e4xd4", "e4xe5"]
+    },
+    {
+      "name": "light pawn: own pieces block its moves and captures",
+      "turn": "light",
+      "pieces": {
+        "light": { "e4": "pawn", "d5": "knight", "d4": "rook" },
+        "dark": { "e5": "bishop" }
+      },
+      "from": "e4",
+      "moves": ["e4xe5"]
+    },
+    {
+      "name": "light pawn: on file a it advances along the edge (D2)",
+      "turn": "light",
+      "pieces": { "light": { "a5": "pawn" }, "dark": { "b5": "rook" } },
+      "from": "a5",
+      "moves": ["a5-a6"]
+    },
+    {
+      "name": "light pawn: on file a its edge square is also its capture square (D2)",
+      "turn": "light",
+      "pieces": { "light": { "a5": "pawn" }, "dark": { "a6": "knight" } },
+      "from": "a5",
+      "moves": ["a5xa6"]
+    },
+    {
+      "name": "light pawn: on file a, blocked by its own piece",
+      "turn": "light",
+      "pieces": { "light": { "a5": "pawn", "a6": "knight" } },
+      "from": "a5",
+      "moves": []
+    },
+    {
+      "name": "light pawn: on rank 8 it advances toward a8 (D2)",
+      "turn": "light",
+      "pieces": { "light": { "e8": "pawn" } },
+      "moves": ["e8-d8"]
+    },
+    {
+      "name": "light pawn: on rank 8 it captures on its edge square (D2)",
+      "turn": "light",
+      "pieces": { "light": { "e8": "pawn" }, "dark": { "d8": "rook" } },
+      "from": "e8",
+      "moves": ["e8xd8"]
+    },
+    {
+      "name": "light pawn: corner h8 runs along rank 8",
+      "turn": "light",
+      "pieces": { "light": { "h8": "pawn" } },
+      "moves": ["h8-g8"]
+    },
+    {
+      "name": "light pawn: corner a1 runs along file a",
+      "turn": "light",
+      "pieces": { "light": { "a1": "pawn" } },
+      "moves": ["a1-a2"]
+    },
+    {
+      "name": "light pawn: b7 promotes on a8 along its ray; side captures do not promote",
+      "turn": "light",
+      "pieces": { "light": { "b7": "pawn" }, "dark": { "a7": "knight", "b8": "knight" } },
+      "from": "b7",
+      "moves": ["b7-a8=queen", "b7-a8=rook", "b7-a8=bishop", "b7-a8=knight", "b7xa7", "b7xb8"]
+    },
+    {
+      "name": "light pawn: a7 promotes on a8 along file a",
+      "turn": "light",
+      "pieces": { "light": { "a7": "pawn" } },
+      "moves": ["a7-a8=queen", "a7-a8=rook", "a7-a8=bishop", "a7-a8=knight"]
+    },
+    {
+      "name": "light pawn: b8 captures on a8 and promotes",
+      "turn": "light",
+      "pieces": { "light": { "b8": "pawn" }, "dark": { "a8": "rook" } },
+      "from": "b8",
+      "moves": ["b8xa8=queen", "b8xa8=rook", "b8xa8=bishop", "b8xa8=knight"]
+    },
+    {
+      "name": "light pawn: no promotion on the dark corner h8",
+      "turn": "light",
+      "pieces": { "light": { "h7": "pawn" }, "dark": { "h8": "knight" } },
+      "from": "h7",
+      "moves": ["h7-g8", "h7xh8"]
+    },
+    {
+      "name": "dark pawn: a4 moves to b3 and captures on b4 or a3",
+      "turn": "dark",
+      "pieces": { "dark": { "a4": "pawn" }, "light": { "b4": "knight", "a3": "knight" } },
+      "from": "a4",
+      "moves": ["a4-b3", "a4xa3", "a4xb4"]
+    },
+    {
+      "name": "dark pawn: captures on the two edge-sharing forward squares, never head-on or backward",
+      "turn": "dark",
+      "pieces": {
+        "dark": { "d5": "pawn" },
+        "light": { "e5": "knight", "d4": "knight", "e4": "bishop", "c5": "rook", "d6": "rook" }
+      },
+      "from": "d5",
+      "moves": ["d5xd4", "d5xe5"]
+    },
+    {
+      "name": "dark pawn: on file h it advances along the edge (D2)",
+      "turn": "dark",
+      "pieces": { "dark": { "h4": "pawn" } },
+      "moves": ["h4-h3"]
+    },
+    {
+      "name": "dark pawn: on file h its edge square is also its capture square (D2)",
+      "turn": "dark",
+      "pieces": { "dark": { "h4": "pawn" }, "light": { "h3": "knight" } },
+      "from": "h4",
+      "moves": ["h4xh3"]
+    },
+    {
+      "name": "dark pawn: on rank 1 it advances toward h1 (D2)",
+      "turn": "dark",
+      "pieces": { "dark": { "d1": "pawn" } },
+      "moves": ["d1-e1"]
+    },
+    {
+      "name": "dark pawn: on rank 1 it captures on its edge square (D2)",
+      "turn": "dark",
+      "pieces": { "dark": { "d1": "pawn" }, "light": { "e1": "bishop" } },
+      "from": "d1",
+      "moves": ["d1xe1"]
+    },
+    {
+      "name": "dark pawn: corner a1 runs along rank 1",
+      "turn": "dark",
+      "pieces": { "dark": { "a1": "pawn" } },
+      "moves": ["a1-b1"]
+    },
+    {
+      "name": "dark pawn: corner h8 runs along file h",
+      "turn": "dark",
+      "pieces": { "dark": { "h8": "pawn" } },
+      "moves": ["h8-h7"]
+    },
+    {
+      "name": "dark pawn: g2 promotes on h1 along its ray; side captures do not promote",
+      "turn": "dark",
+      "pieces": { "dark": { "g2": "pawn" }, "light": { "h2": "knight", "g1": "knight" } },
+      "from": "g2",
+      "moves": ["g2-h1=queen", "g2-h1=rook", "g2-h1=bishop", "g2-h1=knight", "g2xg1", "g2xh2"]
+    },
+    {
+      "name": "dark pawn: h2 promotes on h1 along file h",
+      "turn": "dark",
+      "pieces": { "dark": { "h2": "pawn" } },
+      "moves": ["h2-h1=queen", "h2-h1=rook", "h2-h1=bishop", "h2-h1=knight"]
+    },
+    {
+      "name": "dark pawn: g1 captures on h1 and promotes",
+      "turn": "dark",
+      "pieces": { "dark": { "g1": "pawn" }, "light": { "h1": "rook" } },
+      "from": "g1",
+      "moves": ["g1xh1=queen", "g1xh1=rook", "g1xh1=bishop", "g1xh1=knight"]
+    },
+    {
+      "name": "dark pawn: no promotion on the light corner a1",
+      "turn": "dark",
+      "pieces": { "dark": { "a2": "pawn" }, "light": { "a1": "knight" } },
+      "from": "a2",
+      "moves": ["a2-b1", "a2xa1"]
+    },
+    {
+      "name": "pawnFirstMove one (default): an unmoved pawn steps one square",
+      "parameters": { "pawnFirstMove": "one" },
+      "turn": "light",
+      "unmoved": ["h5"],
+      "pieces": { "light": { "h5": "pawn" } },
+      "moves": ["h5-g6"]
+    },
+    {
+      "name": "pawnFirstMove one (default): an unmoved dark pawn steps one square",
+      "parameters": { "pawnFirstMove": "one" },
+      "turn": "dark",
+      "unmoved": ["a4"],
+      "pieces": { "dark": { "a4": "pawn" } },
+      "moves": ["a4-b3"]
+    },
+    {
+      "name": "pawnFirstMove two: an unmoved pawn steps one or two along its ray",
+      "parameters": { "pawnFirstMove": "two" },
+      "turn": "light",
+      "unmoved": ["h5"],
+      "pieces": { "light": { "h5": "pawn" } },
+      "moves": ["h5-g6", "h5-f7"]
+    },
+    {
+      "name": "pawnFirstMove two: an unmoved dark pawn steps one or two along its ray",
+      "parameters": { "pawnFirstMove": "two" },
+      "turn": "dark",
+      "unmoved": ["a4"],
+      "pieces": { "dark": { "a4": "pawn" } },
+      "moves": ["a4-b3", "a4-c2"]
+    },
+    {
+      "name": "pawnFirstMove two: a pawn that has moved steps one",
+      "parameters": { "pawnFirstMove": "two" },
+      "turn": "light",
+      "pieces": { "light": { "h5": "pawn" } },
+      "moves": ["h5-g6"]
+    },
+    {
+      "name": "pawnFirstMove two: blocked on the first square",
+      "parameters": { "pawnFirstMove": "two" },
+      "turn": "light",
+      "unmoved": ["h5"],
+      "pieces": { "light": { "h5": "pawn" }, "dark": { "g6": "knight" } },
+      "from": "h5",
+      "moves": []
+    },
+    {
+      "name": "pawnFirstMove two: second square occupied, and no capture there",
+      "parameters": { "pawnFirstMove": "two" },
+      "turn": "light",
+      "unmoved": ["h5"],
+      "pieces": { "light": { "h5": "pawn" }, "dark": { "f7": "knight" } },
+      "from": "h5",
+      "moves": ["h5-g6"]
+    },
+    {
+      "name": "pawnFirstMove two: second square off the board",
+      "parameters": { "pawnFirstMove": "two" },
+      "turn": "light",
+      "unmoved": ["b2"],
+      "pieces": { "light": { "b2": "pawn" } },
+      "moves": ["b2-a3"]
+    },
+    {
+      "name": "pawnFirstMove two: on a far edge the ray is off the board, so one square along the edge",
+      "parameters": { "pawnFirstMove": "two" },
+      "turn": "light",
+      "unmoved": ["a5"],
+      "pieces": { "light": { "a5": "pawn" } },
+      "moves": ["a5-a6"]
+    },
+    {
+      "name": "firstMoveCaptures allowed (default): light may capture on move 1",
+      "parameters": { "firstMoveCaptures": "allowed" },
+      "turn": "light",
+      "ply": 0,
+      "pieces": { "light": { "d4": "knight" }, "dark": { "e6": "pawn" } },
+      "from": "d4",
+      "moves": ["d4-b3", "d4-b5", "d4-c2", "d4-c6", "d4-e2", "d4xe6", "d4-f3", "d4-f5"]
+    },
+    {
+      "name": "firstMoveCaptures allowed (default): dark may capture on its first move",
+      "parameters": { "firstMoveCaptures": "allowed" },
+      "turn": "dark",
+      "ply": 1,
+      "pieces": { "dark": { "e5": "knight" }, "light": { "d3": "pawn" } },
+      "from": "e5",
+      "moves": ["e5-c4", "e5-c6", "e5xd3", "e5-d7", "e5-f3", "e5-f7", "e5-g4", "e5-g6"]
+    },
+    {
+      "name": "firstMoveCaptures forbidden: no capture on light's first move",
+      "parameters": { "firstMoveCaptures": "forbidden" },
+      "turn": "light",
+      "ply": 0,
+      "pieces": { "light": { "d4": "knight" }, "dark": { "e6": "pawn" } },
+      "from": "d4",
+      "moves": ["d4-b3", "d4-b5", "d4-c2", "d4-c6", "d4-e2", "d4-f3", "d4-f5"]
+    },
+    {
+      "name": "firstMoveCaptures forbidden: no capture on dark's first move",
+      "parameters": { "firstMoveCaptures": "forbidden" },
+      "turn": "dark",
+      "ply": 1,
+      "pieces": { "dark": { "e5": "knight" }, "light": { "d3": "pawn" } },
+      "from": "e5",
+      "moves": ["e5-c4", "e5-c6", "e5-d7", "e5-f3", "e5-f7", "e5-g4", "e5-g6"]
+    },
+    {
+      "name": "firstMoveCaptures forbidden: no pawn capture on the first move",
+      "parameters": { "firstMoveCaptures": "forbidden" },
+      "turn": "light",
+      "ply": 0,
+      "pieces": { "light": { "e4": "pawn" }, "dark": { "d4": "knight" } },
+      "from": "e4",
+      "moves": ["e4-d5"]
+    },
+    {
+      "name": "firstMoveCaptures forbidden: captures return on light's second move",
+      "parameters": { "firstMoveCaptures": "forbidden" },
+      "turn": "light",
+      "ply": 2,
+      "pieces": { "light": { "d4": "knight" }, "dark": { "e6": "pawn" } },
+      "from": "d4",
+      "moves": ["d4-b3", "d4-b5", "d4-c2", "d4-c6", "d4-e2", "d4xe6", "d4-f3", "d4-f5"]
+    },
+    {
+      "name": "king: one square any way, blocked by its own piece",
+      "turn": "light",
+      "pieces": { "light": { "e4": "king", "e5": "pawn" }, "dark": { "d4": "knight" } },
+      "from": "e4",
+      "moves": ["e4-d3", "e4xd4", "e4-d5", "e4-e3", "e4-f3", "e4-f4", "e4-f5"]
+    },
+    {
+      "name": "king: light corner h1",
+      "turn": "light",
+      "pieces": { "light": { "h1": "king" } },
+      "moves": ["h1-g1", "h1-g2", "h1-h2"]
+    },
+    {
+      "name": "king: dark corner a8",
+      "turn": "dark",
+      "pieces": { "dark": { "a8": "king" } },
+      "moves": ["a8-a7", "a8-b7", "a8-b8"]
+    },
+    {
+      "name": "king: no castling",
+      "turn": "light",
+      "ply": 0,
+      "unmoved": ["e1", "h1"],
+      "pieces": { "light": { "e1": "king", "h1": "rook" } },
+      "from": "e1",
+      "moves": ["e1-d1", "e1-d2", "e1-e2", "e1-f1", "e1-f2"]
+    },
+    {
+      "name": "queen: slides until blocked, captures the first enemy",
+      "turn": "light",
+      "pieces": { "light": { "a1": "queen", "a3": "pawn" }, "dark": { "c3": "knight" } },
+      "from": "a1",
+      "moves": [
+        "a1-a2",
+        "a1-b1",
+        "a1-c1",
+        "a1-d1",
+        "a1-e1",
+        "a1-f1",
+        "a1-g1",
+        "a1-h1",
+        "a1-b2",
+        "a1xc3"
+      ]
+    },
+    {
+      "name": "rook: dark rook along file and rank",
+      "turn": "dark",
+      "pieces": { "dark": { "d4": "rook", "d6": "knight" }, "light": { "f4": "pawn" } },
+      "from": "d4",
+      "moves": ["d4-d5", "d4-d3", "d4-d2", "d4-d1", "d4-c4", "d4-b4", "d4-a4", "d4-e4", "d4xf4"]
+    },
+    {
+      "name": "bishop: light bishop blocked and capturing",
+      "turn": "light",
+      "pieces": { "light": { "c1": "bishop", "b2": "pawn" }, "dark": { "e3": "knight" } },
+      "from": "c1",
+      "moves": ["c1-d2", "c1xe3"]
+    },
+    {
+      "name": "bishop: dark bishop on the edge",
+      "turn": "dark",
+      "pieces": { "dark": { "h3": "bishop" }, "light": { "f5": "pawn" } },
+      "from": "h3",
+      "moves": ["h3-g4", "h3xf5", "h3-g2", "h3-f1"]
+    },
+    {
+      "name": "knight: light knight in the corner",
+      "turn": "light",
+      "pieces": { "light": { "a1": "knight" } },
+      "moves": ["a1-b3", "a1-c2"]
+    },
+    {
+      "name": "knight: dark knight jumps, blocked only on its landing square",
+      "turn": "dark",
+      "pieces": {
+        "dark": { "g7": "knight", "e8": "pawn", "f7": "pawn" },
+        "light": { "h5": "rook" }
+      },
+      "from": "g7",
+      "moves": ["g7-e6", "g7-f5", "g7xh5"]
+    },
+    {
+      "name": "default start, light, pawnFirstMove one",
+      "start": true,
+      "turn": "light",
+      "ply": 0,
+      "count": 15
+    },
+    {
+      "name": "default start, dark, pawnFirstMove one",
+      "start": true,
+      "turn": "dark",
+      "ply": 1,
+      "count": 15
+    },
+    {
+      "name": "default start, light, pawnFirstMove two",
+      "parameters": { "pawnFirstMove": "two" },
+      "start": true,
+      "turn": "light",
+      "ply": 0,
+      "count": 23
+    },
+    {
+      "name": "default start, dark, pawnFirstMove two",
+      "parameters": { "pawnFirstMove": "two" },
+      "start": true,
+      "turn": "dark",
+      "ply": 1,
+      "count": 23
+    }
+  ]
+}

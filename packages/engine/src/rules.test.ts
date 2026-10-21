@@ -62,6 +62,23 @@ describe("resolveRuleset", () => {
     expect(() => resolveRuleset(catalog, "nope")).toThrow(/nope/);
   });
 
+  it("rejects pieces without movement data and unknown movement conditions", () => {
+    const army = withRuleset((r) => (r.army.dragon = 1));
+    expect(() => resolveRuleset(army, "standard")).toThrow(/dragon/);
+    const promo = structuredClone(catalog);
+    promo.pieces[0]!.pieces.pawn!.promotesTo = ["dragon"];
+    expect(() => resolveRuleset(promo, "standard")).toThrow(/dragon/);
+    const when = structuredClone(catalog);
+    when.pieces[0]!.pieces.pawn!.moves[1]!.when = { pawnFirstMove: "three" };
+    expect(() => resolveRuleset(when, "standard")).toThrow(/three/);
+    expect(() =>
+      resolveRuleset(
+        withRuleset((r) => (r.pieces.version = "9.9.9")),
+        "standard",
+      ),
+    ).toThrow(/pieces/);
+  });
+
   it("rejects a parameter registry whose default is not one of its options", () => {
     const c = structuredClone(catalog);
     c.parameters[0]!.default = "three";

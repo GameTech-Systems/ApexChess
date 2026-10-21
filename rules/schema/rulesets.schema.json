@@ -10,6 +10,7 @@
     "status",
     "name",
     "board",
+    "pieces",
     "army",
     "firstToMove",
     "setup",
@@ -33,6 +34,7 @@
     "status": { "enum": ["draft", "official", "retired"] },
     "name": { "type": "string", "minLength": 1 },
     "board": { "$ref": "#/definitions/ref" },
+    "pieces": { "$ref": "#/definitions/ref" },
     "army": {
       "description": "Pieces each side starts with, by piece id.",
       "type": "object",
