@@ -1,1 +1,102 @@
+name: Unpack zip
 
+# Upload a .zip at the top level of the repository (Add file → Upload files).
+# This workflow unpacks it at the repository root on the same branch, removes the zip,
+# and commits the result with a DCO sign-off.
+#   - On main (possible only before the main ruleset is imported): commits straight to main.
+#   - On any other branch: also runs CI on the new commit and turns on auto-merge (rebase)
+#     for the branch's pull request, opening the pull request if there isn't one yet.
+# Paths inside the zip are paths from the repository root. A zip adds or replaces files;
+# it can't delete them. The workflow refuses absolute paths, "..", symlinks, .git/, and
+# .github/workflows/ (GitHub doesn't let this workflow's token change workflow files).
+
+on:
+  push:
+    paths:
+      - "*.zip"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: write
+
+concurrency:
+  group: unpack-zip-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  unpack:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Unpack the zip files
+        id: unpack
+        run: |
+          set -euo pipefail
+          shopt -s nullglob
+          zips=( *.zip )
+          if [ ${#zips[@]} -eq 0 ]; then
+            echo "No zip at the top level; nothing to do."
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          bad='(^/|(^|/)\.\.(/|$)|^\.git/|^\.github/workflows/)'
+          names=""
+          for z in "${zips[@]}"; do
+            echo "::group::$z"
+            unzip -Z1 "$z" | grep -v '^__MACOSX/' > /tmp/entries.txt || true
+            if grep -Eq "$bad" /tmp/entries.txt; then
+              echo "::error::$z contains paths this workflow will not write:"
+              grep -E "$bad" /tmp/entries.txt
+              exit 1
+            fi
+            if zipinfo "$z" | grep -Eq '^l'; then
+              echo "::error::$z contains symbolic links; remove them and upload again."
+              exit 1
+            fi
+            cat /tmp/entries.txt
+            unzip -o -q "$z" -d .
+            rm -rf __MACOSX
+            find . -name .DS_Store -not -path './.git/*' -delete
+            git rm -q "$z"
+            names="$names $z"
+            echo "::endgroup::"
+          done
+          names="${names# }"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -q -s -m "Unpack $names" -m "Uploaded by @${GITHUB_ACTOR}; unpacked by the Unpack zip workflow."
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          {
+            echo "### Unpacked $names into ${GITHUB_REF_NAME}"
+            echo '```'
+            git show --stat --format= HEAD | tail -n 40
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+          echo "names=$names" >> "$GITHUB_OUTPUT"
+
+      - name: Run CI and turn on auto-merge (branches only)
+        if: steps.unpack.outputs.changed == 'true' && github.ref_name != github.event.repository.default_branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          BRANCH: ${{ github.ref_name }}
+          BASE: ${{ github.event.repository.default_branch }}
+          NAMES: ${{ steps.unpack.outputs.names }}
+        run: |
+          set -euo pipefail
+          # Pushes made with this workflow's token don't start other workflows, so start CI here.
+          gh workflow run ci.yml --ref "$BRANCH"
+          pr="$(gh pr list --head "$BRANCH" --state open --json number --jq '.[0].number // empty')"
+          if [ -z "$pr" ]; then
+            url="$(gh pr create --head "$BRANCH" --base "$BASE" --title "Upload: $NAMES" \
+              --body "Unpacked from $NAMES by the Unpack zip workflow. CI runs on the unpacked commit, and this pull request merges itself when CI passes.")"
+            pr="${url##*/}"
+          fi
+          gh pr merge "$pr" --auto --rebase
+          echo "Auto-merge is on for pull request #$pr; it merges when the ci check passes." >> "$GITHUB_STEP_SUMMARY"
