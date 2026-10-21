@@ -1,0 +1,72 @@
+{
+  "ruleset": {
+    "id": "standard",
+    "version": "0.1.0"
+  },
+  "setups": {
+    "light": {
+      "h1": "king",
+      "g1": "bishop",
+      "h2": "rook",
+      "f1": "rook",
+      "g2": "queen",
+      "h3": "bishop",
+      "e1": "pawn",
+      "f2": "pawn",
+      "g3": "pawn",
+      "h4": "pawn",
+      "d1": "pawn",
+      "e2": "pawn",
+      "f3": "knight",
+      "g4": "pawn",
+      "h5": "pawn",
+      "h6": "knight"
+    },
+    "dark": {
+      "h1": "king",
+      "g1": "bishop",
+      "h2": "rook",
+      "f1": "rook",
+      "g2": "queen",
+      "h3": "bishop",
+      "e1": "pawn",
+      "f2": "pawn",
+      "g3": "pawn",
+      "h4": "pawn",
+      "d1": "pawn",
+      "e2": "pawn",
+      "f3": "knight",
+      "g4": "pawn",
+      "h5": "pawn",
+      "h6": "knight"
+    }
+  },
+  "moves": [
+    "h4-g5",
+    "c6-d4",
+    "f3xd4",
+    "b5-c4",
+    "g2-e4",
+    "e8-f7",
+    "h3-g2",
+    "a6-b5",
+    "e4-e6",
+    "c4xd4",
+    "e6xb6",
+    "d8-e7",
+    "b6xc7",
+    "a3-c4",
+    "g2xb7",
+    "a7xb7",
+    "c7xb7",
+    "a8xb7",
+    "h5-g6",
+    "b8xg3",
+    "h2-h5",
+    "b5-c6"
+  ],
+  "result": {
+    "status": "checkmate",
+    "winner": "dark"
+  }
+}
