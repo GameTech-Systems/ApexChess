@@ -1,0 +1,57 @@
+body {
+  margin: 0;
+  font-family: system-ui, sans-serif;
+}
+main {
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 0.5rem;
+}
+button {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0 1rem;
+}
+.board {
+  display: block;
+  width: 100%;
+  height: auto;
+  touch-action: manipulation;
+}
+.sq-light {
+  fill: #f0d9b5;
+}
+.sq-dark {
+  fill: #b58863;
+}
+.sq {
+  cursor: pointer;
+}
+.pc {
+  pointer-events: none;
+}
+.pc text {
+  font-size: 0.8px;
+  font-weight: 700;
+}
+.pc-light circle {
+  fill: #fff;
+  stroke: #222;
+  stroke-width: 0.06;
+}
+.pc-light text {
+  fill: #222;
+}
+.pc-dark circle {
+  fill: #222;
+  stroke: #fff;
+  stroke-width: 0.06;
+}
+.pc-dark text {
+  fill: #fff;
+}
+.coord {
+  font-size: 0.55px;
+  fill: #555;
+  pointer-events: none;
+}

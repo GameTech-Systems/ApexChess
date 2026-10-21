@@ -63,7 +63,7 @@ Attack maps from the same movement data, legal moves, check, checkmate, stalemat
 Done when: check and mate fixtures pass, including pawn attacks near the corners.
 Decisions: D8.
 
-### S9 — Diamond board renderer · Sonnet 5.5 · medium · `todo`
+### S9 — Diamond board renderer · Sonnet 5.5 · medium · `done`
 SVG board turned 45° with the player's own king at the bottom, coordinates, placeholder pieces, square colors from the board data, responsive to phone width, tap targets large enough on a phone.
 Done when: both seat views render the default setup correctly.
 Decisions: D4.
