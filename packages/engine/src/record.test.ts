@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
 import sample from "../test/fixtures/sample-game.json";
 import { catalog } from "./catalog";
-import { legalMoves } from "./game";
+import { legalMoves, result } from "./game";
 import { moveText } from "./moves";
-import { addMove, newRecord, replay } from "./record";
+import { addMove, newRecord, replay, type GameRecord } from "./record";
 import { resolveRuleset } from "./rules";
+import type { Result } from "./game";
 
 const ruleset = resolveRuleset(catalog, "standard");
 const setup = ruleset.setup.default.pieces;
@@ -32,8 +33,11 @@ describe("game record", () => {
   });
 
   it("plays the full sample game to its recorded result", () => {
-    const rec = sample as unknown as ReturnType<typeof newRecord> & { result: unknown };
+    const rec = sample as unknown as GameRecord & { result: Result };
     const game = replay(ruleset, rec);
     expect(game.position.ply).toBe(rec.moves.length);
+    expect(result(ruleset, game)).toEqual(rec.result);
+    expect(rec.result.status).toBe("checkmate");
+    expect(rec.ruleset).toEqual({ id: ruleset.id, version: ruleset.version });
   });
 });
