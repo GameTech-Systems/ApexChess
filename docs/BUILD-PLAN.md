@@ -96,7 +96,7 @@ Bot self-play across setups; reports of wins, losses, draws, and win percentage 
 
 ## Phase 4: Public launch
 
-### S16 — Deploy · Sonnet 5.5 · medium · `todo`
+### S16 — Deploy · Sonnet 5.5 · medium · `done`
 Deploy the static app to apexchess.icu, privacy policy page, no blank screens on errors.
 Decisions: D11.
 
@@ -127,7 +127,7 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D8 | Draw rules | Decided: stalemate, threefold repetition, fifty-move rule, insufficient material, and agreement are draws | S8 |
 | D9 | Name for files and ranks on the turned board | Decided: keep "files and ranks" | S14 |
 | D10 | License | Default (applied): PolyForm Shield 1.0.0 with a CLA and DCO sign-off, as in Chess Nines | S1 |
-| D11 | Hosting | Default: Cloudflare (Workers with Static Assets); confirm terms at signup | S16 |
+| D11 | Hosting | Default (applied, provisional): Cloudflare (Workers with Static Assets); confirm terms at signup; see decisions/0004 | S16 |
 | D12 | Engine code from Chess Nines | Decided: a separate engine in this repo that copies patterns, not a shared package | S5 |
 | D13 | Hidden setups online | Decided: each player locks a saved setup before matchmaking; the server reveals both at the start, then flips the coin | S18 |
 | D14 | Hidden setups in hot-seat play | Decided: each player builds a setup while the other looks away; both are revealed at the start | S12 |
