@@ -42,11 +42,11 @@ Short output is the default: every reply, note, and file is paid for again in la
 - **Dependencies.** Only permissive licenses (MIT, BSD, Apache-2.0, ISC). Never GPL, LGPL, or AGPL (so no Stockfish or Fairy-Stockfish). List third-party components in NOTICE.
 - **Naming.** Product text says "Apex Chess". apexchess.icu is the web address. Use the owner's terms: chord (side to side), ray (forward and back), front chord, Player's Choice, The Elbow Room.
 
-## Stack (planned; S5 scaffolds it)
+## Stack
 TypeScript, pnpm workspaces (`packages/engine`, `apps/web`, later `packages/sim`), Vite + React static SPA, Vitest, Node 22. Hosting: Cloudflare, provisional.
 
 ## Commands
-None until S5. S5 adds `pnpm dev`, `build`, `test`, `lint`, `typecheck`, and `validate:rules`, and writes them here.
+`pnpm install`, `pnpm dev` (web app), `pnpm build`, `pnpm test` (Vitest, all packages), `pnpm lint` (ESLint + Prettier check; `pnpm exec prettier --write .` to fix), `pnpm typecheck`, `pnpm validate:rules` (Ajv: `rules/<kind>/*.json` against `rules/schema/<kind>.schema.json`).
 
 ## Where things live
 - `docs/HANDOFF.md`: current state and the next session (rewritten every session). `docs/sessions/LOG.md`: one line per session.
