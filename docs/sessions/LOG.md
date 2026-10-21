@@ -8,3 +8,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-10-20 | S1 follow-up | Sonnet 5.5 (chat) · medium | done | (zip) | Added next-session model/effort close and token-efficiency rules |
 | 2026-10-21 | S5 | Sonnet 5.5 · medium | done | 1 | pnpm workspace, Vitest, ESLint, validate:rules, labels |
 | 2026-10-21 | S6 | Opus 5.5 · high | done | 3 | Rules schemas and data, ruleset resolver, setup constraint checks; D1-D15 decided |
+| 2026-10-21 | S7 | Opus 5.5 · high | done | 4 | Movement data, pseudo-legal move generator, Apex pawn fixtures for both sides |

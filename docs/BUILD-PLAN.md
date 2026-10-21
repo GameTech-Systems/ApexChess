@@ -53,7 +53,7 @@ Design and validate the data formats from `docs/RULES.md`: `rules/parameters.jso
 Done when: the default setup and ruleset load, validate, and resolve with no null values; the constraint data accepts the default setup and rejects hand-made illegal ones.
 Decisions: D4, D5, D6.
 
-### S7 — Move generator with Apex pawns · Opus 5.5 · high · `todo`
+### S7 — Move generator with Apex pawns · Opus 5.5 · high · `done`
 Pseudo-legal moves for king, queen, rook, bishop, and knight from movement data; the Apex pawn (ray step, edge-sharing captures, far-edge travel, promotion on the far light corner only, any of four pieces); no castling or en passant. Hand-worked fixture positions for every pawn case, each pawn parameter at every option.
 Done when: fixtures pass for both sides, including far-edge and corner cases.
 Decisions: D1, D2, D3, D7.
