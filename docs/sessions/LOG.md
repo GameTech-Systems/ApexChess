@@ -10,3 +10,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-10-21 | S6 | Opus 5.5 · high | done | 3 | Rules schemas and data, ruleset resolver, setup constraint checks; D1-D15 decided |
 | 2026-10-21 | S7 | Opus 5.5 · high | done | 4 | Movement data, pseudo-legal move generator, Apex pawn fixtures for both sides |
 | 2026-10-21 | S8 | Opus 5.5 · high | done | 5 | Attack maps, legal moves, check, mate, D8 draws from data; corner pawn fixtures |
+| 2026-10-21 | S9 | Sonnet 5.5 · medium | done | 6 | SVG diamond board, both seat views, placeholder pieces, coordinates |
