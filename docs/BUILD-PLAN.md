@@ -58,7 +58,7 @@ Pseudo-legal moves for king, queen, rook, bishop, and knight from movement data;
 Done when: fixtures pass for both sides, including far-edge and corner cases.
 Decisions: D1, D2, D3, D7.
 
-### S8 — Check, checkmate, and draws · Opus 5.5 · high · `todo`
+### S8 — Check, checkmate, and draws · Opus 5.5 · high · `done`
 Attack maps from the same movement data, legal moves, check, checkmate, stalemate, threefold repetition, fifty-move rule, insufficient material.
 Done when: check and mate fixtures pass, including pawn attacks near the corners.
 Decisions: D8.
