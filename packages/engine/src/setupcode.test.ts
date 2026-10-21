@@ -146,3 +146,16 @@ describe("canonicalSetupId", () => {
     expect([a, mirrorSetup(board, "light", a)]).toContainEqual(back);
   });
 });
+
+describe("setupArea", () => {
+  it("lists every square a setup code covers, corner first", async () => {
+    const { catalog } = await import("./catalog");
+    const { resolveRuleset } = await import("./rules");
+    const { setupArea } = await import("./setupcode");
+    const r = resolveRuleset(catalog, "standard");
+    const area = setupArea(r);
+    expect(area[0]).toBe("h1");
+    expect(area).toHaveLength(21);
+    expect(Object.keys(r.setup.default.pieces).every((sq) => area.includes(sq))).toBe(true);
+  });
+});
