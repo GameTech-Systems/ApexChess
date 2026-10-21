@@ -9,13 +9,30 @@ export interface BoardProps {
   view: Side;
   pieceSet: PieceSet;
   onSquareClick?: (square: string) => void;
+  /** Square of the selected piece. */
+  selected?: string;
+  /** Squares the selected piece can move to. */
+  targets?: ReadonlySet<string>;
+  /** Squares of the last move played. */
+  lastMove?: readonly string[];
+  /** Square of a royal piece in check. */
+  checked?: string;
 }
 
 /** Placeholder labels only; real art comes later. */
 const LABELS: Record<string, string> = { knight: "N" };
 const label = (piece: string) => LABELS[piece] ?? piece.charAt(0).toUpperCase();
 
-export function Board({ board, position, view, onSquareClick }: BoardProps) {
+export function Board({
+  board,
+  position,
+  view,
+  onSquareClick,
+  selected,
+  targets,
+  lastMove,
+  checked,
+}: BoardProps) {
   const vb = viewBoxFor(board);
   const squares: string[] = [];
   for (let r = board.ranks - 1; r >= 0; r--)
@@ -46,6 +63,18 @@ export function Board({ board, position, view, onSquareClick }: BoardProps) {
             onClick={() => onSquareClick?.(name)}
           >
             <polygon className={`sq sq-${squareColor(board, name)}`} points={points} />
+            {lastMove?.includes(name) && <polygon className="mark-last" points={points} />}
+            {checked === name && <polygon className="mark-check" points={points} />}
+            {selected === name && <polygon className="mark-selected" points={points} />}
+            {targets?.has(name) && (
+              <circle
+                className={piece ? "mark-capture" : "mark-target"}
+                data-target={name}
+                cx={c.x}
+                cy={c.y}
+                r={piece ? 0.8 : 0.22}
+              />
+            )}
             {piece && (
               <g data-piece={piece.piece} data-side={piece.side} className={`pc pc-${piece.side}`}>
                 <circle cx={c.x} cy={c.y} r={0.62} />
