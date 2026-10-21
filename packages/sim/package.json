@@ -1,0 +1,17 @@
+{
+  "name": "@apexchess/sim",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "sim": "vite-node src/cli.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit"
+  },
+  "dependencies": {
+    "@apexchess/engine": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "vite-node": "^2.1.9"
+  }
+}
