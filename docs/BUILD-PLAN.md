@@ -48,7 +48,7 @@ Pre-approved dependencies: typescript, vite, react, react-dom, @vitejs/plugin-re
 Done when: CI passes on the PR, `pnpm dev` serves a blank app shell, and `validate:rules` passes.
 Decisions: D12.
 
-### S6 — Rules data: board, setups, rulesets · Opus 5.5 · high · `todo`
+### S6 — Rules data: board, setups, rulesets · Opus 5.5 · high · `done`
 Design and validate the data formats from `docs/RULES.md`: `rules/parameters.json` (registry: id, default, options, status, affects), `rules/rulesets/standard.json` (the default rules), `rules/setups/default.json` (the default arrangement), and setup constraints as data (the home region up to the front chord, how many pieces may stand beyond it, and where; king square). Include each side's forward direction, far edges, and promotion square as data. Add the schemas and loader with tests.
 Done when: the default setup and ruleset load, validate, and resolve with no null values; the constraint data accepts the default setup and rejects hand-made illegal ones.
 Decisions: D4, D5, D6.
@@ -128,9 +128,10 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D9 | Name for files and ranks on the turned board | Decided: keep "files and ranks" | S14 |
 | D10 | License | Default (applied): PolyForm Shield 1.0.0 with a CLA and DCO sign-off, as in Chess Nines | S1 |
 | D11 | Hosting | Default: Cloudflare (Workers with Static Assets); confirm terms at signup | S16 |
-| D12 | Engine code from Chess Nines | Default: a separate engine in this repo that copies patterns, not a shared package | S5 |
-| D13 | Hidden setups online | Default: each player locks a saved setup before matchmaking; the server reveals both at the start, then flips the coin | S18 |
-| D14 | Hidden setups in hot-seat play | Default: each player builds a setup while the other looks away; both are revealed at the start | S12 |
+| D12 | Engine code from Chess Nines | Decided: a separate engine in this repo that copies patterns, not a shared package | S5 |
+| D13 | Hidden setups online | Decided: each player locks a saved setup before matchmaking; the server reveals both at the start, then flips the coin | S18 |
+| D14 | Hidden setups in hot-seat play | Decided: each player builds a setup while the other looks away; both are revealed at the start | S12 |
+| D15 | Sides when two players play again | Decided: they alternate sides | S5 |
 
 ## Ledger sync format
 
