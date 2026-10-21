@@ -91,7 +91,7 @@ A random legal mover first, then a search AI on our own engine so it respects an
 Show-legal-moves toggle, last-move highlight, undo (off in online play), pieces-in-danger indicator, sound toggle, a rules screen with The Elbow Room note, and a phone layout.
 Decisions: D9.
 
-### S15 — Self-play harness and setup statistics · Opus 5.5 · high · `todo`
+### S15 — Self-play harness and setup statistics · Opus 5.5 · high · `done`
 Bot self-play across setups; reports of wins, losses, draws, and win percentage by setup family and setup features, plus the first-move score. Measures and thresholds are written down before the first run.
 
 ## Phase 4: Public launch
