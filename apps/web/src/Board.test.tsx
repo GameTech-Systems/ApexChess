@@ -34,8 +34,22 @@ describe("Board highlights", () => {
 });
 
 describe("App", () => {
-  it("opens on the setup builder with the army to place and no game yet", () => {
+  it("opens on a choice of opponent and level", () => {
     const html = renderToStaticMarkup(<App />);
+    expect(html).toContain("Two players");
+    expect(html).toContain("Play the computer");
+    expect(html).toContain("Random moves");
+    expect(html).not.toContain("to move");
+  });
+
+  it("against the computer, builds only the player's setup", () => {
+    const html = renderToStaticMarkup(<App initialMode="computer" />);
+    expect(html).toContain("Build your setup");
+    expect(html).not.toContain("look away");
+  });
+
+  it("in hot seat, opens on the setup builder with the army to place and no game yet", () => {
+    const html = renderToStaticMarkup(<App initialMode="hotseat" />);
     expect(html).toContain("Player 1: build your setup");
     expect(html).toContain("pawn ×8");
     expect(html).toContain("Choose");
@@ -49,5 +63,12 @@ describe("Game", () => {
     expect(html).toContain("light to move");
     expect(html).toContain("--sq-dark:#000000");
     expect(html).toContain("Player 1 plays light, Player 2 plays dark.");
+  });
+
+  it("against the computer, names the sides", () => {
+    const html = renderToStaticMarkup(
+      <Game setups={[setup, setup]} onChangeSetups={() => {}} computer="easy" />,
+    );
+    expect(html).toContain("You play light, the computer (Easy) plays dark.");
   });
 });

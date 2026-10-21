@@ -78,7 +78,7 @@ export function play(ruleset: ResolvedRuleset, game: GameState, move: Move): Gam
 }
 
 /** Non-royal pieces left match one of the ruleset's insufficient-material cases. */
-function insufficientMaterial(ruleset: ResolvedRuleset, pos: Position): boolean {
+export function insufficientMaterial(ruleset: ResolvedRuleset, pos: Position): boolean {
   const rest = Object.entries(pos.squares).filter(
     ([, p]) => !ruleset.pieces.pieces[p.piece]?.royal,
   );
