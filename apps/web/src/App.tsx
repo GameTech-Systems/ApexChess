@@ -9,10 +9,13 @@ import {
   resolveRuleset,
   result,
   type GameRecord,
+  type Pieces,
   type Move,
   type Side,
 } from "@apexchess/engine";
 import { Board } from "./Board";
+import { SetupBuilder } from "./SetupBuilder";
+import { seatOf, setupsForGame } from "./seats";
 import {
   DEFAULT_DARK_SQUARE,
   darkSquareColors,
@@ -23,8 +26,16 @@ import {
 import "./board.css";
 
 const ruleset = resolveRuleset(catalog, "standard");
-// D14: hot-seat setups are hidden until both are built, so both sides use the default.
-const setup = ruleset.setup.default.pieces;
+const presets = catalog.setups
+  .filter((s) => s.status === "official")
+  .map((s) => ({ name: s.name, pieces: s.pieces }));
+const store = (() => {
+  try {
+    return window.localStorage;
+  } catch {
+    return { getItem: () => null, setItem: () => undefined };
+  }
+})();
 
 function describe(res: ReturnType<typeof result>): string {
   if (res.status === "checkmate") return `Checkmate. ${res.winner} wins.`;
@@ -32,10 +43,41 @@ function describe(res: ReturnType<typeof result>): string {
   return "";
 }
 
+/** D14: each player builds a setup while the other looks away; both are revealed at the start. */
 export function App() {
-  const [record, setRecord] = useState<GameRecord>(() => newRecord(ruleset, setup, setup));
-  // D15: players alternate sides on rematch, so the first mover's seat alternates in the log.
+  const [built, setBuilt] = useState<Pieces[]>([]);
+  if (built.length < 2) {
+    const player = built.length + 1;
+    return (
+      <main>
+        <SetupBuilder
+          key={player}
+          ruleset={ruleset}
+          title={`Player ${player}: build your setup${player === 2 ? " (Player 1, look away)" : " (Player 2, look away)"}`}
+          presets={presets}
+          store={store}
+          onDone={(pieces) => setBuilt([...built, pieces])}
+        />
+      </main>
+    );
+  }
+  return <Game setups={[built[0]!, built[1]!]} onChangeSetups={() => setBuilt([])} />;
+}
+
+export function Game({
+  setups,
+  onChangeSetups,
+}: {
+  setups: readonly [Pieces, Pieces];
+  onChangeSetups: () => void;
+}) {
+  // D15: players alternate sides on rematch; `games` counts finished-or-abandoned games.
   const [games, setGames] = useState(0);
+  const start = (n: number) => {
+    const { light, dark } = setupsForGame(setups, n);
+    return newRecord(ruleset, light, dark);
+  };
+  const [record, setRecord] = useState<GameRecord>(() => start(0));
   const [selected, setSelected] = useState<string>();
   const [pending, setPending] = useState<{ from: string; to: string; choices: string[] }>();
   const [dark, setDark] = useState<DarkSquareColor>(DEFAULT_DARK_SQUARE);
@@ -74,8 +116,9 @@ export function App() {
   };
 
   const rematch = () => {
-    setRecord(newRecord(ruleset, setup, setup));
-    setGames(games + 1);
+    const next = over ? games + 1 : games;
+    setRecord(start(next));
+    setGames(next);
     setSelected(undefined);
     setPending(undefined);
   };
@@ -95,6 +138,9 @@ export function App() {
       />
       <p role="status" className="status">
         {over ? describe(res) : `${pos.turn} to move${checked ? " (check)" : ""}`}
+      </p>
+      <p className="seats">
+        Player 1 plays {seatOf(0, games)}, Player 2 plays {seatOf(1, games)}.
       </p>
       {pending && (
         <div role="group" aria-label="Promote to" className="promo">
@@ -117,7 +163,10 @@ export function App() {
       )}
       <div className="controls">
         <button type="button" onClick={rematch}>
-          {over ? `Rematch (game ${games + 2})` : "New game"}
+          {over ? `Rematch (game ${games + 2})` : "Restart"}
+        </button>
+        <button type="button" onClick={onChangeSetups}>
+          New setups
         </button>
         <label>
           <input type="checkbox" checked={flip} onChange={(e) => setFlip(e.target.checked)} /> Turn

@@ -105,3 +105,18 @@ main {
   fill: #555;
   pointer-events: none;
 }
+.tray,
+.saved {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+  padding: 0;
+  list-style: none;
+}
+.tray button[aria-pressed="true"] {
+  outline: 3px solid #3b6ea5;
+}
+.errors {
+  color: #a00;
+  min-height: 1.2em;
+}

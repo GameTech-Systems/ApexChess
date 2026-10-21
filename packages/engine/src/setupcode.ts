@@ -19,6 +19,10 @@ export function mirrorSetup(board: Board, side: Side, pieces: Pieces): Pieces {
 }
 
 /** Squares of the setup area, chord by chord from the corner, files ascending within a chord. */
+export function setupArea(ruleset: ResolvedRuleset): string[] {
+  return chordRows(ruleset).flat();
+}
+
 function chordRows(ruleset: ResolvedRuleset): string[][] {
   const { board } = ruleset;
   const { beyondFrontChord, frontChord } = ruleset.setup.constraints;

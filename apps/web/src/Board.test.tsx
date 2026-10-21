@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 import { catalog, resolveRuleset, startPosition } from "@apexchess/engine";
-import { App } from "./App";
+import { App, Game } from "./App";
 import { Board } from "./Board";
 
 const ruleset = resolveRuleset(catalog, "standard");
@@ -34,9 +34,20 @@ describe("Board highlights", () => {
 });
 
 describe("App", () => {
-  it("starts a game with the default setup, light to move, black dark squares", () => {
+  it("opens on the setup builder with the army to place and no game yet", () => {
     const html = renderToStaticMarkup(<App />);
+    expect(html).toContain("Player 1: build your setup");
+    expect(html).toContain("pawn ×8");
+    expect(html).toContain("Choose");
+    expect(html).not.toContain("to move");
+  });
+});
+
+describe("Game", () => {
+  it("starts with light to move, black dark squares, and each player's seat", () => {
+    const html = renderToStaticMarkup(<Game setups={[setup, setup]} onChangeSetups={() => {}} />);
     expect(html).toContain("light to move");
     expect(html).toContain("--sq-dark:#000000");
+    expect(html).toContain("Player 1 plays light, Player 2 plays dark.");
   });
 });
