@@ -31,6 +31,8 @@ export interface Row {
   label: string;
   feature?: string;
   value?: string;
+  /** Pool families with this feature value: few means the row mostly measures those setups. */
+  families?: number;
   /** Preset id, when the family is a preset's. */
   preset?: string;
   summary: Summary;
@@ -90,10 +92,16 @@ export function buildReport(
       label: id,
       ...(id === presetId ? { preset: ruleset.setup.default.id } : {}),
     });
-  const byFeature = new Map<string, Tally & { label: string; feature: string; value: string }>();
+  const byFeature = new Map<
+    string,
+    Tally & { label: string; feature: string; value: string; families: number }
+  >();
   const featureTally = (feature: string, value: string) => {
     const key = `${feature}=${value}`;
-    if (!byFeature.has(key)) byFeature.set(key, { ...emptyTally(), label: key, feature, value });
+    if (!byFeature.has(key)) {
+      const families = new Set(ids.filter((_, i) => features[i]![feature] === value)).size;
+      byFeature.set(key, { ...emptyTally(), label: key, feature, value, families });
+    }
     return byFeature.get(key)!;
   };
 
@@ -197,12 +205,14 @@ export function toMarkdown(r: Report): string {
     "",
     "## Setup features",
     "",
-    "Games where the two sides differ on the feature, from the side that has the value.",
+    "Games where the two sides differ on the feature, from the side that has the value. Families: pool setups with that value; with few, a row mostly measures those setups.",
     "",
   );
   out.push(bar(r.features, r.zCritical.features), "");
-  out.push(`Feature | Value | ${HEAD} | Stands out`, `---|---|${RULE}|---`);
+  out.push(`Feature | Value | Families | ${HEAD} | Stands out`, `---|---|---|${RULE}|---`);
   for (const f of r.features)
-    out.push(`${f.feature} | ${f.value} | ${cells(f.summary)} | ${f.standsOut ? "yes" : ""}`);
+    out.push(
+      `${f.feature} | ${f.value} | ${f.families} | ${cells(f.summary)} | ${f.standsOut ? "yes" : ""}`,
+    );
   return out.join("\n") + "\n";
 }
