@@ -18,11 +18,61 @@ button {
   height: auto;
   touch-action: manipulation;
 }
+main {
+  --sq-dark: #000;
+}
 .sq-light {
-  fill: #f0d9b5;
+  fill: #fff;
+  stroke: #000;
+  stroke-width: 0.03;
 }
 .sq-dark {
-  fill: #b58863;
+  fill: var(--sq-dark);
+  stroke: #000;
+  stroke-width: 0.03;
+}
+.mark-last {
+  fill: #f5c542;
+  fill-opacity: 0.45;
+  pointer-events: none;
+}
+.mark-check {
+  fill: #d93025;
+  fill-opacity: 0.6;
+  pointer-events: none;
+}
+.mark-selected {
+  fill: none;
+  stroke: #1a73e8;
+  stroke-width: 0.12;
+  pointer-events: none;
+}
+.mark-target {
+  fill: #1a73e8;
+  stroke: #fff;
+  stroke-width: 0.04;
+  pointer-events: none;
+}
+.mark-capture {
+  fill: none;
+  stroke: #1a73e8;
+  stroke-width: 0.1;
+  pointer-events: none;
+}
+.controls,
+.promo {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin: 0.5rem 0;
+}
+.moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.75rem;
+  padding-left: 1.5rem;
+  font-family: ui-monospace, monospace;
 }
 .sq {
   cursor: pointer;

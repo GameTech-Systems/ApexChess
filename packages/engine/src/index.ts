@@ -6,3 +6,4 @@ export * from "./setup";
 export { catalog } from "./catalog";
 export * from "./moves";
 export * from "./game";
+export * from "./record";
