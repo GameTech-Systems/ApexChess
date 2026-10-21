@@ -54,6 +54,8 @@ export interface Movement {
 }
 
 export interface PieceRules {
+  /** Single upper-case letter for setup codes; unique within the piece set. */
+  letter: string;
   /** May never be left attacked; checkmating it wins. */
   royal?: boolean;
   /** Its moves reset the move-rule count, as captures do. */

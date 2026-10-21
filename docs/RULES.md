@@ -40,6 +40,8 @@ Players may choose their own arrangement of the same 16 pieces, under two rules:
 
 Bishops may start on the same color *(D6)*.
 
+**Setup code.** An arrangement is written as one letter per square (K, Q, R, B, N, P), chord by chord from the king outward, chords joined by `/`, digits for runs of empty squares. The default is `K/BR/RQB/PPPP/PPNPP/5N`. Light and dark use the same code. An arrangement and its mirror image (reflected across the h1 to a8 ray) share one **setup id**, the smaller of their two codes, so results can be grouped by setup.
+
 Saved arrangements and popular presets can be offered. Online, a player does not see the opponent's arrangement until the game begins, and a coin flip decides who plays light. Light moves first.
 
 ## 5. How the pieces move
