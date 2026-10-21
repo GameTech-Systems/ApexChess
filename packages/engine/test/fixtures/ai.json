@@ -1,0 +1,72 @@
+{
+  "notes": "Hand-worked positions for the computer opponent. Defaults: ply 10, no unmoved pieces, standard parameters. `best` is the move it must play; `avoid` lists moves it must not play; `mates` means its move must give checkmate.",
+  "positions": [
+    {
+      "name": "rook mates on the back rank",
+      "turn": "light",
+      "pieces": { "light": { "b6": "king", "d2": "rook" }, "dark": { "a8": "king" } },
+      "best": "d2-d8"
+    },
+    {
+      "name": "queen mates rather than stalemates",
+      "turn": "light",
+      "pieces": { "light": { "b6": "king", "d7": "queen" }, "dark": { "a8": "king" } },
+      "mates": true,
+      "avoid": ["d7-c7"]
+    },
+    {
+      "name": "knight takes a loose queen",
+      "turn": "light",
+      "pieces": {
+        "light": { "h1": "king", "g1": "rook", "e4": "knight" },
+        "dark": { "a8": "king", "b8": "rook", "d6": "queen" }
+      },
+      "best": "e4xd6"
+    },
+    {
+      "name": "queen does not take a knight its rook defends",
+      "turn": "light",
+      "pieces": {
+        "light": { "h1": "king", "d4": "queen" },
+        "dark": { "a8": "king", "d8": "rook", "d7": "knight" }
+      },
+      "avoid": ["d4xd7"]
+    },
+    {
+      "name": "first move takes a loose queen when captures are allowed (D7 default)",
+      "turn": "light",
+      "ply": 0,
+      "pieces": {
+        "light": { "h1": "king", "g1": "rook", "e4": "knight" },
+        "dark": { "a8": "king", "b8": "rook", "d6": "queen" }
+      },
+      "best": "e4xd6"
+    },
+    {
+      "name": "first move cannot capture under firstMoveCaptures forbidden (D7 option)",
+      "parameters": { "firstMoveCaptures": "forbidden" },
+      "turn": "light",
+      "ply": 0,
+      "pieces": {
+        "light": { "h1": "king", "g1": "rook", "e4": "knight" },
+        "dark": { "a8": "king", "b8": "rook", "d6": "queen" }
+      },
+      "avoid": ["e4xd6"]
+    },
+    {
+      "name": "unmoved pawn promotes with a two-square first move (D3 option)",
+      "parameters": { "pawnFirstMove": "two" },
+      "turn": "light",
+      "unmoved": ["c6"],
+      "pieces": { "light": { "h1": "king", "c6": "pawn" }, "dark": { "h8": "king", "f6": "rook" } },
+      "best": "c6-a8=queen"
+    },
+    {
+      "name": "unmoved pawn steps one square by default (D3 default)",
+      "turn": "light",
+      "unmoved": ["c6"],
+      "pieces": { "light": { "h1": "king", "c6": "pawn" }, "dark": { "h8": "king", "f6": "rook" } },
+      "avoid": ["c6-a8=queen"]
+    }
+  ]
+}

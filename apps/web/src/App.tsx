@@ -1,13 +1,15 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   addMove,
   catalog,
+  chooseSetup,
   inCheck,
   legalMoves,
   newRecord,
   replay,
   resolveRuleset,
   result,
+  seededRandom,
   type GameRecord,
   type Pieces,
   type Move,
@@ -15,6 +17,7 @@ import {
 } from "@apexchess/engine";
 import { Board } from "./Board";
 import { SetupBuilder } from "./SetupBuilder";
+import { DEFAULT_LEVEL, computerMove, levels, type Level } from "./computer";
 import { seatOf, setupsForGame } from "./seats";
 import {
   DEFAULT_DARK_SQUARE,
@@ -43,8 +46,75 @@ function describe(res: ReturnType<typeof result>): string {
   return "";
 }
 
+/** Seeds differ per game; the engine stays deterministic for a given seed. */
+const newRandom = () => seededRandom(Math.floor(Math.random() * 2 ** 32));
+
+type Mode = "hotseat" | "computer";
+
+export function App({ initialMode }: { initialMode?: Mode }) {
+  const [mode, setMode] = useState(initialMode);
+  const [level, setLevel] = useState<Level>(DEFAULT_LEVEL);
+  if (!mode) {
+    return (
+      <main>
+        <section aria-label="Choose an opponent" className="controls">
+          <button type="button" onClick={() => setMode("hotseat")}>
+            Two players
+          </button>
+          <button type="button" onClick={() => setMode("computer")}>
+            Play the computer
+          </button>
+          <label>
+            Computer{" "}
+            <select value={level} onChange={(e) => setLevel(e.target.value as Level)}>
+              {Object.entries(levels).map(([id, l]) => (
+                <option key={id} value={id}>
+                  {l.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        </section>
+      </main>
+    );
+  }
+  return mode === "computer" ? (
+    <VsComputer level={level} onChangeSetups={() => setMode(undefined)} />
+  ) : (
+    <HotSeat />
+  );
+}
+
+/** The player builds a setup; the computer picks a legal preset, revealed when the game starts. */
+function VsComputer({ level, onChangeSetups }: { level: Level; onChangeSetups: () => void }) {
+  const [setups, setSetups] = useState<[Pieces, Pieces]>();
+  if (!setups) {
+    return (
+      <main>
+        <SetupBuilder
+          ruleset={ruleset}
+          title="Build your setup"
+          presets={presets}
+          store={store}
+          onDone={(pieces) =>
+            setSetups([
+              pieces,
+              chooseSetup(
+                ruleset,
+                presets.map((p) => p.pieces),
+                newRandom(),
+              ),
+            ])
+          }
+        />
+      </main>
+    );
+  }
+  return <Game setups={setups} onChangeSetups={onChangeSetups} computer={level} />;
+}
+
 /** D14: each player builds a setup while the other looks away; both are revealed at the start. */
-export function App() {
+function HotSeat() {
   const [built, setBuilt] = useState<Pieces[]>([]);
   if (built.length < 2) {
     const player = built.length + 1;
@@ -64,12 +134,15 @@ export function App() {
   return <Game setups={[built[0]!, built[1]!]} onChangeSetups={() => setBuilt([])} />;
 }
 
+/** With `computer`, Player 2 is the computer at that level. */
 export function Game({
   setups,
   onChangeSetups,
+  computer,
 }: {
   setups: readonly [Pieces, Pieces];
   onChangeSetups: () => void;
+  computer?: Level;
 }) {
   // D15: players alternate sides on rematch; `games` counts finished-or-abandoned games.
   const [games, setGames] = useState(0);
@@ -82,13 +155,16 @@ export function Game({
   const [pending, setPending] = useState<{ from: string; to: string; choices: string[] }>();
   const [dark, setDark] = useState<DarkSquareColor>(DEFAULT_DARK_SQUARE);
   const [flip, setFlip] = useState(true);
+  const random = useMemo(newRandom, []);
 
   const game = useMemo(() => replay(ruleset, record), [record]);
   const res = result(ruleset, game);
   const pos = game.position;
   const moves = useMemo(() => legalMoves(ruleset, pos), [pos]);
   const over = res.status !== "ongoing";
-  const view: Side = flip ? pos.turn : "light";
+  const computerSide = computer ? seatOf(1, games) : undefined;
+  const computerTurn = !over && pos.turn === computerSide;
+  const view: Side = computer ? seatOf(0, games) : flip ? pos.turn : "light";
   const targets = selected ? targetsFrom(moves, selected) : undefined;
   const last = record.moves.at(-1);
   const lastMove = last ? [last.slice(0, 2), last.slice(3, 5)] : undefined;
@@ -104,8 +180,18 @@ export function Game({
     setPending(undefined);
   };
 
+  // The short delay lets the player's move render before the search runs.
+  useEffect(() => {
+    if (!computerTurn) return;
+    const timer = setTimeout(() => {
+      const move = computerMove(ruleset, game, computer!, random);
+      if (move) setRecord((r) => addMove(ruleset, r, move));
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [computerTurn, game, computer, random]);
+
   const onSquareClick = (square: string) => {
-    if (over || pending) return;
+    if (over || pending || computerTurn) return;
     if (selected && targets?.has(square)) {
       const choices = promotionChoices(moves, selected, square);
       if (choices.length) return setPending({ from: selected, to: square, choices });
@@ -137,10 +223,14 @@ export function Game({
         checked={checked}
       />
       <p role="status" className="status">
-        {over ? describe(res) : `${pos.turn} to move${checked ? " (check)" : ""}`}
+        {over
+          ? describe(res)
+          : `${pos.turn} to move${checked ? " (check)" : ""}${computerTurn ? ", computer thinking" : ""}`}
       </p>
       <p className="seats">
-        Player 1 plays {seatOf(0, games)}, Player 2 plays {seatOf(1, games)}.
+        {computer
+          ? `You play ${seatOf(0, games)}, the computer (${levels[computer].label}) plays ${seatOf(1, games)}.`
+          : `Player 1 plays ${seatOf(0, games)}, Player 2 plays ${seatOf(1, games)}.`}
       </p>
       {pending && (
         <div role="group" aria-label="Promote to" className="promo">
@@ -168,10 +258,12 @@ export function Game({
         <button type="button" onClick={onChangeSetups}>
           New setups
         </button>
-        <label>
-          <input type="checkbox" checked={flip} onChange={(e) => setFlip(e.target.checked)} /> Turn
-          the board each move
-        </label>
+        {!computer && (
+          <label>
+            <input type="checkbox" checked={flip} onChange={(e) => setFlip(e.target.checked)} />{" "}
+            Turn the board each move
+          </label>
+        )}
         <label>
           Dark squares{" "}
           <select value={dark} onChange={(e) => setDark(e.target.value as DarkSquareColor)}>

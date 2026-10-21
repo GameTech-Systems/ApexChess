@@ -8,3 +8,4 @@ export * from "./moves";
 export * from "./game";
 export * from "./record";
 export * from "./setupcode";
+export * from "./ai";
