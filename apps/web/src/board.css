@@ -120,3 +120,34 @@ main {
   color: #a00;
   min-height: 1.2em;
 }
+.mark-danger {
+  fill: #e8710a;
+  fill-opacity: 0.55;
+  pointer-events: none;
+}
+.rules {
+  line-height: 1.45;
+}
+.controls label {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+@media (max-width: 600px) {
+  main {
+    padding: 0.25rem;
+  }
+  .controls,
+  .promo {
+    gap: 0.35rem;
+  }
+  .controls button {
+    flex: 1 1 auto;
+  }
+  .moves {
+    max-height: 7rem;
+    overflow-y: auto;
+    font-size: 0.85rem;
+  }
+}

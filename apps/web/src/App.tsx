@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   addMove,
   catalog,
@@ -16,6 +16,8 @@ import {
   type Side,
 } from "@apexchess/engine";
 import { Board } from "./Board";
+import { Rules } from "./Rules";
+import { piecesInDanger, playSound, undoMoves } from "./playAids";
 import { SetupBuilder } from "./SetupBuilder";
 import { DEFAULT_LEVEL, computerMove, levels, type Level } from "./computer";
 import { seatOf, setupsForGame } from "./seats";
@@ -54,6 +56,13 @@ type Mode = "hotseat" | "computer";
 export function App({ initialMode }: { initialMode?: Mode }) {
   const [mode, setMode] = useState(initialMode);
   const [level, setLevel] = useState<Level>(DEFAULT_LEVEL);
+  const [showRules, setShowRules] = useState(false);
+  if (showRules)
+    return (
+      <main>
+        <Rules onClose={() => setShowRules(false)} />
+      </main>
+    );
   if (!mode) {
     return (
       <main>
@@ -74,6 +83,9 @@ export function App({ initialMode }: { initialMode?: Mode }) {
               ))}
             </select>
           </label>
+          <button type="button" onClick={() => setShowRules(true)}>
+            Rules
+          </button>
         </section>
       </main>
     );
@@ -155,6 +167,10 @@ export function Game({
   const [pending, setPending] = useState<{ from: string; to: string; choices: string[] }>();
   const [dark, setDark] = useState<DarkSquareColor>(DEFAULT_DARK_SQUARE);
   const [flip, setFlip] = useState(true);
+  const [showMoves, setShowMoves] = useState(true);
+  const [showDanger, setShowDanger] = useState(false);
+  const [sound, setSound] = useState(false);
+  const [showRules, setShowRules] = useState(false);
   const random = useMemo(newRandom, []);
 
   const game = useMemo(() => replay(ruleset, record), [record]);
@@ -165,7 +181,11 @@ export function Game({
   const computerSide = computer ? seatOf(1, games) : undefined;
   const computerTurn = !over && pos.turn === computerSide;
   const view: Side = computer ? seatOf(0, games) : flip ? pos.turn : "light";
-  const targets = selected ? targetsFrom(moves, selected) : undefined;
+  const targets = selected && showMoves ? targetsFrom(moves, selected) : undefined;
+  const danger = useMemo(
+    () => (showDanger ? piecesInDanger(ruleset, pos, view) : undefined),
+    [showDanger, pos, view],
+  );
   const last = record.moves.at(-1);
   const lastMove = last ? [last.slice(0, 2), last.slice(3, 5)] : undefined;
   const checked = inCheck(ruleset, pos)
@@ -179,6 +199,16 @@ export function Game({
     setSelected(undefined);
     setPending(undefined);
   };
+
+  const moveCount = record.moves.length;
+  const lastCapture = useRef(false);
+  lastCapture.current = Object.keys(pos.squares).length < 32;
+  const prevCount = useRef(moveCount);
+  useEffect(() => {
+    if (sound && moveCount > prevCount.current)
+      playSound(over ? "end" : lastCapture.current ? "capture" : "move");
+    prevCount.current = moveCount;
+  }, [moveCount, sound, over]);
 
   // The short delay lets the player's move render before the search runs.
   useEffect(() => {
@@ -201,6 +231,13 @@ export function Game({
     setSelected(own && square !== selected ? square : undefined);
   };
 
+  // Online play will not offer undo; here it takes back the last move (and the computer's reply).
+  const undo = () => {
+    setRecord(undoMoves(record, computer ? (computerSide === "light" ? 1 : 0) : undefined));
+    setSelected(undefined);
+    setPending(undefined);
+  };
+
   const rematch = () => {
     const next = over ? games + 1 : games;
     setRecord(start(next));
@@ -208,6 +245,13 @@ export function Game({
     setSelected(undefined);
     setPending(undefined);
   };
+
+  if (showRules)
+    return (
+      <main>
+        <Rules onClose={() => setShowRules(false)} />
+      </main>
+    );
 
   return (
     <main style={{ "--sq-dark": darkSquareColors[dark] } as React.CSSProperties}>
@@ -221,6 +265,7 @@ export function Game({
         targets={targets}
         lastMove={lastMove}
         checked={checked}
+        danger={danger}
       />
       <p role="status" className="status">
         {over
@@ -255,8 +300,14 @@ export function Game({
         <button type="button" onClick={rematch}>
           {over ? `Rematch (game ${games + 2})` : "Restart"}
         </button>
+        <button type="button" onClick={undo} disabled={record.moves.length === 0 || computerTurn}>
+          Undo
+        </button>
         <button type="button" onClick={onChangeSetups}>
           New setups
+        </button>
+        <button type="button" onClick={() => setShowRules(true)}>
+          Rules
         </button>
         {!computer && (
           <label>
@@ -264,6 +315,26 @@ export function Game({
             Turn the board each move
           </label>
         )}
+        <label>
+          <input
+            type="checkbox"
+            checked={showMoves}
+            onChange={(e) => setShowMoves(e.target.checked)}
+          />{" "}
+          Show legal moves
+        </label>
+        <label>
+          <input
+            type="checkbox"
+            checked={showDanger}
+            onChange={(e) => setShowDanger(e.target.checked)}
+          />{" "}
+          Show pieces in danger
+        </label>
+        <label>
+          <input type="checkbox" checked={sound} onChange={(e) => setSound(e.target.checked)} />{" "}
+          Sound
+        </label>
         <label>
           Dark squares{" "}
           <select value={dark} onChange={(e) => setDark(e.target.value as DarkSquareColor)}>

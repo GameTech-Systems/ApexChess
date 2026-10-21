@@ -17,6 +17,8 @@ export interface BoardProps {
   lastMove?: readonly string[];
   /** Square of a royal piece in check. */
   checked?: string;
+  /** Squares of pieces that are attacked and undefended. */
+  danger?: ReadonlySet<string>;
 }
 
 /** Placeholder labels only; real art comes later. */
@@ -32,6 +34,7 @@ export function Board({
   targets,
   lastMove,
   checked,
+  danger,
 }: BoardProps) {
   const vb = viewBoxFor(board);
   const squares: string[] = [];
@@ -65,6 +68,7 @@ export function Board({
             <polygon className={`sq sq-${squareColor(board, name)}`} points={points} />
             {lastMove?.includes(name) && <polygon className="mark-last" points={points} />}
             {checked === name && <polygon className="mark-check" points={points} />}
+            {danger?.has(name) && <polygon className="mark-danger" points={points} />}
             {selected === name && <polygon className="mark-selected" points={points} />}
             {targets?.has(name) && (
               <circle
