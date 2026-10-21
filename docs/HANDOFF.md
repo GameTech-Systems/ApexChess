@@ -1,27 +1,26 @@
 # Handoff
 
-Updated 2026-10-21 by S7 (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-10-21 by S8 (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
 - Phase 1. Rules data in `rules/` (parameters, board, pieces, default setup, `standard` ruleset 0.1.0 draft) with schemas; resolver, setup checks.
-- Engine: `generateMoves` gives pseudo-legal moves from `rules/pieces/standard.json` (steps for light, mirrored; `onFarEdge`, `firstMove`, `when`); `startPosition`, `moveText`. Format: `docs/decisions/0002-rules-data.md`.
+- Engine: `generateMoves`, `attackedSquares`, `legalMoves`, `inCheck`, `makeMove`, and `newGame`/`play`/`result` (checkmate; stalemate, threefold, fifty-move, insufficient material draws). Format: `docs/decisions/0002-rules-data.md`.
 
 ## Next session
-**S8 — Check, checkmate, and draws** · Opus 5.5 · effort high
-Set: `/model opus` · `/effort high`
-Why: attack maps, legality, and draw rules need careful design.
-Start with: `/start-session S8`
+**S9 — Diamond board renderer** · Sonnet 5.5 · effort medium
+Set: `/model sonnet` · `/effort medium`
+Why: rendering from settled board data; no rule design.
+Start with: `/start-session S9`
 
 ## Decisions in effect for the next step
-- D8: stalemate, threefold, fifty-move, insufficient material, agreement are draws (decided)
-- D7: no first-move captures option is applied in `generateMoves` on plies 0 and 1 (decided)
+- D4: light's king on h1, dark's on a8; each player sees their own king at the bottom (decided)
 
 ## Open questions for the owner
-- None blocking S8. Under `firstMoveCaptures: forbidden`, does a piece still give check on ply 0/1? Default: yes, attacks count.
+- None blocking S9. Draws by repetition and the fifty-move rule end the game automatically (provisional; claim-based is the alternative).
+- `standard` ruleset is still draft 0.1.0; make it official 1.0.0 when the owner approves.
 
 ## Notes for Claude
-- Build attack maps from the same movement data (capture-capable entries); `generateMoves` has no make/unmake yet.
-- `Position` tracks `ply` and `unmoved`; no en passant state by design.
-- Move fixtures: `packages/engine/test/fixtures/moves.json` (defaults ply 10, nothing unmoved).
-- Ruleset `standard` stays draft 0.1.0; can go official 1.0.0 after S8.
+- Royal piece and move-rule reset come from piece flags `royal`, `resetsMoveRule`; draw data lives in the ruleset's `draws`.
+- Owner (2026-10-21): attacks give check even under `firstMoveCaptures: forbidden`; it cannot arise in `standard` since chords 0 to 4 are full.
+- Fixtures: `packages/engine/test/fixtures/legal.json` (check, mate, stalemate, material) and `moves.json`.
 - `pnpm lint` includes `prettier --check`; run `pnpm exec prettier --write .` before committing.
