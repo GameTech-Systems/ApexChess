@@ -68,7 +68,7 @@ SVG board turned 45° with the player's own king at the bottom, coordinates, pla
 Done when: both seat views render the default setup correctly.
 Decisions: D4.
 
-### S10 — Hot-seat game with the default setup · Sonnet 5.5 · medium · `todo`
+### S10 — Hot-seat game with the default setup · Sonnet 5.5 · medium · `done`
 Game state, turns, legal-move highlighting, promotion picker, game end, a full sample game fixture; every game keeps the ruleset id and version and both setups.
 
 ## Phase 2: Setup builder
