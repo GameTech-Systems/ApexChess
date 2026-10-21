@@ -46,6 +46,8 @@ Claude opens and merges its own pull requests after CI passes. The owner does no
 4. Keep CLAUDE.md short. The handoff carries the moving state.
 5. Set model and effort at the start; switching mid-session re-reads the whole conversation without the cache.
 6. Expect two limits, a rolling 5-hour window and a weekly cap, shared with claude.ai chat. Use chat for design discussion and the ledger, and Claude Code for implementation. Start Opus steps at the beginning of a fresh window.
+7. Keep output short: replies, notes, PR text, and the handoff. The rules are under "Token efficiency" in `CLAUDE.md`.
+8. Every session ends with the next step, model, and effort, plus the two commands to set them. Type them before the first message of the next session.
 
 ## Repo hygiene
 
