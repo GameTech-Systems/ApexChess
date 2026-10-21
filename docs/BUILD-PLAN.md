@@ -73,7 +73,7 @@ Game state, turns, legal-move highlighting, promotion picker, game end, a full s
 
 ## Phase 2: Setup builder
 
-### S11 — Setup validator and setup codes · Sonnet 5.5 · high · `todo`
+### S11 — Setup validator and setup codes · Sonnet 5.5 · high · `done`
 Validate Player's Choice arrangements from the constraint data; a short shareable setup code; a canonical setup id that treats mirror images (reflection across the h1 to a8 ray) as one family for statistics.
 Done when: legal and illegal arrangement fixtures pass and codes round-trip.
 Decisions: D5, D6.
