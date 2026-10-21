@@ -1,0 +1,22 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Setup",
+  "description": "One side's starting arrangement, written for light. The board's mirror maps it onto dark's squares.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "status", "name", "pieces", "source"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "status": { "enum": ["draft", "official", "retired"] },
+    "name": { "type": "string", "minLength": 1 },
+    "pieces": {
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z][1-9][0-9]?$" },
+      "additionalProperties": { "type": "string", "pattern": "^[a-z]+$" }
+    },
+    "source": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string" }
+  }
+}

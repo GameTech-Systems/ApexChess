@@ -1,0 +1,25 @@
+{
+  "id": "standard",
+  "version": "0.1.0",
+  "status": "draft",
+  "name": "Standard 8x8, turned 45 degrees",
+  "files": 8,
+  "ranks": 8,
+  "sides": {
+    "light": {
+      "corner": "h1",
+      "forward": [-1, 1],
+      "farEdges": [{ "file": "a" }, { "rank": 8 }],
+      "promotionSquares": ["a8"],
+      "mirror": "identity"
+    },
+    "dark": {
+      "corner": "a8",
+      "forward": [1, -1],
+      "farEdges": [{ "file": "h" }, { "rank": 1 }],
+      "promotionSquares": ["h1"],
+      "mirror": "rotate180"
+    }
+  },
+  "source": "docs/RULES.md sections 1, 2 and 5; corners per owner decision D4 (2026-10-21)."
+}

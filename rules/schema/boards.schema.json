@@ -1,0 +1,77 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Board",
+  "description": "Board size and each side's geometry in standard a1 to h8 coordinates. The 45-degree turn is rendering only.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "version", "status", "name", "files", "ranks", "sides", "source"],
+  "definitions": {
+    "square": { "type": "string", "pattern": "^[a-z][1-9][0-9]?$" },
+    "side": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["corner", "forward", "farEdges", "promotionSquares", "mirror"],
+      "properties": {
+        "corner": {
+          "$ref": "#/definitions/square",
+          "description": "This side's home corner. Chord 0; chords are counted outward from it."
+        },
+        "forward": {
+          "description": "[file step, rank step] toward the opposing corner, along the ray. A square's chord is (square - corner) dot forward.",
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "enum": [-1, 0, 1] }
+        },
+        "farEdges": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["file"],
+                "properties": { "file": { "type": "string", "pattern": "^[a-z]$" } }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["rank"],
+                "properties": { "rank": { "type": "integer", "minimum": 1 } }
+              }
+            ]
+          }
+        },
+        "promotionSquares": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "$ref": "#/definitions/square" }
+        },
+        "mirror": {
+          "enum": ["identity", "rotate180"],
+          "description": "How a setup written for light maps onto this side's squares."
+        }
+      }
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "status": { "enum": ["draft", "official", "retired"] },
+    "name": { "type": "string", "minLength": 1 },
+    "files": { "type": "integer", "minimum": 1, "maximum": 26 },
+    "ranks": { "type": "integer", "minimum": 1, "maximum": 99 },
+    "sides": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["light", "dark"],
+      "properties": {
+        "light": { "$ref": "#/definitions/side" },
+        "dark": { "$ref": "#/definitions/side" }
+      }
+    },
+    "source": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string" }
+  }
+}
