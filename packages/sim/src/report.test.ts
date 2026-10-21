@@ -50,6 +50,7 @@ describe("buildReport", () => {
       ["1", 1, 1, 1],
       ["2", 1, 1, 1],
     ]);
+    expect(rows.map((r) => r.families)).toEqual([1, 1]);
     expect(report.features.some((r) => r.feature === "beyond")).toBe(false);
   });
 
@@ -80,6 +81,7 @@ describe("toMarkdown", () => {
     expect(md).toContain("## First move");
     expect(md).toContain("## Setup families");
     expect(md).toContain("## Setup features");
+    expect(md).toContain("Feature | Value | Families | Games");
     expect(md).toContain("standard@");
     expect(md).toMatch(/Warning: 100% of games hit the ply cap/);
     expect(md).toContain("docs/decisions/0003-self-play-measures.md");
