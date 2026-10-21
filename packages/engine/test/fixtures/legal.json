@@ -1,0 +1,387 @@
+{
+  "notes": "Hand-worked legal moves, check, and game status. Defaults: ply 10, no unmoved pieces, standard parameters. Status is the result with no history: ongoing, checkmate, stalemate, or insufficientMaterial.",
+  "positions": [
+    {
+      "name": "light pawn on a7 checks a8 along the file-a edge (D2)",
+      "turn": "dark",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "a7": "pawn"
+        },
+        "dark": {
+          "a8": "king"
+        }
+      },
+      "check": true,
+      "status": "ongoing",
+      "moves": ["a8xa7", "a8-b7", "a8-b8"]
+    },
+    {
+      "name": "light pawn on b8 checks a8 along the rank-8 edge (D2)",
+      "turn": "dark",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "b8": "pawn"
+        },
+        "dark": {
+          "a8": "king"
+        }
+      },
+      "check": true,
+      "status": "ongoing",
+      "moves": ["a8xb8", "a8-a7", "a8-b7"]
+    },
+    {
+      "name": "light pawn on b7 does not check a8 but covers a7 and b8 (D1)",
+      "turn": "dark",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "b7": "pawn"
+        },
+        "dark": {
+          "a8": "king"
+        }
+      },
+      "check": false,
+      "status": "ongoing",
+      "moves": ["a8xb7"]
+    },
+    {
+      "name": "checkmate by pawns next to a8",
+      "turn": "dark",
+      "pieces": {
+        "light": {
+          "b6": "king",
+          "a7": "pawn",
+          "c8": "pawn"
+        },
+        "dark": {
+          "a8": "king"
+        }
+      },
+      "check": true,
+      "status": "checkmate",
+      "moves": []
+    },
+    {
+      "name": "checkmate by dark pawns next to h1 (mirrored)",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king"
+        },
+        "dark": {
+          "g3": "king",
+          "h2": "pawn",
+          "f1": "pawn"
+        }
+      },
+      "check": true,
+      "status": "checkmate",
+      "moves": []
+    },
+    {
+      "name": "stalemate by a pawn next to a8",
+      "turn": "dark",
+      "pieces": {
+        "light": {
+          "c6": "king",
+          "b7": "pawn"
+        },
+        "dark": {
+          "a8": "king"
+        }
+      },
+      "check": false,
+      "status": "stalemate",
+      "moves": []
+    },
+    {
+      "name": "checkmate by a protected queen next to h1",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king"
+        },
+        "dark": {
+          "f3": "king",
+          "g2": "queen"
+        }
+      },
+      "check": true,
+      "status": "checkmate",
+      "moves": []
+    },
+    {
+      "name": "rook check: block it or step aside, never along the line",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "b4": "rook"
+        },
+        "dark": {
+          "a8": "king",
+          "h8": "rook"
+        }
+      },
+      "check": true,
+      "status": "ongoing",
+      "moves": ["h1-g1", "h1-g2", "b4-h4"]
+    },
+    {
+      "name": "a pinned knight has no legal moves",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "g2": "knight"
+        },
+        "dark": {
+          "a8": "king",
+          "b7": "bishop"
+        }
+      },
+      "check": false,
+      "status": "ongoing",
+      "from": "g2",
+      "moves": []
+    },
+    {
+      "name": "a king may not step next to the other king",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "e4": "king",
+          "a1": "rook"
+        },
+        "dark": {
+          "e6": "king",
+          "h8": "rook"
+        }
+      },
+      "check": false,
+      "status": "ongoing",
+      "from": "e4",
+      "moves": ["e4-d3", "e4-e3", "e4-f3", "e4-d4", "e4-f4"]
+    },
+    {
+      "name": "pawnFirstMove one: an unmoved pawn cannot block a check two squares ahead",
+      "parameters": {
+        "pawnFirstMove": "one"
+      },
+      "turn": "light",
+      "unmoved": ["e3"],
+      "pieces": {
+        "light": {
+          "h5": "king",
+          "e3": "pawn"
+        },
+        "dark": {
+          "a8": "king",
+          "a5": "rook"
+        }
+      },
+      "check": true,
+      "status": "ongoing",
+      "from": "e3",
+      "moves": []
+    },
+    {
+      "name": "pawnFirstMove two: an unmoved pawn blocks a check with its two-square move (D3)",
+      "parameters": {
+        "pawnFirstMove": "two"
+      },
+      "turn": "light",
+      "unmoved": ["e3"],
+      "pieces": {
+        "light": {
+          "h5": "king",
+          "e3": "pawn"
+        },
+        "dark": {
+          "a8": "king",
+          "a5": "rook"
+        }
+      },
+      "check": true,
+      "status": "ongoing",
+      "from": "e3",
+      "moves": ["e3-c5"]
+    },
+    {
+      "name": "firstMoveCaptures allowed: the king may capture its unprotected attacker on ply 0",
+      "parameters": {
+        "firstMoveCaptures": "allowed"
+      },
+      "ply": 0,
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king"
+        },
+        "dark": {
+          "a8": "king",
+          "h2": "rook"
+        }
+      },
+      "check": true,
+      "status": "ongoing",
+      "from": "h1",
+      "moves": ["h1-g1", "h1xh2"]
+    },
+    {
+      "name": "firstMoveCaptures forbidden: attacks still give check on ply 0, but the king may not capture (owner, 2026-10-21)",
+      "parameters": {
+        "firstMoveCaptures": "forbidden"
+      },
+      "ply": 0,
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king"
+        },
+        "dark": {
+          "a8": "king",
+          "h2": "rook"
+        }
+      },
+      "check": true,
+      "status": "ongoing",
+      "from": "h1",
+      "moves": ["h1-g1"]
+    },
+    {
+      "name": "insufficient material: king against king",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king"
+        },
+        "dark": {
+          "a8": "king"
+        }
+      },
+      "status": "insufficientMaterial"
+    },
+    {
+      "name": "insufficient material: king and knight against king",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "e4": "knight"
+        },
+        "dark": {
+          "a8": "king"
+        }
+      },
+      "status": "insufficientMaterial"
+    },
+    {
+      "name": "insufficient material: king and bishop against king",
+      "turn": "dark",
+      "pieces": {
+        "light": {
+          "h1": "king"
+        },
+        "dark": {
+          "a8": "king",
+          "d5": "bishop"
+        }
+      },
+      "status": "insufficientMaterial"
+    },
+    {
+      "name": "insufficient material: bishops on one square color",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "c1": "bishop"
+        },
+        "dark": {
+          "a8": "king",
+          "f4": "bishop"
+        }
+      },
+      "status": "insufficientMaterial"
+    },
+    {
+      "name": "enough material: bishops on opposite square colors",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "c1": "bishop"
+        },
+        "dark": {
+          "a8": "king",
+          "f5": "bishop"
+        }
+      },
+      "status": "ongoing"
+    },
+    {
+      "name": "enough material: a knight each",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "e4": "knight"
+        },
+        "dark": {
+          "a8": "king",
+          "d5": "knight"
+        }
+      },
+      "status": "ongoing"
+    },
+    {
+      "name": "enough material: two knights",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "e4": "knight",
+          "e5": "knight"
+        },
+        "dark": {
+          "a8": "king"
+        }
+      },
+      "status": "ongoing"
+    },
+    {
+      "name": "enough material: a pawn",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king",
+          "e4": "pawn"
+        },
+        "dark": {
+          "a8": "king"
+        }
+      },
+      "status": "ongoing"
+    },
+    {
+      "name": "enough material: a rook",
+      "turn": "light",
+      "pieces": {
+        "light": {
+          "h1": "king"
+        },
+        "dark": {
+          "a8": "king",
+          "d5": "rook"
+        }
+      },
+      "status": "ongoing"
+    }
+  ]
+}

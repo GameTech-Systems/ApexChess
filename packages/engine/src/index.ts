@@ -5,3 +5,4 @@ export * from "./rules";
 export * from "./setup";
 export { catalog } from "./catalog";
 export * from "./moves";
+export * from "./game";

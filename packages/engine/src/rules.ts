@@ -54,6 +54,10 @@ export interface Movement {
 }
 
 export interface PieceRules {
+  /** May never be left attacked; checkmating it wins. */
+  royal?: boolean;
+  /** Its moves reset the move-rule count, as captures do. */
+  resetsMoveRule?: boolean;
   moves: Movement[];
   promotesTo?: string[];
 }
@@ -81,6 +85,17 @@ export interface SetupConstraints {
   beyondFrontChord: { chords: number[]; maxPieces: number };
 }
 
+/** Non-royal material left on the board, both sides together, that cannot mate. */
+export type DeadMaterial = { pieces: string[] } | { sameColor: string };
+
+export interface Draws {
+  /** The same position this many times, the start included. */
+  repetitions: number;
+  /** Moves by each side with no capture and no move by a `resetsMoveRule` piece. */
+  moveRule: number;
+  insufficientMaterial: DeadMaterial[];
+}
+
 export interface Ruleset extends Ref {
   status: Status;
   name: string;
@@ -91,6 +106,7 @@ export interface Ruleset extends Ref {
   setup: { default: Ref; constraints: SetupConstraints };
   /** Parameter id to option value; null means undecided. */
   parameters: Record<string, string | null>;
+  draws: Draws;
   source: string;
   notes?: string;
 }
@@ -114,6 +130,7 @@ export interface ResolvedRuleset {
   firstToMove: Side;
   setup: { default: Setup; constraints: SetupConstraints };
   parameters: Record<string, string>;
+  draws: Draws;
 }
 
 function find<T extends Ref>(list: T[], ref: Ref, what: string): T {
@@ -159,6 +176,10 @@ export function resolveRuleset(
     if (!pieces.pieces[piece]) throw new Error(`${where}: piece ${piece} has no movement data`);
   };
   for (const piece of Object.keys(ruleset.army)) known(piece, `ruleset ${id} army`);
+  for (const dead of ruleset.draws.insufficientMaterial) {
+    for (const piece of "pieces" in dead ? dead.pieces : [dead.sameColor])
+      known(piece, `ruleset ${id} insufficient material`);
+  }
   for (const [piece, rules] of Object.entries(pieces.pieces)) {
     for (const to of rules.promotesTo ?? []) known(to, `${piece} promotion`);
     for (const m of rules.moves) {
@@ -183,5 +204,6 @@ export function resolveRuleset(
       constraints: ruleset.setup.constraints,
     },
     parameters,
+    draws: ruleset.draws,
   };
 }
