@@ -84,7 +84,7 @@ Decisions: D14.
 
 ## Phase 3: Playable product
 
-### S13 — Computer opponent · Opus 5.5 · high · `todo`
+### S13 — Computer opponent · Opus 5.5 · high · `done`
 A random legal mover first, then a search AI on our own engine so it respects any ruleset and setup. The computer picks its setup from the presets.
 
 ### S14 — Play aids, rules screen, mobile layout · Sonnet 5.5 · medium · `todo`
