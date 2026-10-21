@@ -5,6 +5,7 @@
   "name": "Apex Chess pieces",
   "pieces": {
     "king": {
+      "letter": "K",
       "royal": true,
       "moves": [
         {
@@ -24,6 +25,7 @@
       ]
     },
     "queen": {
+      "letter": "Q",
       "moves": [
         {
           "steps": [
@@ -41,6 +43,7 @@
       ]
     },
     "rook": {
+      "letter": "R",
       "moves": [
         {
           "steps": [
@@ -54,6 +57,7 @@
       ]
     },
     "bishop": {
+      "letter": "B",
       "moves": [
         {
           "steps": [
@@ -67,6 +71,7 @@
       ]
     },
     "knight": {
+      "letter": "N",
       "moves": [
         {
           "steps": [
@@ -85,6 +90,7 @@
       ]
     },
     "pawn": {
+      "letter": "P",
       "resetsMoveRule": true,
       "moves": [
         {

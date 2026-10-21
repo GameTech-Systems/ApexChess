@@ -59,8 +59,13 @@
       "additionalProperties": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["moves"],
+        "required": ["letter", "moves"],
         "properties": {
+          "letter": {
+            "type": "string",
+            "pattern": "^[A-Z]$",
+            "description": "Single upper-case letter used in setup codes; unique within the piece set."
+          },
           "royal": {
             "type": "boolean",
             "description": "true: its side may never leave it attacked, and checkmating it wins."
