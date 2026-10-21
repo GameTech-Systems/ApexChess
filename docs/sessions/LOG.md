@@ -15,3 +15,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-10-21 | S11 | Sonnet 5.5 · high | done | 8 | Setup codes, mirror reflection, canonical setup id; piece letters added to data |
 | 2026-10-21 | S12 | Sonnet 5.5 · medium | done | 9 | Setup builder, device-saved setups, presets, two-setup hot-seat, side alternation |
 | 2026-10-21 | S13 | Opus 5.5 · high | done | 10 | Computer opponent: random mover, alpha-beta search, preset setup, levels |
+| 2026-10-21 | S14 | Sonnet 5.5 · medium | done | 11 | Play aids (legal moves, danger, undo, sound), rules screen, phone layout |
