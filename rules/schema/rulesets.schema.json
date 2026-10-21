@@ -89,11 +89,15 @@
       "additionalProperties": { "type": ["string", "null"] }
     },
     "draws": {
-      "description": "Automatic draws. Stalemate is always a draw; agreement comes from the players.",
+      "description": "Draw rules. Stalemate and insufficient material are always automatic; agreement comes from the players.",
       "type": "object",
       "additionalProperties": false,
-      "required": ["repetitions", "moveRule", "insufficientMaterial"],
+      "required": ["mode", "repetitions", "moveRule", "insufficientMaterial"],
       "properties": {
+        "mode": {
+          "enum": ["claim", "auto"],
+          "description": "claim: a player must claim a draw by repetition or the move rule. auto: it ends the game."
+        },
         "repetitions": {
           "type": "integer",
           "minimum": 2,

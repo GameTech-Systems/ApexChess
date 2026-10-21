@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
 import fixtureData from "../test/fixtures/legal.json";
 import { catalog } from "./catalog";
-import { inCheck, legalMoves, makeMove, newGame, play, result, type GameState } from "./game";
+import {
+  claimableDraws,
+  claimDraw,
+  inCheck,
+  legalMoves,
+  makeMove,
+  newGame,
+  play,
+  result,
+  type GameState,
+} from "./game";
 import { generateMoves, moveText, startPosition, type Position } from "./moves";
 import { resolveRuleset, type Side } from "./rules";
 
@@ -106,8 +116,9 @@ describe("legal moves", () => {
   });
 });
 
-describe("play and draws (D8)", () => {
-  const ruleset = rulesetWith();
+describe("play and automatic draws (D8, draws.mode auto)", () => {
+  const ruleset = structuredClone(rulesetWith());
+  ruleset.draws.mode = "auto";
   const move = (game: GameState, text: string) => {
     const m = legalMoves(ruleset, game.position).find((x) => moveText(x) === text);
     if (!m) throw new Error(`no legal move ${text}`);
@@ -181,5 +192,94 @@ describe("play and draws (D8)", () => {
       "e4xd6",
     );
     expect(result(ruleset, game)).toEqual({ status: "draw", reason: "insufficientMaterial" });
+  });
+});
+
+describe("claimed draws (D8, draws.mode claim)", () => {
+  const ruleset = rulesetWith();
+  const move = (game: GameState, text: string) => {
+    const m = legalMoves(ruleset, game.position).find((x) => moveText(x) === text);
+    if (!m) throw new Error(`no legal move ${text}`);
+    return play(ruleset, game, m);
+  };
+  const cycle = ["b1-c3", "b8-c6", "c3-b1", "c6-b8"];
+  const start = () =>
+    newGame(
+      ruleset,
+      position(
+        { light: { h1: "king", b1: "knight" }, dark: { a8: "king", b8: "knight" } },
+        "light",
+      ),
+    );
+  const repeated = () => cycle.concat(cycle).reduce(move, start());
+
+  it("claim is the default mode", () => {
+    expect(ruleset.draws.mode).toBe("claim");
+    expect(start().drawMode).toBe("claim");
+  });
+
+  it("repetition does not end the game; it can be claimed", () => {
+    const game = repeated();
+    expect(result(ruleset, game)).toEqual({ status: "ongoing" });
+    expect(claimableDraws(ruleset, game)).toEqual(["repetition"]);
+    const claimed = claimDraw(ruleset, game, "repetition");
+    expect(result(ruleset, claimed)).toEqual({ status: "draw", reason: "repetition" });
+    expect(() => play(ruleset, claimed, { from: "h1", to: "g1", piece: "king" })).toThrow(/over/);
+  });
+
+  it("play may continue instead, and the repetition claim lapses", () => {
+    const game = move(repeated(), "h1-g1");
+    expect(claimableDraws(ruleset, game)).toEqual([]);
+    expect(() => claimDraw(ruleset, game, "repetition")).toThrow(/claim/);
+  });
+
+  it("fifty-move rule is claimable and stays claimable", () => {
+    const game: GameState = { ...start(), quietPlies: 100 };
+    expect(result(ruleset, game).status).toBe("ongoing");
+    expect(claimableDraws(ruleset, game)).toEqual(["moveRule"]);
+    const next = move(game, "b1-c3");
+    expect(claimableDraws(ruleset, next)).toEqual(["moveRule"]);
+    expect(result(ruleset, claimDraw(ruleset, next, "moveRule"))).toEqual({
+      status: "draw",
+      reason: "moveRule",
+    });
+  });
+
+  it("nothing to claim early, and checkmate beats a claim", () => {
+    expect(claimableDraws(ruleset, start())).toEqual([]);
+    expect(() => claimDraw(ruleset, start(), "moveRule")).toThrow(/claim/);
+    const mate = move(
+      {
+        ...newGame(
+          ruleset,
+          position({ light: { b6: "king", h7: "rook" }, dark: { a8: "king" } }, "light"),
+        ),
+        quietPlies: 99,
+      },
+      "h7-h8",
+    );
+    expect(claimableDraws(ruleset, mate)).toEqual([]);
+  });
+
+  it("insufficient material and stalemate stay automatic", () => {
+    const game = move(
+      newGame(
+        ruleset,
+        position(
+          { light: { h1: "king", e4: "knight" }, dark: { a8: "king", d6: "rook" } },
+          "light",
+        ),
+      ),
+      "e4xd6",
+    );
+    expect(result(ruleset, game)).toEqual({ status: "draw", reason: "insufficientMaterial" });
+  });
+
+  it("a game can be started in auto mode on a claim ruleset", () => {
+    const game = newGame(ruleset, start().position, { drawMode: "auto" });
+    expect(game.drawMode).toBe("auto");
+    const hit = cycle.concat(cycle).reduce(move, game);
+    expect(result(ruleset, hit)).toEqual({ status: "draw", reason: "repetition" });
+    expect(claimableDraws(ruleset, hit)).toEqual([]);
   });
 });

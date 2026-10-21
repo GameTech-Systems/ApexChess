@@ -59,7 +59,7 @@ Dark pawns work the same way in the opposite direction: a dark pawn on a4 moves 
 
 ## 6. Check, checkmate, and the end of the game
 
-Check and checkmate work as in standard chess. Checkmate wins; a player may also resign. Stalemate, threefold repetition, the fifty-move rule, insufficient material, and agreement are draws *(D8)*.
+Check and checkmate work as in standard chess. Checkmate wins; a player may also resign. Stalemate, threefold repetition, the fifty-move rule, insufficient material, and agreement are draws *(D8)*. Stalemate and insufficient material end the game at once. Repetition and the fifty-move rule must be claimed by a player; a game can instead be set to end them automatically (`draws.mode`: `claim` default, `auto`).
 
 ## 7. Opening lines
 

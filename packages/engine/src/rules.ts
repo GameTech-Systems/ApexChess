@@ -88,7 +88,11 @@ export interface SetupConstraints {
 /** Non-royal material left on the board, both sides together, that cannot mate. */
 export type DeadMaterial = { pieces: string[] } | { sameColor: string };
 
+export type DrawMode = "claim" | "auto";
+
 export interface Draws {
+  /** `claim`: repetition and the move rule must be claimed. `auto`: they end the game. */
+  mode: DrawMode;
   /** The same position this many times, the start included. */
   repetitions: number;
   /** Moves by each side with no capture and no move by a `resetsMoveRule` piece. */

@@ -1,6 +1,6 @@
 # Handoff
 
-Updated 2026-10-21 by S8 (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-10-21 by the draw-claim change (Sonnet 5.5). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
 - Phase 1. Rules data in `rules/` (parameters, board, pieces, default setup, `standard` ruleset 0.1.0 draft) with schemas; resolver, setup checks.
@@ -16,7 +16,7 @@ Start with: `/start-session S9`
 - D4: light's king on h1, dark's on a8; each player sees their own king at the bottom (decided)
 
 ## Open questions for the owner
-- None blocking S9. Draws by repetition and the fifty-move rule end the game automatically (provisional; claim-based is the alternative).
+- None blocking S9. Claim vs auto draws done (owner 2026-10-21); UI for claiming and the auto toggle belongs to S10.
 - `standard` ruleset is still draft 0.1.0; make it official 1.0.0 when the owner approves.
 
 ## Notes for Claude
