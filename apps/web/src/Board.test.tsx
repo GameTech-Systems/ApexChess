@@ -57,6 +57,24 @@ describe("App", () => {
   });
 });
 
+describe("Play aids", () => {
+  it("marks pieces in danger", () => {
+    const html = renderToStaticMarkup(<Board {...props} danger={new Set(["h1", "g2"])} />);
+    expect(html.match(/mark-danger/g)).toHaveLength(2);
+    expect(renderToStaticMarkup(<Board {...props} />)).not.toContain("mark-danger");
+  });
+
+  it("offers undo, rules, and the three toggles in a game", () => {
+    const html = renderToStaticMarkup(<Game setups={[setup, setup]} onChangeSetups={() => {}} />);
+    for (const text of ["Undo", "Rules", "Show legal moves", "Show pieces in danger", "Sound"])
+      expect(html).toContain(text);
+  });
+
+  it("offers Rules on the opening choice", () => {
+    expect(renderToStaticMarkup(<App />)).toContain("Rules");
+  });
+});
+
 describe("Game", () => {
   it("starts with light to move, black dark squares, and each player's seat", () => {
     const html = renderToStaticMarkup(<Game setups={[setup, setup]} onChangeSetups={() => {}} />);
