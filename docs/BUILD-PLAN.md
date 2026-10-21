@@ -78,7 +78,7 @@ Validate Player's Choice arrangements from the constraint data; a short shareabl
 Done when: legal and illegal arrangement fixtures pass and codes round-trip.
 Decisions: D5, D6.
 
-### S12 — Setup builder, saved setups, presets · Sonnet 5.5 · medium · `todo`
+### S12 — Setup builder, saved setups, presets · Sonnet 5.5 · medium · `done`
 Drag or tap pieces into the home area, live validation, save arrangements on the device, a list of presets, and hot-seat games with two custom setups.
 Decisions: D14.
 
