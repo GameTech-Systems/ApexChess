@@ -15,6 +15,7 @@
     "firstToMove",
     "setup",
     "parameters",
+    "draws",
     "source"
   ],
   "definitions": {
@@ -86,6 +87,56 @@
       "type": "object",
       "propertyNames": { "pattern": "^[a-z][A-Za-z0-9]*$" },
       "additionalProperties": { "type": ["string", "null"] }
+    },
+    "draws": {
+      "description": "Automatic draws. Stalemate is always a draw; agreement comes from the players.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["repetitions", "moveRule", "insufficientMaterial"],
+      "properties": {
+        "repetitions": {
+          "type": "integer",
+          "minimum": 2,
+          "description": "The same position this many times, the start included, is a draw."
+        },
+        "moveRule": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "This many moves by each side with no capture and no move by a resetsMoveRule piece is a draw."
+        },
+        "insufficientMaterial": {
+          "type": "array",
+          "description": "Material that cannot mate. Each case lists the non-royal pieces left on the board, both sides together.",
+          "items": {
+            "oneOf": [
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["pieces"],
+                "properties": {
+                  "pieces": {
+                    "type": "array",
+                    "items": { "type": "string", "pattern": "^[a-z]+$" },
+                    "description": "Exactly these pieces."
+                  }
+                }
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["sameColor"],
+                "properties": {
+                  "sameColor": {
+                    "type": "string",
+                    "pattern": "^[a-z]+$",
+                    "description": "Any number of this piece, all on squares of one color."
+                  }
+                }
+              }
+            ]
+          }
+        }
+      }
     },
     "source": { "type": "string", "minLength": 1 },
     "notes": { "type": "string" }

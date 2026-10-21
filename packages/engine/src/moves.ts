@@ -54,26 +54,52 @@ function applies(m: Movement, edge: boolean, unmoved: boolean, params: Record<st
   return Object.entries(m.when ?? {}).every(([k, v]) => params[k] === v);
 }
 
+/** Visit every square each applicable movement entry of the piece on `from` reaches, stopping at the first occupied one. */
+function walk(
+  ruleset: ResolvedRuleset,
+  pos: Position,
+  from: string,
+  visit: (to: string, target: PlacedPiece | undefined, m: Movement) => void,
+) {
+  const { board, parameters } = ruleset;
+  const { side, piece } = pos.squares[from]!;
+  const rules = ruleset.pieces.pieces[piece];
+  if (!rules) throw new Error(`piece ${piece} has no movement data`);
+  const flip = board.sides[side].mirror === "rotate180" ? -1 : 1;
+  const at = parseSquare(board, from);
+  const edge = onFarEdge(board, side, at);
+  const unmoved = pos.unmoved.includes(from);
+  for (const m of rules.moves) {
+    if (!applies(m, edge, unmoved, parameters)) continue;
+    for (const [df, dr] of m.steps) {
+      for (let n = 1; n <= (m.range ?? Infinity); n++) {
+        const file = at.file + df * flip * n;
+        const rank = at.rank + dr * flip * n;
+        if (file < 0 || rank < 0 || file >= board.files || rank >= board.ranks) break;
+        const to = squareName({ file, rank });
+        const target = pos.squares[to];
+        visit(to, target, m);
+        if (target) break;
+      }
+    }
+  }
+}
+
 /** Every pseudo-legal move for the side to move (own-king safety is not checked). */
 export function generateMoves(ruleset: ResolvedRuleset, pos: Position): Move[] {
-  const { board, parameters } = ruleset;
   const side = pos.turn;
-  const { mirror, promotionSquares } = board.sides[side];
-  const flip = mirror === "rotate180" ? -1 : 1;
-  const unmoved = new Set(pos.unmoved);
+  const { promotionSquares } = ruleset.board.sides[side];
   // D7: with firstMoveCaptures "forbidden", neither side captures on its first move.
-  const captures = !(parameters.firstMoveCaptures === "forbidden" && pos.ply < 2);
+  const captures = !(ruleset.parameters.firstMoveCaptures === "forbidden" && pos.ply < 2);
   const moves: Move[] = [];
   const seen = new Set<string>();
 
   for (const [from, { side: owner, piece }] of Object.entries(pos.squares)) {
     if (owner !== side) continue;
-    const rules = ruleset.pieces.pieces[piece];
-    if (!rules) throw new Error(`piece ${piece} has no movement data`);
-    const at = parseSquare(board, from);
-    const edge = onFarEdge(board, side, at);
     const add = (to: string, captured?: string) => {
-      const promos = promotionSquares.includes(to) ? (rules.promotesTo ?? []) : [];
+      const promos = promotionSquares.includes(to)
+        ? (ruleset.pieces.pieces[piece]!.promotesTo ?? [])
+        : [];
       for (const promotion of promos.length ? promos : [undefined]) {
         const m: Move = { from, to, piece };
         if (captured) m.captured = captured;
@@ -84,24 +110,26 @@ export function generateMoves(ruleset: ResolvedRuleset, pos: Position): Move[] {
         moves.push(m);
       }
     };
-
-    for (const m of rules.moves) {
-      if (!applies(m, edge, unmoved.has(from), parameters)) continue;
-      for (const [df, dr] of m.steps) {
-        for (let n = 1; n <= (m.range ?? Infinity); n++) {
-          const file = at.file + df * flip * n;
-          const rank = at.rank + dr * flip * n;
-          if (file < 0 || rank < 0 || file >= board.files || rank >= board.ranks) break;
-          const to = squareName({ file, rank });
-          const target = pos.squares[to];
-          if (target) {
-            if (target.side !== side && m.mode !== "move" && captures) add(to, target.piece);
-            break;
-          }
-          if (m.mode !== "capture") add(to);
-        }
-      }
-    }
+    walk(ruleset, pos, from, (to, target, m) => {
+      if (!target) {
+        if (m.mode !== "capture") add(to);
+      } else if (target.side !== side && m.mode !== "move" && captures) add(to, target.piece);
+    });
   }
   return moves;
+}
+
+/**
+ * Squares the pieces of `by` attack: every square a capture-capable entry reaches, occupied or not.
+ * D7 does not apply: under firstMoveCaptures "forbidden", attacks still give check (owner, 2026-10-21).
+ */
+export function attackedSquares(ruleset: ResolvedRuleset, pos: Position, by: Side): Set<string> {
+  const attacked = new Set<string>();
+  for (const [from, { side }] of Object.entries(pos.squares)) {
+    if (side !== by) continue;
+    walk(ruleset, pos, from, (to, _target, m) => {
+      if (m.mode !== "move") attacked.add(to);
+    });
+  }
+  return attacked;
 }

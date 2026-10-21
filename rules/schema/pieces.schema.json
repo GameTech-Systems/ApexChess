@@ -61,6 +61,14 @@
         "additionalProperties": false,
         "required": ["moves"],
         "properties": {
+          "royal": {
+            "type": "boolean",
+            "description": "true: its side may never leave it attacked, and checkmating it wins."
+          },
+          "resetsMoveRule": {
+            "type": "boolean",
+            "description": "true: its moves reset the move-rule count, as captures do."
+          },
           "moves": {
             "type": "array",
             "minItems": 1,
