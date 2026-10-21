@@ -1,0 +1,121 @@
+{
+  "id": "standard",
+  "version": "0.1.0",
+  "status": "draft",
+  "name": "Apex Chess pieces",
+  "pieces": {
+    "king": {
+      "moves": [
+        {
+          "steps": [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+            [1, 1],
+            [1, -1],
+            [-1, 1],
+            [-1, -1]
+          ],
+          "range": 1,
+          "mode": "both"
+        }
+      ]
+    },
+    "queen": {
+      "moves": [
+        {
+          "steps": [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1],
+            [1, 1],
+            [1, -1],
+            [-1, 1],
+            [-1, -1]
+          ],
+          "mode": "both"
+        }
+      ]
+    },
+    "rook": {
+      "moves": [
+        {
+          "steps": [
+            [1, 0],
+            [-1, 0],
+            [0, 1],
+            [0, -1]
+          ],
+          "mode": "both"
+        }
+      ]
+    },
+    "bishop": {
+      "moves": [
+        {
+          "steps": [
+            [1, 1],
+            [1, -1],
+            [-1, 1],
+            [-1, -1]
+          ],
+          "mode": "both"
+        }
+      ]
+    },
+    "knight": {
+      "moves": [
+        {
+          "steps": [
+            [1, 2],
+            [2, 1],
+            [2, -1],
+            [1, -2],
+            [-1, -2],
+            [-2, -1],
+            [-2, 1],
+            [-1, 2]
+          ],
+          "range": 1,
+          "mode": "both"
+        }
+      ]
+    },
+    "pawn": {
+      "moves": [
+        { "steps": [[-1, 1]], "range": 1, "mode": "move", "onFarEdge": false },
+        {
+          "steps": [[-1, 1]],
+          "range": 2,
+          "mode": "move",
+          "onFarEdge": false,
+          "firstMove": true,
+          "when": { "pawnFirstMove": "two" }
+        },
+        {
+          "steps": [
+            [-1, 0],
+            [0, 1]
+          ],
+          "range": 1,
+          "mode": "capture",
+          "onFarEdge": false
+        },
+        {
+          "steps": [
+            [-1, 0],
+            [0, 1]
+          ],
+          "range": 1,
+          "mode": "both",
+          "onFarEdge": true
+        }
+      ],
+      "promotesTo": ["queen", "rook", "bishop", "knight"]
+    }
+  },
+  "source": "docs/RULES.md section 5; pawns per owner decisions D1 (ray step, edge-sharing captures), D2 (far-edge square is move and capture), D3 (two-square first move as an option), 2026-10-21.",
+  "notes": "Steps are [file, rank] written for light; the board's mirror maps them for dark. No range means the piece slides to the board edge. No castling, no en passant."
+}

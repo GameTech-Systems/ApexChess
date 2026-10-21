@@ -4,3 +4,4 @@ export const ENGINE_VERSION = "0.0.0";
 export * from "./rules";
 export * from "./setup";
 export { catalog } from "./catalog";
+export * from "./moves";

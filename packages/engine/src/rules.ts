@@ -39,6 +39,33 @@ export interface Board extends Ref {
   notes?: string;
 }
 
+export interface Movement {
+  /** [file, rank] steps written for light; the board's mirror maps them for dark. */
+  steps: [number, number][];
+  /** Most squares per direction; undefined slides to the board edge. */
+  range?: number;
+  mode: "move" | "capture" | "both";
+  /** Only when the piece is (true) or is not (false) on a far edge of its side. */
+  onFarEdge?: boolean;
+  /** Only while the piece has not moved. */
+  firstMove?: boolean;
+  /** Only when each listed parameter has this value. */
+  when?: Record<string, string>;
+}
+
+export interface PieceRules {
+  moves: Movement[];
+  promotesTo?: string[];
+}
+
+export interface PieceSet extends Ref {
+  status: Status;
+  name: string;
+  pieces: Record<string, PieceRules>;
+  source: string;
+  notes?: string;
+}
+
 export interface Setup extends Ref {
   status: Status;
   name: string;
@@ -58,6 +85,7 @@ export interface Ruleset extends Ref {
   status: Status;
   name: string;
   board: Ref;
+  pieces: Ref;
   army: Record<string, number>;
   firstToMove: Side;
   setup: { default: Ref; constraints: SetupConstraints };
@@ -70,6 +98,7 @@ export interface Ruleset extends Ref {
 export interface RulesCatalog {
   parameters: Parameter[];
   boards: Board[];
+  pieces: PieceSet[];
   setups: Setup[];
   rulesets: Ruleset[];
 }
@@ -80,6 +109,7 @@ export interface ResolvedRuleset {
   status: Status;
   name: string;
   board: Board;
+  pieces: PieceSet;
   army: Record<string, number>;
   firstToMove: Side;
   setup: { default: Setup; constraints: SetupConstraints };
@@ -124,12 +154,28 @@ export function resolveRuleset(
     parameters[p.id] = value;
   }
 
+  const pieces = find(catalog.pieces, ruleset.pieces, "pieces");
+  const known = (piece: string, where: string) => {
+    if (!pieces.pieces[piece]) throw new Error(`${where}: piece ${piece} has no movement data`);
+  };
+  for (const piece of Object.keys(ruleset.army)) known(piece, `ruleset ${id} army`);
+  for (const [piece, rules] of Object.entries(pieces.pieces)) {
+    for (const to of rules.promotesTo ?? []) known(to, `${piece} promotion`);
+    for (const m of rules.moves) {
+      for (const [key, value] of Object.entries(m.when ?? {})) {
+        if (!registry.get(key)?.options.some((o) => o.value === value))
+          throw new Error(`${piece} movement: unknown condition ${key} = ${value}`);
+      }
+    }
+  }
+
   return {
     id: ruleset.id,
     version: ruleset.version,
     status: ruleset.status,
     name: ruleset.name,
     board: find(catalog.boards, ruleset.board, "board"),
+    pieces,
     army: ruleset.army,
     firstToMove: ruleset.firstToMove,
     setup: {
