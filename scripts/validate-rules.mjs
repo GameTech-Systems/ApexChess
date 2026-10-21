@@ -1,4 +1,4 @@
-// Validate rules/<kind>/**/*.json against rules/schema/<kind>.schema.json (Ajv).
+// Validate rules/<kind>/**/*.json and rules/<kind>.json against rules/schema/<kind>.schema.json (Ajv).
 // Passes when rules/ is empty. Returns a list of error strings.
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
@@ -20,21 +20,27 @@ export function validateRules(rulesDir) {
   const ajv = new Ajv({ allErrors: true, strict: true });
   addFormats(ajv);
   const schemaDir = join(rulesDir, "schema");
-  for (const name of readdirSync(rulesDir)) {
-    const dir = join(rulesDir, name);
-    if (name === "schema" || !statSync(dir).isDirectory()) continue;
-    const files = jsonFiles(dir);
-    if (files.length === 0) continue;
+  const check = (name, files) => {
     const schemaPath = join(schemaDir, `${name}.schema.json`);
     if (!existsSync(schemaPath)) {
       errors.push(`rules/${name}: no schema at rules/schema/${name}.schema.json`);
-      continue;
+      return;
     }
     const validate = ajv.compile(JSON.parse(readFileSync(schemaPath, "utf8")));
     for (const f of files) {
       if (!validate(JSON.parse(readFileSync(f, "utf8")))) {
         errors.push(`${relative(rulesDir, f)}: ${ajv.errorsText(validate.errors)}`);
       }
+    }
+  };
+  for (const name of readdirSync(rulesDir)) {
+    const p = join(rulesDir, name);
+    if (name === "schema") continue;
+    if (statSync(p).isDirectory()) {
+      const files = jsonFiles(p);
+      if (files.length > 0) check(name, files);
+    } else if (name.endsWith(".json")) {
+      check(name.slice(0, -".json".length), [p]);
     }
   }
   return errors;

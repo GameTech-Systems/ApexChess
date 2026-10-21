@@ -28,6 +28,17 @@ describe("validateRules", () => {
     expect(validateRules(bad)).toHaveLength(1);
   });
 
+  it("validates a top-level rules/<name>.json against rules/schema/<name>.schema.json", () => {
+    const schema = { type: "object", required: ["id"], properties: { id: { type: "number" } } };
+    expect(validateRules(fixture({ "schema/registry.schema.json": schema, "registry.json": { id: 1 } }))).toEqual([]);
+    expect(validateRules(fixture({ "schema/registry.schema.json": schema, "registry.json": {} }))).toHaveLength(1);
+    expect(validateRules(fixture({ "registry.json": {} }))).toHaveLength(1);
+  });
+
+  it("passes on the repository's rules/", () => {
+    expect(validateRules(join(__dirname, "../../rules"))).toEqual([]);
+  });
+
   it("reports a data folder that has no schema", () => {
     expect(validateRules(fixture({ "piece/a.json": {} }))).toHaveLength(1);
   });
