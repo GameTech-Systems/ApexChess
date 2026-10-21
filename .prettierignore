@@ -1,0 +1,7 @@
+pnpm-lock.yaml
+dist
+docs
+assets
+*.md
+.github
+.claude

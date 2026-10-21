@@ -42,7 +42,7 @@ Confirm or change D1 to D9 in the ledger. Claude then updates `docs/RULES.md` an
 
 ## Phase 1: Engine and board
 
-### S5 — Workspace, CI, and labels · Sonnet 5.5 · medium · `todo`
+### S5 — Workspace, CI, and labels · Sonnet 5.5 · medium · `done`
 Scaffold the pnpm workspace: `packages/engine` (pure TypeScript, no DOM), `apps/web` (Vite + React), strict shared tsconfig, Vitest, ESLint, Prettier. Root scripts: `dev`, `build`, `test`, `lint`, `typecheck`, `validate:rules` (Ajv validation of `rules/` against `rules/schema/`; passes when `rules/` is empty). Pin Node 22 and pnpm in `package.json`. The existing `ci` job already runs these once `package.json` exists. Write the commands into CLAUDE.md. Create the issue labels the templates use (`rule-proposal`, `setup-report`, `balance-report`, `playtest`, `bug`) with `gh api`.
 Pre-approved dependencies: typescript, vite, react, react-dom, @vitejs/plugin-react, vitest, eslint, typescript-eslint, prettier, ajv, ajv-formats.
 Done when: CI passes on the PR, `pnpm dev` serves a blank app shell, and `validate:rules` passes.
