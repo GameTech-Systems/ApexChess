@@ -1,0 +1,25 @@
+export function Privacy({ onClose }: { onClose: () => void }) {
+  return (
+    <section aria-label="Privacy" className="rules">
+      <h1>Privacy</h1>
+      <p>
+        Apex Chess runs in your browser. No accounts, no sign-in, no ads, no analytics, and no
+        cookies.
+      </p>
+      <h2>What is stored</h2>
+      <p>
+        Setups you save are kept in this browser's local storage so you can reuse them. They stay on
+        this device and are never sent to us. Clearing your browser's site data removes them.
+      </p>
+      <h2>What is not collected</h2>
+      <p>
+        Games you play against the computer or on one screen are not sent anywhere. The site is
+        served by Cloudflare, which may keep standard server logs (such as IP address) for security
+        and operation.
+      </p>
+      <button type="button" onClick={onClose}>
+        Close
+      </button>
+    </section>
+  );
+}

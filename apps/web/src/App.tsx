@@ -16,6 +16,7 @@ import {
   type Side,
 } from "@apexchess/engine";
 import { Board } from "./Board";
+import { Privacy } from "./Privacy";
 import { Rules } from "./Rules";
 import { piecesInDanger, playSound, undoMoves } from "./playAids";
 import { SetupBuilder } from "./SetupBuilder";
@@ -57,10 +58,17 @@ export function App({ initialMode }: { initialMode?: Mode }) {
   const [mode, setMode] = useState(initialMode);
   const [level, setLevel] = useState<Level>(DEFAULT_LEVEL);
   const [showRules, setShowRules] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   if (showRules)
     return (
       <main>
         <Rules onClose={() => setShowRules(false)} />
+      </main>
+    );
+  if (showPrivacy)
+    return (
+      <main>
+        <Privacy onClose={() => setShowPrivacy(false)} />
       </main>
     );
   if (!mode) {
@@ -85,6 +93,9 @@ export function App({ initialMode }: { initialMode?: Mode }) {
           </label>
           <button type="button" onClick={() => setShowRules(true)}>
             Rules
+          </button>
+          <button type="button" onClick={() => setShowPrivacy(true)}>
+            Privacy
           </button>
         </section>
       </main>
