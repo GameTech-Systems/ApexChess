@@ -54,7 +54,8 @@ export function summarize(t: Tally): Summary {
 export function normalCdf(x: number): number {
   const t = 1 / (1 + (0.3275911 * Math.abs(x)) / Math.SQRT2);
   const poly =
-    t * (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
+    t *
+    (0.254829592 + t * (-0.284496736 + t * (1.421413741 + t * (-1.453152027 + t * 1.061405429))));
   const erf = 1 - poly * Math.exp(-(x * x) / 2);
   return x >= 0 ? (1 + erf) / 2 : (1 - erf) / 2;
 }

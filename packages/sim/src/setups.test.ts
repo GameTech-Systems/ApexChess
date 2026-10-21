@@ -16,7 +16,10 @@ const { board } = ruleset;
 const { frontChord } = ruleset.setup.constraints;
 
 function withConstraints(c: Partial<ResolvedRuleset["setup"]["constraints"]>): ResolvedRuleset {
-  return { ...ruleset, setup: { ...ruleset.setup, constraints: { ...ruleset.setup.constraints, ...c } } };
+  return {
+    ...ruleset,
+    setup: { ...ruleset.setup, constraints: { ...ruleset.setup.constraints, ...c } },
+  };
 }
 
 describe("randomSetup", () => {
@@ -32,7 +35,9 @@ describe("randomSetup", () => {
   it("is deterministic per seed and varies across seeds", () => {
     expect(randomSetup(ruleset, seededRandom(7))).toEqual(randomSetup(ruleset, seededRandom(7)));
     const ids = new Set(
-      Array.from({ length: 20 }, (_, i) => canonicalSetupId(ruleset, randomSetup(ruleset, seededRandom(i)))),
+      Array.from({ length: 20 }, (_, i) =>
+        canonicalSetupId(ruleset, randomSetup(ruleset, seededRandom(i))),
+      ),
     );
     expect(ids.size).toBeGreaterThan(15);
   });
@@ -48,10 +53,15 @@ describe("randomSetup", () => {
   });
 
   it("throws when the constraints leave no legal arrangement", () => {
-    expect(() => randomSetup(withConstraints({ beyondFrontChord: { chords: [5], maxPieces: 0 } }), seededRandom(1))).toThrow(
+    expect(() =>
+      randomSetup(
+        withConstraints({ beyondFrontChord: { chords: [5], maxPieces: 0 } }),
+        seededRandom(1),
+      ),
+    ).toThrow(/no legal arrangement/);
+    expect(() => randomSetup(withConstraints({ frontChord: 3 }), seededRandom(1))).toThrow(
       /no legal arrangement/,
     );
-    expect(() => randomSetup(withConstraints({ frontChord: 3 }), seededRandom(1))).toThrow(/no legal arrangement/);
   });
 });
 
@@ -75,7 +85,9 @@ describe("setupFeatures", () => {
   it("gives a setup and its mirror image the same features", () => {
     for (let seed = 1; seed <= 30; seed++) {
       const pieces = randomSetup(ruleset, seededRandom(seed));
-      expect(setupFeatures(ruleset, mirrorSetup(board, "light", pieces))).toEqual(setupFeatures(ruleset, pieces));
+      expect(setupFeatures(ruleset, mirrorSetup(board, "light", pieces))).toEqual(
+        setupFeatures(ruleset, pieces),
+      );
     }
   });
 
