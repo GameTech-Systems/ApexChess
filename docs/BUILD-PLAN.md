@@ -117,15 +117,15 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 
 | ID | Topic | In effect | Needed by |
 |---|---|---|---|
-| D1 | Pawn move and capture | Default: one square straight ahead along its ray (no capture); captures one square forward and to the side, on the two edge-sharing forward squares | S7 |
-| D2 | Pawn on a far edge | Default: it advances one square along the edge toward the opposing king's corner, and that square is also its capture square | S7 |
-| D3 | Pawn first move | Default: one square only | S7 |
-| D4 | Which corner is light | Default: light's king on h1, dark's on a8; each player sees their own king at the bottom | S6 |
-| D5 | Where the one piece beyond the front chord may start | Default: on the next chord only (c1 to h6 for light, f8 to a3 for dark) | S6 |
-| D6 | Bishops on the same color in Player's Choice | Default: allowed | S6 |
-| D7 | Captures on the first move | Default: allowed | S7 |
-| D8 | Draw rules | Default: stalemate, threefold repetition, fifty-move rule, insufficient material, and agreement are draws | S8 |
-| D9 | Name for files and ranks on the turned board | Default: keep "files and ranks" | S14 |
+| D1 | Pawn move and capture | Decided: one square straight ahead along its ray (no capture); captures one square forward and to the side, on the two edge-sharing forward squares | S7 |
+| D2 | Pawn on a far edge | Decided: it advances one square along the edge toward the opposing king's corner, and that square is also its capture square | S7 |
+| D3 | Pawn first move | Decided: one square only by default; rule option `pawnFirstMove: two` (two squares along its ray) | S7 |
+| D4 | Which corner is light | Decided: light's king on h1, dark's on a8; each player sees their own king at the bottom | S6 |
+| D5 | Where the one piece beyond the front chord may start | Decided: on the next chord only (c1 to h6 for light, f8 to a3 for dark) | S6 |
+| D6 | Bishops on the same color in Player's Choice | Decided: allowed | S6 |
+| D7 | Captures on the first move | Decided: allowed by default; rule option `firstMoveCaptures: forbidden` | S7 |
+| D8 | Draw rules | Decided: stalemate, threefold repetition, fifty-move rule, insufficient material, and agreement are draws | S8 |
+| D9 | Name for files and ranks on the turned board | Decided: keep "files and ranks" | S14 |
 | D10 | License | Default (applied): PolyForm Shield 1.0.0 with a CLA and DCO sign-off, as in Chess Nines | S1 |
 | D11 | Hosting | Default: Cloudflare (Workers with Static Assets); confirm terms at signup | S16 |
 | D12 | Engine code from Chess Nines | Default: a separate engine in this repo that copies patterns, not a shared package | S5 |
