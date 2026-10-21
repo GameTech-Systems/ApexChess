@@ -1,0 +1,31 @@
+{
+  "legal": [
+    { "name": "default setup", "changes": {} },
+    { "name": "bishops on the same color (D6)", "changes": { "h2": "bishop", "h3": "rook" } },
+    {
+      "name": "queen as the piece beyond the front chord",
+      "changes": { "g2": "knight", "h6": null, "e3": "queen" }
+    },
+    { "name": "piece beyond on c1", "changes": { "h6": null, "c1": "knight" } }
+  ],
+  "illegal": [
+    {
+      "name": "king off its corner",
+      "changes": { "h1": "bishop", "g1": "king" },
+      "code": "corner"
+    },
+    {
+      "name": "two pieces beyond the front chord",
+      "changes": { "h4": null, "g5": "pawn" },
+      "code": "beyond"
+    },
+    {
+      "name": "piece two chords beyond (D5)",
+      "changes": { "h6": null, "h7": "knight" },
+      "code": "region"
+    },
+    { "name": "extra queen, missing pawn", "changes": { "h5": "queen" }, "code": "army" },
+    { "name": "unknown piece", "changes": { "h5": "dragon" }, "code": "army" },
+    { "name": "square off the board", "changes": { "h6": null, "i9": "knight" }, "code": "square" }
+  ]
+}

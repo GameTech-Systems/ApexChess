@@ -1,0 +1,20 @@
+{
+  "id": "standard",
+  "version": "0.1.0",
+  "status": "draft",
+  "name": "Apex Chess",
+  "board": { "id": "standard", "version": "0.1.0" },
+  "army": { "king": 1, "queen": 1, "rook": 2, "bishop": 2, "knight": 2, "pawn": 8 },
+  "firstToMove": "light",
+  "setup": {
+    "default": { "id": "default", "version": "1.0.0" },
+    "constraints": {
+      "cornerPiece": "king",
+      "frontChord": 4,
+      "beyondFrontChord": { "chords": [5], "maxPieces": 1 }
+    }
+  },
+  "parameters": { "pawnFirstMove": "one", "firstMoveCaptures": "allowed" },
+  "source": "docs/RULES.md draft 0.1; setup rules per owner decisions D5 (next chord only) and D6 (same-color bishops allowed), 2026-10-21.",
+  "notes": "Draft until movement data lands (S7); becomes official as 1.0.0."
+}

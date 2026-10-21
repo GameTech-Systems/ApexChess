@@ -1,0 +1,25 @@
+{
+  "id": "default",
+  "version": "1.0.0",
+  "status": "official",
+  "name": "Default",
+  "pieces": {
+    "h1": "king",
+    "g1": "bishop",
+    "h2": "rook",
+    "f1": "rook",
+    "g2": "queen",
+    "h3": "bishop",
+    "e1": "pawn",
+    "f2": "pawn",
+    "g3": "pawn",
+    "h4": "pawn",
+    "d1": "pawn",
+    "e2": "pawn",
+    "f3": "knight",
+    "g4": "pawn",
+    "h5": "pawn",
+    "h6": "knight"
+  },
+  "source": "docs/RULES.md section 3 (written for light; dark mirrors through the center)."
+}

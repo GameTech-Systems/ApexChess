@@ -1,0 +1,32 @@
+{
+  "parameters": [
+    {
+      "id": "pawnFirstMove",
+      "name": "Pawn first move",
+      "description": "How far a pawn may move along its ray on its first move. There is no en passant.",
+      "default": "one",
+      "options": [
+        { "value": "one", "label": "One square only" },
+        { "value": "two", "label": "Two squares along its ray" }
+      ],
+      "status": "decided",
+      "decision": "D3",
+      "affects": ["movement"],
+      "source": "Owner decision D3, 2026-10-21: one square by default, two squares as a rule option."
+    },
+    {
+      "id": "firstMoveCaptures",
+      "name": "Captures on the first move",
+      "description": "Whether each side may capture on its first move.",
+      "default": "allowed",
+      "options": [
+        { "value": "allowed", "label": "Allowed" },
+        { "value": "forbidden", "label": "No captures on either side's first move" }
+      ],
+      "status": "decided",
+      "decision": "D7",
+      "affects": ["movement", "captures"],
+      "source": "Owner decision D7, 2026-10-21: allowed by default, no first-move captures as a rule option."
+    }
+  ]
+}

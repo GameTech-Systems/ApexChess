@@ -1,0 +1,91 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Ruleset",
+  "description": "A complete rule set: board, army, setup rules, and a value for each registry parameter (null means undecided; the engine refuses to start).",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "version",
+    "status",
+    "name",
+    "board",
+    "army",
+    "firstToMove",
+    "setup",
+    "parameters",
+    "source"
+  ],
+  "definitions": {
+    "ref": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version"],
+      "properties": {
+        "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+        "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" }
+      }
+    }
+  },
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z][a-z0-9-]*$" },
+    "version": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$" },
+    "status": { "enum": ["draft", "official", "retired"] },
+    "name": { "type": "string", "minLength": 1 },
+    "board": { "$ref": "#/definitions/ref" },
+    "army": {
+      "description": "Pieces each side starts with, by piece id.",
+      "type": "object",
+      "minProperties": 1,
+      "propertyNames": { "pattern": "^[a-z]+$" },
+      "additionalProperties": { "type": "integer", "minimum": 1 }
+    },
+    "firstToMove": { "enum": ["light", "dark"] },
+    "setup": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["default", "constraints"],
+      "properties": {
+        "default": { "$ref": "#/definitions/ref" },
+        "constraints": {
+          "description": "Player's Choice rules. Chords are counted from the side's corner (chord 0).",
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["cornerPiece", "frontChord", "beyondFrontChord"],
+          "properties": {
+            "cornerPiece": {
+              "type": "string",
+              "pattern": "^[a-z]+$",
+              "description": "Piece that must start on the side's corner."
+            },
+            "frontChord": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Last chord of the home region (chords 0 to frontChord)."
+            },
+            "beyondFrontChord": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": ["chords", "maxPieces"],
+              "properties": {
+                "chords": {
+                  "type": "array",
+                  "items": { "type": "integer", "minimum": 1 },
+                  "description": "Chords beyond the front chord where pieces may start."
+                },
+                "maxPieces": { "type": "integer", "minimum": 0 }
+              }
+            }
+          }
+        }
+      }
+    },
+    "parameters": {
+      "type": "object",
+      "propertyNames": { "pattern": "^[a-z][A-Za-z0-9]*$" },
+      "additionalProperties": { "type": ["string", "null"] }
+    },
+    "source": { "type": "string", "minLength": 1 },
+    "notes": { "type": "string" }
+  }
+}
