@@ -8,6 +8,8 @@ import { catalog, resolveRuleset, type ResolvedRuleset } from "@apexchess/engine
 import {
   RoomError,
   act,
+  archiveRecord,
+  archiveRow,
   createRoom,
   joinRoom,
   leave,
@@ -24,11 +26,16 @@ import {
   type ServerMessage,
   type Ticket,
 } from "@apexchess/online";
-import { httpStatus, roomCode, route } from "./routes";
+import { insertGame } from "./archive";
+import { clientKey, httpStatus, roomCode, route } from "./routes";
 
 interface Env {
   ROOMS: DurableObjectNamespace<Room>;
   LOBBY: DurableObjectNamespace<Lobby>;
+  /** Anonymous archive of finished games (S19a; docs/decisions/0006). */
+  ARCHIVE: D1Database;
+  /** Requests per address per minute on /api (limit in wrangler.jsonc; provisional). */
+  LIMITER: RateLimit;
 }
 
 /** Rooms are deleted this long after their last change (provisional; see docs/decisions/0005). */
@@ -108,6 +115,8 @@ export default {
     const url = new URL(req.url);
     const r = route(req.method, url.pathname);
     if (!r) return json(fail("notFound", "No such address."), 404);
+    const { success } = await env.LIMITER.limit({ key: clientKey(req.headers) });
+    if (!success) return json(fail("busy", "Too many requests. Wait a minute and try again."), 429);
     try {
       if (r.kind === "create") return json(await openRoom(env, await readLock(req)));
       if (r.kind === "join") return json(await enterRoom(env, r.room, await readLock(req)));
@@ -209,9 +218,24 @@ export class Room extends DurableObject<Env> {
       if (next === room) return;
       await this.save(next);
       this.broadcast(next);
+      await this.archive(room, next);
     } catch (e) {
       if (!(e instanceof RoomError)) throw e;
       send(ws, fail(e.code, e.message));
+    }
+  }
+
+  /** Write the game to the archive once, as it ends. A failed write is logged and never stops play. */
+  private async archive(before: RoomData, after: RoomData): Promise<void> {
+    const rec = archiveRecord(before, after, Date.now());
+    if (!rec) return;
+    const { sql, values } = insertGame(archiveRow(rec), crypto.randomUUID());
+    try {
+      await this.env.ARCHIVE.prepare(sql)
+        .bind(...values)
+        .run();
+    } catch (e) {
+      console.error("archive write failed", e);
     }
   }
 

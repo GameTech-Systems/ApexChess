@@ -27,6 +27,9 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
+      - name: Apply game archive migrations (D1)
+        if: env.CLOUDFLARE_API_TOKEN != ''
+        run: pnpm dlx wrangler@4 d1 migrations apply apexchess-archive --remote
       - name: Deploy to Cloudflare Workers
         if: env.CLOUDFLARE_API_TOKEN != ''
         run: pnpm dlx wrangler@4 deploy

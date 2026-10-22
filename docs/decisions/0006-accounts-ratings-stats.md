@@ -6,7 +6,7 @@ Date: 2026-10-22 · Status: proposed (S19, plan only). D16 to D18 are open; thei
 
 Public setup statistics do not need accounts, so they come first. Accounts and ratings follow only when the owner chooses them.
 
-1. **S19a: anonymous game archive.** When an online game ends, the server writes one record to Cloudflare D1 (fits D11): ruleset id and version, both setups, the moves, the result and reason, and the day it ended. It writes no seat token, room code, IP address, or time of day. The Privacy page changes in the same PR. Rooms are still deleted after 7 days.
+1. **S19a: anonymous game archive.** When an online game ends, the server writes one record to Cloudflare D1 (fits D11): ruleset id and version, both setups, the moves, the result and reason, and the day it ended. It writes no seat token, room code, IP address, or time of day. The Privacy page changes in the same PR. Rooms are still deleted after 7 days. Built in S19a: table `games` (`apps/server/migrations/0001_archive.sql`, row id random), written once per game from `archiveRecord` in `@apexchess/online`; `/api` is rate-limited to 60 requests per address per minute (Workers rate-limit binding, provisional).
 2. **S19b: public setup statistics.** A daily job aggregates the archive with the measures in 0003 (families, features, first-move score, standard error, the N ≥ 30 floor, the Bonferroni bar). It publishes one JSON snapshot per ruleset id and version, and the web app adds a Stats page.
 3. **S19c: accounts (D16).** Optional; anonymous play stays the same.
 4. **S19d: ratings (D17).** Needs S19c and a rule for abandoned games.

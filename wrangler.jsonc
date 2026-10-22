@@ -14,5 +14,19 @@
       { "name": "LOBBY", "class_name": "Lobby" },
     ],
   },
+  // Anonymous game archive (S19a). database_id is a placeholder until the owner runs
+  // `wrangler d1 create apexchess-archive` (docs/DEV-WORKFLOW.md); local dev ignores it.
+  "d1_databases": [
+    {
+      "binding": "ARCHIVE",
+      "database_name": "apexchess-archive",
+      "database_id": "00000000-0000-0000-0000-000000000000",
+      "migrations_dir": "./apps/server/migrations",
+    },
+  ],
+  // Rate limit on /api: 60 requests per address per minute (provisional).
+  "ratelimits": [
+    { "name": "LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },
+  ],
   "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room", "Lobby"] }],
 }

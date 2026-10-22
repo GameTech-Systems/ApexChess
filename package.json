@@ -10,7 +10,7 @@
   },
   "scripts": {
     "dev": "pnpm --filter @apexchess/web dev",
-    "dev:server": "pnpm --filter @apexchess/web build && pnpm dlx wrangler@4 dev",
+    "dev:server": "pnpm --filter @apexchess/web build && CI=1 pnpm dlx wrangler@4 d1 migrations apply apexchess-archive --local && pnpm dlx wrangler@4 dev",
     "build": "pnpm -r build",
     "test": "vitest run",
     "lint": "eslint . && prettier --check .",
