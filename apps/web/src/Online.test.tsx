@@ -18,6 +18,7 @@ const view: RoomView = {
   record: newRecord(ruleset, mirrorSetup(ruleset.board, "light", setup), setup),
   rematch: { you: false, opponent: false },
   opponentOnline: true,
+  timeControl: "untimed",
 };
 const game = (v: Partial<RoomView>) =>
   renderToStaticMarkup(
@@ -35,9 +36,12 @@ describe("online play screens", () => {
   });
 
   it("shows the room code while waiting, and nothing of the opponent", () => {
-    const html = renderToStaticMarkup(<RoomWaiting room="ABC234" onLeave={() => undefined} />);
+    const html = renderToStaticMarkup(
+      <RoomWaiting room="ABC234" timeControl="5+3" onLeave={() => undefined} />,
+    );
     expect(html).toContain("ABC234");
     expect(html).toContain("hidden");
+    expect(html).toContain("5 + 3");
   });
 
   it("offers resign and draw, never undo", () => {
@@ -53,6 +57,25 @@ describe("online play screens", () => {
     expect(html).toContain("Accept draw");
     expect(html).toContain("Decline");
     expect(html).toContain("offline");
+  });
+
+  it("shows both clocks and says an offline opponent's clock keeps running", () => {
+    const html = game({
+      timeControl: "3+2",
+      clock: { light: 61_000, dark: 180_000, running: "light" },
+      opponentOnline: false,
+    });
+    expect(html).toContain("3 + 2");
+    expect(html).toContain("1:01");
+    expect(html).toContain("3:00");
+    expect(html).toContain("clock keeps running");
+    expect(game({}).toString()).not.toContain("clock-");
+  });
+
+  it("warns when a player is away in an abandonment-only game", () => {
+    const html = game({ timeControl: "away5m", away: { who: "opponent", left: 240_000 } });
+    expect(html).toContain("4:00");
+    expect(html).toContain("Your opponent left");
   });
 
   it("offers a rematch when the game is over", () => {

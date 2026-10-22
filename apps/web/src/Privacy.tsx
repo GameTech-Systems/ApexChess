@@ -8,24 +8,27 @@ export function Privacy({ onClose }: { onClose: () => void }) {
       </p>
       <h2>What is stored</h2>
       <p>
-        Setups you save are kept in this browser's local storage so you can reuse them. They stay on
-        this device and are never sent to us. Clearing your browser's site data removes them.
+        Setups you save, and the time control you last picked for online play, are kept in this
+        browser's local storage so you can reuse them. They stay on this device and are never sent
+        to us. Clearing your browser's site data removes them.
       </p>
       <h2>Online games</h2>
       <p>
         When you play online, your locked setup and your moves go to our game server so your
         opponent can see them. The server keeps each room (both setups, the moves, and how the game
-        ended) until 7 days after its last move, then deletes it. No names or accounts are involved.
-        This browser keeps a random room ticket so you can rejoin after a reload; leaving the room
-        removes it.
+        ended) until 7 days after its last move, then deletes it. In a timed game it also keeps each
+        player's time left and when the current turn began, so it can run the clock; these go with
+        the room. No names or accounts are involved. This browser keeps a random room ticket so you
+        can rejoin after a reload; leaving the room removes it.
       </p>
       <h2>Game archive</h2>
       <p>
         When an online game ends, the server also keeps an anonymous copy for setup statistics: the
-        rules version, both setups, the moves, how the game ended, and the day it ended. It holds no
-        room code, ticket, IP address, or time of day, so it cannot be linked back to you, and it is
-        kept after the room is deleted. Statistics are published only as totals, never as single
-        games. Games that ended before this notice was published were not archived.
+        rules version, the time control, both setups, the moves, how the game ended (including on
+        time), and the day it ended. It holds no clock times, room code, ticket, IP address, or time
+        of day, so it cannot be linked back to you, and it is kept after the room is deleted.
+        Statistics are published only as totals, never as single games. Games that ended before this
+        notice was published were not archived.
       </p>
       <h2>Limits on requests</h2>
       <p>

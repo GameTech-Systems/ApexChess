@@ -2,7 +2,12 @@
  * Time controls (D19, docs/decisions/0007). The presets are data in `rules/timeControls.json`. The
  * server keeps the clock; every function here takes the time as `now` (ms), so it is pure.
  */
-import { insufficientMaterial, type Position, type ResolvedRuleset, type Side } from "@apexchess/engine";
+import {
+  insufficientMaterial,
+  type Position,
+  type ResolvedRuleset,
+  type Side,
+} from "@apexchess/engine";
 import data from "../../../rules/timeControls.json";
 import type { End } from "./protocol";
 
@@ -35,7 +40,11 @@ const opposite = (side: Side): Side => (side === "light" ? "dark" : "light");
 /** The clock at the start of a game, or undefined when the control has none. It runs from the start. */
 export function startClock(tc: TimeControl, first: Side, now: number): ClockData | undefined {
   const ms =
-    tc.kind === "fischer" ? tc.initialSeconds * 1000 : tc.kind === "perMove" ? tc.seconds * 1000 : 0;
+    tc.kind === "fischer"
+      ? tc.initialSeconds * 1000
+      : tc.kind === "perMove"
+        ? tc.seconds * 1000
+        : 0;
   return ms ? { light: ms, dark: ms, running: first, since: now } : undefined;
 }
 

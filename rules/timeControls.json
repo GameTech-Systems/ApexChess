@@ -5,22 +5,93 @@
   "source": "Owner decision D19, 2026-10-22: every option is offered (untimed, Fischer increment, fixed time per move, abandonment rule only); the default matches common online chess. The preset list and the default are Claude's choice (provisional): the usual online pairing grid, 10+0 by default.",
   "controls": [
     { "id": "untimed", "kind": "untimed", "label": "Untimed" },
-    { "id": "1+0", "kind": "fischer", "initialSeconds": 60, "incrementSeconds": 0, "label": "1 + 0 · bullet" },
-    { "id": "2+1", "kind": "fischer", "initialSeconds": 120, "incrementSeconds": 1, "label": "2 + 1 · bullet" },
-    { "id": "3+0", "kind": "fischer", "initialSeconds": 180, "incrementSeconds": 0, "label": "3 + 0 · blitz" },
-    { "id": "3+2", "kind": "fischer", "initialSeconds": 180, "incrementSeconds": 2, "label": "3 + 2 · blitz" },
-    { "id": "5+0", "kind": "fischer", "initialSeconds": 300, "incrementSeconds": 0, "label": "5 + 0 · blitz" },
-    { "id": "5+3", "kind": "fischer", "initialSeconds": 300, "incrementSeconds": 3, "label": "5 + 3 · blitz" },
-    { "id": "10+0", "kind": "fischer", "initialSeconds": 600, "incrementSeconds": 0, "label": "10 + 0 · rapid" },
-    { "id": "10+5", "kind": "fischer", "initialSeconds": 600, "incrementSeconds": 5, "label": "10 + 5 · rapid" },
-    { "id": "15+10", "kind": "fischer", "initialSeconds": 900, "incrementSeconds": 10, "label": "15 + 10 · rapid" },
-    { "id": "30+0", "kind": "fischer", "initialSeconds": 1800, "incrementSeconds": 0, "label": "30 + 0 · classical" },
-    { "id": "30+20", "kind": "fischer", "initialSeconds": 1800, "incrementSeconds": 20, "label": "30 + 20 · classical" },
+    {
+      "id": "1+0",
+      "kind": "fischer",
+      "initialSeconds": 60,
+      "incrementSeconds": 0,
+      "label": "1 + 0 · bullet"
+    },
+    {
+      "id": "2+1",
+      "kind": "fischer",
+      "initialSeconds": 120,
+      "incrementSeconds": 1,
+      "label": "2 + 1 · bullet"
+    },
+    {
+      "id": "3+0",
+      "kind": "fischer",
+      "initialSeconds": 180,
+      "incrementSeconds": 0,
+      "label": "3 + 0 · blitz"
+    },
+    {
+      "id": "3+2",
+      "kind": "fischer",
+      "initialSeconds": 180,
+      "incrementSeconds": 2,
+      "label": "3 + 2 · blitz"
+    },
+    {
+      "id": "5+0",
+      "kind": "fischer",
+      "initialSeconds": 300,
+      "incrementSeconds": 0,
+      "label": "5 + 0 · blitz"
+    },
+    {
+      "id": "5+3",
+      "kind": "fischer",
+      "initialSeconds": 300,
+      "incrementSeconds": 3,
+      "label": "5 + 3 · blitz"
+    },
+    {
+      "id": "10+0",
+      "kind": "fischer",
+      "initialSeconds": 600,
+      "incrementSeconds": 0,
+      "label": "10 + 0 · rapid"
+    },
+    {
+      "id": "10+5",
+      "kind": "fischer",
+      "initialSeconds": 600,
+      "incrementSeconds": 5,
+      "label": "10 + 5 · rapid"
+    },
+    {
+      "id": "15+10",
+      "kind": "fischer",
+      "initialSeconds": 900,
+      "incrementSeconds": 10,
+      "label": "15 + 10 · rapid"
+    },
+    {
+      "id": "30+0",
+      "kind": "fischer",
+      "initialSeconds": 1800,
+      "incrementSeconds": 0,
+      "label": "30 + 0 · classical"
+    },
+    {
+      "id": "30+20",
+      "kind": "fischer",
+      "initialSeconds": 1800,
+      "incrementSeconds": 20,
+      "label": "30 + 20 · classical"
+    },
     { "id": "move30s", "kind": "perMove", "seconds": 30, "label": "30 seconds per move" },
     { "id": "move1m", "kind": "perMove", "seconds": 60, "label": "1 minute per move" },
     { "id": "move1d", "kind": "perMove", "seconds": 86400, "label": "1 day per move" },
     { "id": "move3d", "kind": "perMove", "seconds": 259200, "label": "3 days per move" },
-    { "id": "away5m", "kind": "abandonment", "graceSeconds": 300, "label": "Untimed; away 5 minutes loses" }
+    {
+      "id": "away5m",
+      "kind": "abandonment",
+      "graceSeconds": 300,
+      "label": "Untimed; away 5 minutes loses"
+    }
   ],
   "notes": "Fischer: each side starts with initialSeconds and gains incrementSeconds after each of its moves. perMove: every move must be made within seconds; unused time is not kept. abandonment: no clock, but a player who stays disconnected for graceSeconds while the opponent is connected loses. Running out of time loses, or draws when the opponent could not checkmate under D8's insufficient-material test. Clocks start when the game starts and keep running while a player is disconnected."
 }

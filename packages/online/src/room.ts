@@ -94,7 +94,8 @@ function checkLock(ruleset: ResolvedRuleset, lock: Lock): void {
 /** The lock's time control, or the default when it names none. */
 export function lockTimeControl(lock: Lock): TimeControl {
   const tc = timeControl(lock.timeControl ?? DEFAULT_TIME_CONTROL);
-  if (!tc) throw new RoomError("timeControl", "That time control is not offered. Reload to update.");
+  if (!tc)
+    throw new RoomError("timeControl", "That time control is not offered. Reload to update.");
   return tc;
 }
 
@@ -232,7 +233,9 @@ export function act(
   if (msg.type === "rematch") {
     if (!room.end) throw new RoomError("notOver", "The game is still on.");
     const rematch = room.rematch.includes(seat) ? room.rematch : [...room.rematch, seat];
-    return rematch.length < 2 ? { ...room, rematch } : startGame({ ...room, game: room.game + 1 }, ruleset, now);
+    return rematch.length < 2
+      ? { ...room, rematch }
+      : startGame({ ...room, game: room.game + 1 }, ruleset, now);
   }
   if (room.end) throw new RoomError("over", "The game is over.");
 

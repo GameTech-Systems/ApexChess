@@ -17,7 +17,9 @@ describe("Privacy screen", () => {
     const html = renderToStaticMarkup(<Privacy onClose={() => undefined} />);
     expect(html).toContain("Game archive");
     expect(html).toContain("the day it ended");
-    expect(html).toContain("no room code, ticket, IP address, or time of day");
+    expect(html).toContain("no clock times, room code, ticket, IP address, or time of day");
+    expect(html).toContain("the time control");
+    expect(html).toContain("time left");
     expect(html).toContain("Games that ended before");
     expect(html).toContain("not stored");
   });
