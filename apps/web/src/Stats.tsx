@@ -49,11 +49,11 @@ function Cells({ s }: { s: StatsSummary }) {
   );
 }
 
-function Head({ first }: { first: string[] }) {
+function Head({ first, last }: { first: string[]; last: string }) {
   return (
     <thead>
       <tr>
-        {[...first, ...HEAD].map((h) => (
+        {[...first, ...HEAD, last].map((h) => (
           <th key={h} scope="col">
             {h}
           </th>
@@ -97,7 +97,7 @@ export function StatsView({ snapshot: s }: { snapshot: StatsSnapshot }) {
           <p>Light's view. An edge needs |z| ≥ 1.96.</p>
           {first.length ? (
             <table>
-              <Head first={["Sample"]} />
+              <Head first={["Sample"]} last="Verdict" />
               <tbody>
                 {first.map(([label, sum]) => (
                   <tr key={label}>
@@ -118,7 +118,7 @@ export function StatsView({ snapshot: s }: { snapshot: StatsSnapshot }) {
           </p>
           <Bar rows={s.families} z={s.zCritical.families} alpha={alpha} />
           <table>
-            <Head first={["Setup id"]} />
+            <Head first={["Setup id"]} last="Stands out" />
             <tbody>
               {s.families.map((f) => (
                 <tr key={f.label}>
@@ -127,7 +127,7 @@ export function StatsView({ snapshot: s }: { snapshot: StatsSnapshot }) {
                     {f.preset ? ` (${f.preset})` : ""}
                   </td>
                   <Cells s={f.summary} />
-                  <td>{f.standsOut ? "stands out" : ""}</td>
+                  <td>{f.standsOut ? "yes" : ""}</td>
                 </tr>
               ))}
             </tbody>
@@ -140,7 +140,7 @@ export function StatsView({ snapshot: s }: { snapshot: StatsSnapshot }) {
           </p>
           <Bar rows={s.features} z={s.zCritical.features} alpha={alpha} />
           <table>
-            <Head first={["Feature", "Value", "Families"]} />
+            <Head first={["Feature", "Value", "Families"]} last="Stands out" />
             <tbody>
               {s.features.map((f) => (
                 <tr key={f.label}>
@@ -148,7 +148,7 @@ export function StatsView({ snapshot: s }: { snapshot: StatsSnapshot }) {
                   <td>{f.value}</td>
                   <td>{f.families}</td>
                   <Cells s={f.summary} />
-                  <td>{f.standsOut ? "stands out" : ""}</td>
+                  <td>{f.standsOut ? "yes" : ""}</td>
                 </tr>
               ))}
             </tbody>
