@@ -122,7 +122,20 @@ Passkey plus handle, recovery codes, account deletion, handle policy, Terms. Blo
 ### S19d — Phase 6: Ratings · Opus 5.5 · high · `blocked`
 Glicko-2 per ruleset id for signed-in quick-match games. Blocked on D17, S19c, and a rule for abandoned games.
 
-### S20 — Phase 7: Tournaments and growth · `todo`
+### S20 — Phase 7: Tournaments and growth · Opus 5.5 · high · `done`
+Plan only (the S20 default): design, privacy review, and sub-steps. Decisions: D19 and D20 (open). Record: `docs/decisions/0007-tournaments-growth.md`.
+
+### S20a — Phase 7: Clocks · Opus 5.5 · high · `todo`
+Server-kept Fischer clocks for rooms and quick match, using the D19 presets plus untimed. Covers flag fall, the insufficient-material draw (D8), the clock running while a player is disconnected, the time control in the archive record, and the Privacy text. Decisions: D19 (default).
+
+### S20b — Phase 7: Share and replay · Sonnet 5.5 · medium · `todo`
+Setup links open the builder with a setup code. Game links carry ruleset, setups, and moves and open a replay viewer. Links are made only in the player's browser and nothing is stored on the server. No decision needed.
+
+### S20c — Phase 7: Tournaments · Opus 5.5 · high · `todo`
+Private events by link: event display names, round robin or Swiss pairing, byes, tiebreaks, crosstable, `noindex`, deletion 7 days after the last game, and the Privacy text. Needs S20a. Decisions: D20 (default), D19.
+
+### S20d — Phase 7: Leaderboards · Opus 5.5 · high · `blocked`
+Opt-in leaderboards per ruleset id. Blocked on S19c and S19d.
 
 ## Decision defaults
 
@@ -148,6 +161,8 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D16 | Sign-in | Open; default: passkey + handle, no email (0006) | S19c |
 | D17 | Ratings | Open; default: Glicko-2, one pool per ruleset id, signed-in quick match only (0006) | S19d |
 | D18 | Public setup statistics | Open; default (provisional): aggregates only, N ≥ 30, from anonymous archived games (0006) | S19a |
+| D19 | Time controls | Open; default (provisional): Fischer presets 3+2, 5+3, 10+5, 15+10 plus untimed; a player who runs out of time loses unless the opponent has insufficient material (0007) | S20a |
+| D20 | Tournaments | Open; default (provisional): private events by link; round robin up to 8 players, Swiss above; sides set by pairing (0007) | S20c |
 
 ## Ledger sync format
 
