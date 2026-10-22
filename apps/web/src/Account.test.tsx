@@ -44,6 +44,7 @@ describe("Account screens", () => {
           created: "2026-10-22",
           passkeys: 2,
           codes: 7,
+          listed: false,
           ratings: [
             { ruleset: "elbow-room", games: 3, text: "?" },
             { ruleset: "standard", games: 41, text: "1523" },
@@ -54,6 +55,7 @@ describe("Account screens", () => {
         onNewCodes={noop}
         onSignOut={noop}
         onDelete={noop}
+        onListing={noop}
       />,
     );
     expect(html).toContain("RookLover");
@@ -64,6 +66,27 @@ describe("Account screens", () => {
     expect(html).toContain("elbow-room: ? (3 games)");
     for (const label of ["Add a passkey", "New recovery codes", "Sign out", "Delete account"])
       expect(html).toContain(label);
+  });
+
+  it("offers leaderboard listing, off until turned on, and says what it shows", () => {
+    const screen = (listed: boolean) =>
+      renderToStaticMarkup(
+        <AccountScreen
+          view={{ handle: "R", created: "2026-10-22", passkeys: 1, codes: 8, listed, ratings: [] }}
+          busy={false}
+          onAddPasskey={noop}
+          onNewCodes={noop}
+          onSignOut={noop}
+          onDelete={noop}
+          onListing={noop}
+        />,
+      );
+    const off = screen(false);
+    expect(off).toContain("List me on the public leaderboards");
+    expect(off).toMatch(/<input type="checkbox"(?![^>]*checked)/);
+    expect(off).toContain("your handle, rating, and number of rated games");
+    expect(off).toContain("Anyone can see");
+    expect(screen(true)).toMatch(/<input type="checkbox"[^>]*checked/);
   });
 
   it("offers a report path with every listed reason", async () => {

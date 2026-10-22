@@ -102,6 +102,7 @@ describe("account api", () => {
     await api.newCodes("tok");
     await api.signOut("tok");
     await api.remove("tok");
+    await api.setListed("tok", true);
     expect(calls.map((c) => [c.method, c.url, c.auth])).toEqual([
       ["GET", "/api/account", "Bearer tok"],
       ["POST", "/api/account/passkey", "Bearer tok"],
@@ -109,6 +110,17 @@ describe("account api", () => {
       ["POST", "/api/account/codes", "Bearer tok"],
       ["POST", "/api/account/signout", "Bearer tok"],
       ["DELETE", "/api/account", "Bearer tok"],
+      ["POST", "/api/account/listing", "Bearer tok"],
+    ]);
+    expect(calls.at(-1)!.body).toEqual({ listed: true });
+  });
+
+  it("reads the public leaderboards without a token", async () => {
+    const boards = [{ ruleset: "standard", players: [{ handle: "A", rating: 1600, games: 40 }] }];
+    const { calls, fetchFn } = server({ "/api/leaderboard": boards });
+    expect(await accountApi(fetchFn, passkeys).leaderboards()).toEqual(boards);
+    expect(calls).toEqual([
+      { url: "/api/leaderboard", method: "GET", auth: null, body: undefined },
     ]);
   });
 

@@ -3,7 +3,7 @@
  * keeps the passkey. The server API is /api/account (apps/server/src/accounts.ts).
  */
 import { startAuthentication, startRegistration } from "@simplewebauthn/browser";
-import type { RecoverRequest, RegisterRequest, Report } from "@apexchess/online";
+import type { Leaderboard, RecoverRequest, RegisterRequest, Report } from "@apexchess/online";
 import { callApi } from "./event";
 import type { KeyValueStore } from "./savedSetups";
 
@@ -17,6 +17,8 @@ export interface AccountView {
   created: string;
   passkeys: number;
   codes: number;
+  /** Shown on the public leaderboards (S20d); off until the player turns it on. */
+  listed: boolean;
   /** One per ruleset id (S19d); `text` is "?" while the rating is still uncertain. */
   ratings: { ruleset: string; games: number; text: string }[];
 }
@@ -115,5 +117,8 @@ export function accountApi(
     remove: (token: string) =>
       callApi(fetchFn, "/api/account", { method: "DELETE", ...auth(token) }),
     report: (report: Report) => post("/api/reports", report),
+    setListed: (token: string, listed: boolean) =>
+      post<{ listed: boolean }>("/api/account/listing", { listed }, token),
+    leaderboards: () => callApi<Leaderboard[]>(fetchFn, "/api/leaderboard"),
   };
 }

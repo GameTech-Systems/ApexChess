@@ -26,6 +26,7 @@ import { Privacy } from "./Privacy";
 import { Replay } from "./Replay";
 import { Rules } from "./Rules";
 import { copyText, gameLink, parseShare } from "./share";
+import { Leaderboard } from "./Leaderboard";
 import { Stats } from "./Stats";
 import { Terms } from "./Terms";
 import { piecesInDanger, playSound, undoMoves } from "./playAids";
@@ -81,6 +82,7 @@ export function App({
   const [showRules, setShowRules] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
   const [showAccount, setShowAccount] = useState(false);
   // A share link opens straight to its setup or replay; the fragment never reaches the server.
@@ -149,6 +151,12 @@ export function App({
         <Stats onClose={() => setShowStats(false)} current={current} />
       </main>
     );
+  if (showLeaderboard)
+    return (
+      <main>
+        <Leaderboard onClose={() => setShowLeaderboard(false)} />
+      </main>
+    );
   if (showTerms)
     return (
       <main>
@@ -194,6 +202,9 @@ export function App({
           </button>
           <button type="button" onClick={() => setShowStats(true)}>
             Statistics
+          </button>
+          <button type="button" onClick={() => setShowLeaderboard(true)}>
+            Leaderboards
           </button>
           <button type="button" onClick={() => setShowAccount(true)}>
             Account

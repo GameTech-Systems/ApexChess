@@ -56,8 +56,16 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         When you are signed in, quick match sends your session token so the game can be rated. In a
         rated game the room keeps your account id with your seat until the room is deleted. When a
         rated game ends, the server updates your rating for that rule set: it keeps the rating, how
-        sure it is, and how many rated games you have played. It keeps no list of your games or
-        opponents.
+        sure it is, how many rated games you have played, and whether you chose to be listed on the
+        leaderboards (below). It keeps no list of your games or opponents.
+      </p>
+      <h2>Leaderboards</h2>
+      <p>
+        Your account appears on the public leaderboards only if you turn it on in your account. The
+        leaderboards then show your handle, rating, and number of rated games for each rule set
+        where your rating has settled; nothing else. Turning it off, or deleting your account,
+        removes you at once: the server keeps no copy of past leaderboards. Leaderboard data is
+        marked so that it is not indexed by search engines.
       </p>
       <h2>Handle reports</h2>
       <p>
