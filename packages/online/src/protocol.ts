@@ -40,6 +40,7 @@ export type ErrorCode =
   | "notStarted"
   | "over"
   | "notOver"
+  | "busy"
   | "turn"
   | "stale"
   | "illegal";
