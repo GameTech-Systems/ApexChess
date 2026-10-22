@@ -23,4 +23,13 @@ describe("Privacy screen", () => {
     expect(html).toContain("Games that ended before");
     expect(html).toContain("not stored");
   });
+
+  it("describes events: names, deletion, no indexing, and the token kept here", () => {
+    const html = renderToStaticMarkup(<Privacy onClose={() => undefined} />);
+    expect(html).toContain("Tournaments");
+    expect(html).toContain("not your real name");
+    expect(html).toContain("7 days after its last game");
+    expect(html).toContain("not listed or indexed");
+    expect(html).toContain("without names or the event");
+  });
 });
