@@ -107,7 +107,20 @@ Decisions: D11.
 ### S18 — Phase 5: Online play with hidden setups · Opus 5.5 · high · `done`
 Rooms, matchmaking, the server holds both setups hidden until the start, server coin flip, reconnection, ruleset lock per game. Decisions: D13. Record: `docs/decisions/0005-online-play.md`.
 
-### S19 — Phase 6: Accounts, ratings, and public setup statistics · `todo`
+### S19 — Phase 6: Accounts, ratings, and public setup statistics · Opus 5.5 · high · `done`
+Plan only (the S19 default): design, privacy review, and sub-steps. Decisions: D16 to D18 (open). Record: `docs/decisions/0006-accounts-ratings-stats.md`.
+
+### S19a — Phase 6: Anonymous game archive · Opus 5.5 · high · `todo`
+Finished online games go to D1 as anonymous records (ruleset id and version, setups, moves, result, end day). Privacy page updated in the same PR, with no archiving of earlier games. Adds rate limiting on `/api`. Decisions: D18 (default).
+
+### S19b — Phase 6: Public setup statistics · Opus 5.5 · high · `todo`
+A daily aggregate of the archive using the 0003 measures (N ≥ 30, Bonferroni bar); a JSON snapshot per ruleset version and a Stats page. Decisions: D18 (default).
+
+### S19c — Phase 6: Accounts · Opus 5.5 · high · `blocked`
+Passkey plus handle, recovery codes, account deletion, handle policy, Terms. Blocked until the owner decides D16 and the minimum age.
+
+### S19d — Phase 6: Ratings · Opus 5.5 · high · `blocked`
+Glicko-2 per ruleset id for signed-in quick-match games. Blocked on D17, S19c, and a rule for abandoned games.
 
 ### S20 — Phase 7: Tournaments and growth · `todo`
 
@@ -132,6 +145,9 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D13 | Hidden setups online | Decided: each player locks a saved setup before matchmaking; the server reveals both at the start, then flips the coin | S18 |
 | D14 | Hidden setups in hot-seat play | Decided: each player builds a setup while the other looks away; both are revealed at the start | S12 |
 | D15 | Sides when two players play again | Decided: they alternate sides | S5 |
+| D16 | Sign-in | Open; default: passkey + handle, no email (0006) | S19c |
+| D17 | Ratings | Open; default: Glicko-2, one pool per ruleset id, signed-in quick match only (0006) | S19d |
+| D18 | Public setup statistics | Open; default (provisional): aggregates only, N ≥ 30, from anonymous archived games (0006) | S19a |
 
 ## Ledger sync format
 
