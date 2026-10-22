@@ -18,6 +18,7 @@ import {
   type Ticket,
 } from "@apexchess/online";
 import { Board } from "./Board";
+import { copyText, gameLink } from "./share";
 import { SetupBuilder, type Preset } from "./SetupBuilder";
 import { promotionChoices, targetsFrom } from "./hotseat";
 import {
@@ -378,6 +379,7 @@ export function OnlineGame({
 }) {
   const record = view.record!;
   const side = view.side!;
+  const [copied, setCopied] = useState(false);
   const prev = useRef<GameRecord>();
   const game = useMemo(() => follow(ruleset, record, prev.current), [ruleset, record]);
   prev.current = record;
@@ -512,6 +514,17 @@ export function OnlineGame({
             )}
           </>
         )}
+        <button
+          type="button"
+          disabled={!record.moves.length}
+          onClick={async () =>
+            setCopied(
+              await copyText(location.origin + location.pathname + gameLink(ruleset, record)),
+            )
+          }
+        >
+          {copied ? "Link copied" : "Copy game link"}
+        </button>
         <button type="button" onClick={onLeave}>
           Leave room
         </button>

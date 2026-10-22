@@ -20,7 +20,9 @@ import { Online } from "./Online";
 import { loadTicket } from "./online";
 import type { KeyValueStore } from "./savedSetups";
 import { Privacy } from "./Privacy";
+import { Replay } from "./Replay";
 import { Rules } from "./Rules";
+import { copyText, gameLink, parseShare } from "./share";
 import { Stats } from "./Stats";
 import { piecesInDanger, playSound, undoMoves } from "./playAids";
 import { SetupBuilder } from "./SetupBuilder";
@@ -75,6 +77,33 @@ export function App({
   const [showRules, setShowRules] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  // A share link opens straight to its setup or replay; the fragment never reaches the server.
+  const [shared, setShared] = useState(() =>
+    parseShare(ruleset, typeof window === "undefined" ? "" : window.location.hash),
+  );
+  const closeShared = () => {
+    history.replaceState(null, "", window.location.pathname + window.location.search);
+    setShared(undefined);
+  };
+  if (shared?.kind === "game")
+    return (
+      <main>
+        <Replay ruleset={ruleset} record={shared.record} onClose={closeShared} />
+      </main>
+    );
+  if (shared?.kind === "setup")
+    return (
+      <main>
+        <SetupBuilder
+          ruleset={ruleset}
+          title="Shared setup"
+          presets={presets}
+          store={storage}
+          initial={shared.pieces}
+          onDone={closeShared}
+        />
+      </main>
+    );
   if (showRules)
     return (
       <main>
@@ -219,6 +248,8 @@ export function Game({
   const [showDanger, setShowDanger] = useState(false);
   const [sound, setSound] = useState(false);
   const [showRules, setShowRules] = useState(false);
+  const [showReplay, setShowReplay] = useState(false);
+  const [copied, setCopied] = useState(false);
   const random = useMemo(newRandom, []);
 
   const game = useMemo(() => replay(ruleset, record), [record]);
@@ -301,6 +332,13 @@ export function Game({
       </main>
     );
 
+  if (showReplay)
+    return (
+      <main>
+        <Replay ruleset={ruleset} record={record} onClose={() => setShowReplay(false)} />
+      </main>
+    );
+
   return (
     <main style={{ "--sq-dark": darkSquareColors[dark] } as React.CSSProperties}>
       <Board
@@ -356,6 +394,19 @@ export function Game({
         </button>
         <button type="button" onClick={() => setShowRules(true)}>
           Rules
+        </button>
+        <button type="button" onClick={() => setShowReplay(true)} disabled={!record.moves.length}>
+          Replay
+        </button>
+        <button
+          type="button"
+          disabled={!record.moves.length}
+          onClick={async () => {
+            const url = location.origin + location.pathname + gameLink(ruleset, record);
+            setCopied(await copyText(url));
+          }}
+        >
+          {copied ? "Link copied" : "Copy game link"}
         </button>
         {!computer && (
           <label>

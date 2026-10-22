@@ -128,7 +128,7 @@ Plan only (the S20 default): design, privacy review, and sub-steps. Decisions: D
 ### S20a — Phase 7: Clocks · Opus 5.5 · high · `done`
 Server-kept Fischer clocks for rooms and quick match, using the D19 presets plus untimed. Covers flag fall, the insufficient-material draw (D8), the clock running while a player is disconnected, the time control in the archive record, and the Privacy text. Decisions: D19 (default).
 
-### S20b — Phase 7: Share and replay · Sonnet 5.5 · medium · `todo`
+### S20b — Phase 7: Share and replay · Sonnet 5.5 · medium · `done`
 Setup links open the builder with a setup code. Game links carry ruleset, setups, and moves and open a replay viewer. Links are made only in the player's browser and nothing is stored on the server. No decision needed.
 
 ### S20c — Phase 7: Tournaments · Opus 5.5 · high · `todo`
