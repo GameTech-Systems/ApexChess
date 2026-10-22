@@ -31,11 +31,7 @@ export const formatRecoveryCode = (code: string) => code.match(/.{1,4}/g)!.join(
 
 /** A code as typed, in its stored form; O reads as 0 and I or L as 1. */
 export function normalizeRecoveryCode(text: string): string | undefined {
-  const code = text
-    .toUpperCase()
-    .replace(/[\s-]/g, "")
-    .replace(/O/g, "0")
-    .replace(/[IL]/g, "1");
+  const code = text.toUpperCase().replace(/[\s-]/g, "").replace(/O/g, "0").replace(/[IL]/g, "1");
   return code.length === RECOVERY_LENGTH && [...code].every((c) => ALPHABET.includes(c))
     ? code
     : undefined;

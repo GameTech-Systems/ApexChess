@@ -44,8 +44,9 @@ import {
   type ServerMessage,
   type Ticket,
 } from "@apexchess/online";
+import { accountAction, cleanUpAccounts } from "./accounts";
 import { insertGame } from "./archive";
-import { clientKey, httpStatus, roomCode, route } from "./routes";
+import { bearerToken, clientKey, httpStatus, passkeyOrigin, roomCode, route } from "./routes";
 import { getStats, listStats, refreshStats } from "./stats";
 
 interface Env {
@@ -53,7 +54,10 @@ interface Env {
   LOBBY: DurableObjectNamespace<Lobby>;
   /** Private events by link (D20). */
   EVENTS: DurableObjectNamespace<Tournament>;
-  /** Anonymous archive of finished games (S19a) and its statistics (S19b); docs/decisions/0006. */
+  /**
+   * Anonymous archive of finished games (S19a) and its statistics (S19b); accounts (S19c) live in
+   * their own tables in the same database. docs/decisions/0006.
+   */
   ARCHIVE: D1Database;
   /** Requests per address per minute on /api (limit in wrangler.jsonc; provisional). */
   LIMITER: RateLimit;
@@ -217,6 +221,27 @@ export default {
             token: req.headers.get("x-event-token") ?? "",
           }),
         );
+      if (r.kind === "account" || r.kind === "report") {
+        const text = req.method === "POST" ? await req.text() : "";
+        let body: unknown;
+        try {
+          body = text && text.length <= MAX_BODY ? JSON.parse(text) : undefined;
+        } catch {
+          body = undefined;
+        }
+        const result = await accountAction(
+          r.kind === "report" ? "report" : r.action,
+          body,
+          bearerToken(req.headers),
+          {
+            db: env.ARCHIVE,
+            now: Date.now(),
+            site: passkeyOrigin(req),
+            random: (n) => crypto.getRandomValues(new Uint8Array(n)),
+          },
+        );
+        return json(result);
+      }
       if (r.kind === "stats") return publicJson(JSON.stringify(await listStats(env.ARCHIVE)));
       if (r.kind === "snapshot") {
         const text = await getStats(env.ARCHIVE, r.ruleset.id, r.ruleset.version);
@@ -235,10 +260,11 @@ export default {
     }
   },
 
-  /** The daily statistics job (cron in wrangler.jsonc). */
+  /** The daily job (cron in wrangler.jsonc): statistics, then expired account sessions. */
   async scheduled(controller: ScheduledController, env: Env): Promise<void> {
     const written = await refreshStats(env.ARCHIVE, controller.scheduledTime);
     console.log("stats: wrote", written, "snapshots");
+    await cleanUpAccounts(env.ARCHIVE, controller.scheduledTime);
   },
 } satisfies ExportedHandler<Env>;
 

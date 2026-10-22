@@ -25,7 +25,8 @@ describe("handles (S19c policy, also used for event names)", () => {
     for (const bad of ["Rook Lover", "a@bc", "<script>", "hi!", "a\nbc", "_lead", "-xy", "2nd"])
       expect(ok(bad)).toBeUndefined();
     // Cyrillic "а" looks like Latin "a"; non-ASCII letters could pass for another handle.
-    for (const bad of ["аdmin1", "élan", "棋手棋手", "😀😀😀", "a​bc"]) expect(ok(bad)).toBeUndefined();
+    for (const bad of ["аdmin1", "élan", "棋手棋手", "😀😀😀", "a​bc"])
+      expect(ok(bad)).toBeUndefined();
   });
 
   it("refuses reserved names in any case or punctuation, and names that use the site or staff", () => {
