@@ -151,6 +151,25 @@ export function AccountScreen({
       <p>
         Passkeys: {view.passkeys}. Recovery codes left: {view.codes}.
       </p>
+      <h2>Ratings</h2>
+      {view.ratings.length ? (
+        <>
+          <ul>
+            {view.ratings.map((r) => (
+              <li key={r.ruleset}>
+                {r.ruleset}: {r.text} ({r.games} {r.games === 1 ? "game" : "games"})
+              </li>
+            ))}
+          </ul>
+          <p>A rating shows ? until it has settled after a few more games.</p>
+        </>
+      ) : (
+        <p>No rated games yet.</p>
+      )}
+      <p>
+        Quick-match games against another signed-in player count, one rating per rule set. Untimed
+        games do not.
+      </p>
       <button type="button" onClick={onAddPasskey} disabled={busy}>
         Add a passkey on this device
       </button>
@@ -161,7 +180,10 @@ export function AccountScreen({
         Sign out
       </button>
       <h2>Delete account</h2>
-      <p>This deletes your handle, passkeys, and recovery codes at once. It cannot be undone.</p>
+      <p>
+        This deletes your handle, passkeys, recovery codes, and ratings at once. It cannot be
+        undone.
+      </p>
       <label>
         Type your handle to confirm{" "}
         <input value={confirm} onChange={(e) => setConfirm(e.target.value)} spellCheck={false} />

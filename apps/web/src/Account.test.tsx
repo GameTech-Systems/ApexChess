@@ -39,7 +39,16 @@ describe("Account screens", () => {
   it("signed in: handle, passkeys, codes left, and the account actions", () => {
     const html = renderToStaticMarkup(
       <AccountScreen
-        view={{ handle: "RookLover", created: "2026-10-22", passkeys: 2, codes: 7 }}
+        view={{
+          handle: "RookLover",
+          created: "2026-10-22",
+          passkeys: 2,
+          codes: 7,
+          ratings: [
+            { ruleset: "elbow-room", games: 3, text: "?" },
+            { ruleset: "standard", games: 41, text: "1523" },
+          ],
+        }}
         busy={false}
         onAddPasskey={noop}
         onNewCodes={noop}
@@ -51,6 +60,8 @@ describe("Account screens", () => {
     expect(html).toContain("2026-10-22");
     expect(html).toContain("Passkeys: 2");
     expect(html).toContain("Recovery codes left: 7");
+    expect(html).toContain("standard: 1523 (41 games)");
+    expect(html).toContain("elbow-room: ? (3 games)");
     for (const label of ["Add a passkey", "New recovery codes", "Sign out", "Delete account"])
       expect(html).toContain(label);
   });

@@ -72,6 +72,11 @@ describe("online play screens", () => {
     expect(game({}).toString()).not.toContain("clock-");
   });
 
+  it("says when a game is rated (S19d)", () => {
+    expect(game({ timeControl: "3+2", rated: true })).toContain("Rated game");
+    expect(game({ timeControl: "3+2" })).not.toContain("Rated game");
+  });
+
   it("warns when a player is away in an abandonment-only game", () => {
     const html = game({ timeControl: "away5m", away: { who: "opponent", left: 240_000 } });
     expect(html).toContain("4:00");

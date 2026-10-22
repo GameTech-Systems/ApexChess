@@ -30,12 +30,14 @@ import {
   loadTimeControl,
   lockFor,
   parseServerMessage,
+  seekMessage,
   reconnectDelay,
   requestTicket,
   saveTicket,
   saveTimeControl,
 } from "./online";
 import type { KeyValueStore } from "./savedSetups";
+import { loadSession } from "./account";
 
 interface Props {
   ruleset: ResolvedRuleset;
@@ -94,6 +96,7 @@ export function Online({ ruleset, presets, store, onExit, onEvent }: Props) {
         saveTicket(store, t);
         setTicket(t);
       }}
+      session={loadSession(store)?.token}
       onChangeSetup={() => setSetup(undefined)}
       onExit={onExit}
     />
@@ -115,6 +118,7 @@ function OnlineLobby({
   onTimeControl,
   notice,
   onTicket,
+  session,
   onChangeSetup,
   onExit,
 }: {
@@ -122,6 +126,8 @@ function OnlineLobby({
   onTimeControl: (id: string) => void;
   notice?: string;
   onTicket: (t: Ticket) => void;
+  /** A signed-in player's session token: quick match then plays rated games (S19d). */
+  session?: string;
   onChangeSetup: () => void;
   onExit: () => void;
 }) {
@@ -143,7 +149,7 @@ function OnlineLobby({
   const quickMatch = () => {
     setError(undefined);
     const ws = new WebSocket(apiUrl(location, "/api/match", true));
-    ws.onopen = () => ws.send(JSON.stringify({ type: "seek", ...lock }));
+    ws.onopen = () => ws.send(seekMessage(lock, session));
     ws.onmessage = (e) => {
       const msg = parseServerMessage(String(e.data));
       if (msg?.type === "matched") onTicket({ room: msg.room, token: msg.token });
@@ -185,6 +191,11 @@ function OnlineLobby({
             <p>
               Quick match pairs you with someone on the same time control. A room you join keeps the
               time control its creator chose.
+            </p>
+            <p>
+              {session
+                ? "You are signed in: a quick match against another signed-in player is rated, unless it is untimed."
+                : "Sign in on the Account page to play rated quick matches."}
             </p>
             <button type="button" onClick={quickMatch} disabled={busy}>
               Quick match
@@ -368,7 +379,9 @@ function Clocks({ view, side }: { view: RoomView; side: "light" | "dark" }) {
   const opponent = side === "light" ? "dark" : "light";
   return (
     <div className="clocks" aria-label="Clocks">
-      <p>Time control: {tcLabel(view.timeControl)}.</p>
+      <p>
+        Time control: {tcLabel(view.timeControl)}.{view.rated ? " Rated game." : ""}
+      </p>
       {clock &&
         (
           [

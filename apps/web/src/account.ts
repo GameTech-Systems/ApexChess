@@ -17,6 +17,8 @@ export interface AccountView {
   created: string;
   passkeys: number;
   codes: number;
+  /** One per ruleset id (S19d); `text` is "?" while the rating is still uncertain. */
+  ratings: { ruleset: string; games: number; text: string }[];
 }
 
 const KEY = "apexchess.account.v1";
