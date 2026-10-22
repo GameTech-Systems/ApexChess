@@ -2,7 +2,15 @@ import { createRequire } from "node:module";
 import { beforeEach, describe, expect, it } from "vitest";
 import { RECOVERY_CODES, RoomError, formatRecoveryCode, type ErrorCode } from "@apexchess/online";
 import accountsTable from "../migrations/0004_accounts.sql?raw";
-import { accountAction, cleanUpAccounts, sha256, type AccountDeps } from "./accounts";
+import ratingsTable from "../migrations/0005_ratings.sql?raw";
+import {
+  accountAction,
+  cleanUpAccounts,
+  sessionAccount,
+  sha256,
+  type AccountDeps,
+} from "./accounts";
+import { rateGame } from "./ratings";
 
 // node:sqlite stands in for D1: same SQL, same migration.
 type Sqlite = {
@@ -57,6 +65,7 @@ const rows = (table: string) => sqlite.prepare(`SELECT * FROM ${table}`).all();
 beforeEach(() => {
   sqlite = new DatabaseSync(":memory:");
   sqlite.exec(accountsTable);
+  sqlite.exec(ratingsTable);
   nextCredential = "cred-1";
   deps = {
     db: d1(sqlite),
@@ -252,6 +261,7 @@ describe("signing in", () => {
       created: "2026-10-22",
       passkeys: 1,
       codes: RECOVERY_CODES,
+      ratings: [],
     });
   });
 
@@ -335,8 +345,12 @@ describe("deleting an account", () => {
     const { token } = await signUp();
     nextCredential = "cred-2";
     const other = await signUp("Other");
+    const id = rows("accounts").find((a) => a.handle === "RookLover")!.id as string;
+    const otherId = rows("accounts").find((a) => a.handle === "Other")!.id as string;
+    await rateGame(deps.db, { ruleset: "standard", light: id, dark: otherId, score: 1 });
     await accountAction("delete", undefined, token, deps);
-    for (const t of ["accounts", "passkeys", "recovery_codes", "sessions"])
+    expect(rows("ratings").map((r) => r.account_id)).toEqual([otherId]);
+    for (const t of ["accounts", "passkeys", "recovery_codes", "sessions", "ratings"])
       expect(JSON.stringify(rows(t))).not.toMatch(/RookLover|cred-1/);
     expect(rows("accounts")).toHaveLength(1);
     expect(await code(accountAction("view", undefined, token, deps))).toBe("signIn");
@@ -372,5 +386,64 @@ describe("daily clean-up", () => {
     await cleanUpAccounts(deps.db, T0 + 31 * DAY);
     expect(rows("sessions")).toEqual([]);
     expect(await code(accountAction("view", undefined, token, deps))).toBe("signIn");
+  });
+});
+
+describe("ratings (S19d)", () => {
+  async function two() {
+    const a = await signUp("RookLover");
+    nextCredential = "cred-2";
+    const b = await signUp("Other");
+    const id = (handle: string) => rows("accounts").find((r) => r.handle === handle)!.id as string;
+    return { a: { ...a, id: id("RookLover") }, b: { ...b, id: id("Other") } };
+  }
+  const ratings = (token: string) =>
+    accountAction("view", undefined, token, deps).then((v) => (v as { ratings: unknown }).ratings);
+
+  it("finds the account behind a live session only", async () => {
+    const { a } = await two();
+    expect(await sessionAccount(deps.db, a.token, T0)).toBe(a.id);
+    expect(await sessionAccount(deps.db, "wrong", T0)).toBeUndefined();
+    expect(await sessionAccount(deps.db, a.token, T0 + 31 * DAY)).toBeUndefined();
+  });
+
+  it("starts both players at 1500/350 and updates each from the other's old rating", async () => {
+    const { a, b } = await two();
+    await rateGame(deps.db, { ruleset: "standard", light: a.id, dark: b.id, score: 1 });
+    const [ra] = (await ratings(a.token)) as { rating: number; rd: number; games: number }[];
+    const [rb] = (await ratings(b.token)) as { rating: number; rd: number; games: number }[];
+    expect(ra).toMatchObject({ ruleset: "standard", games: 1, text: "?" });
+    expect(rb).toMatchObject({ ruleset: "standard", games: 1, text: "?" });
+    expect(ra!.rating).toBeGreaterThan(1500);
+    expect(ra!.rating - 1500).toBeCloseTo(1500 - rb!.rating, 6);
+    expect(ra!.rd).toBeLessThan(350);
+  });
+
+  it("keeps one pool per ruleset id", async () => {
+    const { a, b } = await two();
+    await rateGame(deps.db, { ruleset: "standard", light: a.id, dark: b.id, score: 0.5 });
+    await rateGame(deps.db, { ruleset: "elbow-room", light: b.id, dark: a.id, score: 0 });
+    await rateGame(deps.db, { ruleset: "standard", light: b.id, dark: a.id, score: 1 });
+    const list = (await ratings(a.token)) as { ruleset: string; games: number }[];
+    expect(list.map((r) => [r.ruleset, r.games])).toEqual([
+      ["elbow-room", 1],
+      ["standard", 2],
+    ]);
+  });
+
+  it("shows the rating once RD is 110 or less", async () => {
+    const { a, b } = await two();
+    for (let i = 0; i < 30; i++)
+      await rateGame(deps.db, { ruleset: "standard", light: a.id, dark: b.id, score: i % 2 });
+    const [r] = (await ratings(a.token)) as { rd: number; text: string }[];
+    expect(r!.rd).toBeLessThanOrEqual(110);
+    expect(r!.text).toMatch(/^\d+$/);
+  });
+
+  it("scores nothing when either account is gone", async () => {
+    const { a, b } = await two();
+    await accountAction("delete", undefined, b.token, deps);
+    await rateGame(deps.db, { ruleset: "standard", light: a.id, dark: b.id, score: 1 });
+    expect(rows("ratings")).toEqual([]);
   });
 });

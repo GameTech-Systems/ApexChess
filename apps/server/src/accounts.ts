@@ -1,7 +1,8 @@
 /**
  * Accounts (S19c, D16; docs/decisions/0006): a passkey plus a handle, stored in D1 (table layout in
  * migrations/0004_accounts.sql). Passkeys are checked by @simplewebauthn/server. Sessions and
- * recovery codes are stored as SHA-256 hashes only. Game logic never reads this; anonymous play is
+ * recovery codes are stored as SHA-256 hashes only. Game rules never read this (quick match reads the
+ * account behind a session, to rate games, S19d); anonymous play is
  * unchanged.
  */
 import {
@@ -25,6 +26,7 @@ import {
   RECOVERY_CODES,
   RECOVERY_LENGTH,
 } from "@apexchess/online";
+import { ratingsOf } from "./ratings";
 
 type Db = Pick<D1Database, "prepare" | "batch">;
 
@@ -116,6 +118,22 @@ async function handleTaken(db: Db, handle: string) {
       .bind(handleKey(handle))
       .first()) !== null
   );
+}
+
+/** The account behind a live session token, or undefined (quick match uses it to rate games, S19d). */
+export async function sessionAccount(
+  db: Db,
+  token: string,
+  now: number,
+): Promise<string | undefined> {
+  const row = await db
+    .prepare(
+      "SELECT s.account_id FROM sessions s JOIN accounts a ON a.id = s.account_id" +
+        " WHERE s.token_hash = ? AND s.expires > ?",
+    )
+    .bind(await sha256(token), now)
+    .first<{ account_id: string }>();
+  return row?.account_id;
 }
 
 async function signedIn(deps: AccountDeps, token: string | undefined) {
@@ -369,12 +387,13 @@ export async function accountAction(
         created: account.created_day,
         passkeys: await count("passkeys"),
         codes: await count("recovery_codes"),
+        ratings: await ratingsOf(db, account.id),
       };
     }
     case "delete": {
       const account = await signedIn(deps, token);
       await db.batch(
-        ["passkeys", "recovery_codes", "sessions"]
+        ["passkeys", "recovery_codes", "sessions", "ratings"]
           .map((t) => db.prepare(`DELETE FROM ${t} WHERE account_id = ?`).bind(account.id))
           .concat(db.prepare("DELETE FROM accounts WHERE id = ?").bind(account.id)),
       );
