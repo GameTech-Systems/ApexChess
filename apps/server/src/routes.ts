@@ -7,7 +7,11 @@ export type Route =
   | { kind: "socket"; room: string }
   | { kind: "match" }
   | { kind: "stats" }
-  | { kind: "snapshot"; ruleset: RulesetRef };
+  | { kind: "snapshot"; ruleset: RulesetRef }
+  | { kind: "newEvent" }
+  | { kind: "joinEvent"; event: string }
+  | { kind: "startEvent"; event: string }
+  | { kind: "event"; event: string };
 
 /** No 0, O, 1, I, or L, so a code read aloud or typed is hard to get wrong. */
 export const ROOM_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -38,6 +42,14 @@ export function route(method: string, pathname: string): Route | undefined {
     return method === "GET"
       ? { kind: "snapshot", ruleset: { id: s[1]!, version: s[2]! } }
       : undefined;
+  if (pathname === "/api/events") return method === "POST" ? { kind: "newEvent" } : undefined;
+  const e = /^\/api\/events\/([^/]+)(?:\/(join|start))?$/.exec(pathname);
+  const event = e && normalizeCode(e[1]!);
+  if (event) {
+    if (!e[2]) return method === "GET" ? { kind: "event", event } : undefined;
+    if (method !== "POST") return undefined;
+    return e[2] === "join" ? { kind: "joinEvent", event } : { kind: "startEvent", event };
+  }
   const m = /^\/api\/rooms\/([^/]+)\/(join|socket)$/.exec(pathname);
   const room = m && normalizeCode(m[1]!);
   if (!room) return undefined;
@@ -47,7 +59,8 @@ export function route(method: string, pathname: string): Route | undefined {
 
 export function httpStatus(code: ErrorCode): number {
   if (code === "notFound") return 404;
-  if (code === "full") return 409;
+  if (code === "full" || code === "started") return 409;
+  if (code === "host") return 403;
   if (code === "busy") return 429;
   return 400;
 }

@@ -27,6 +27,25 @@ describe("api routes", () => {
   });
 });
 
+describe("event routes (D20)", () => {
+  it("maps create, join, start, and view", () => {
+    expect(route("POST", "/api/events")).toEqual({ kind: "newEvent" });
+    expect(route("POST", "/api/events/evt234/join")).toEqual({
+      kind: "joinEvent",
+      event: "EVT234",
+    });
+    expect(route("POST", "/api/events/EVT234/start")).toEqual({
+      kind: "startEvent",
+      event: "EVT234",
+    });
+    expect(route("GET", "/api/events/EVT234")).toEqual({ kind: "event", event: "EVT234" });
+    expect(route("GET", "/api/events")).toBeUndefined();
+    expect(route("GET", "/api/events/EVT234/join")).toBeUndefined();
+    expect(route("POST", "/api/events/EVT234")).toBeUndefined();
+    expect(route("GET", "/api/events/EVT0/start")).toBeUndefined();
+  });
+});
+
 describe("room codes", () => {
   it("are six characters from an alphabet without look-alikes", () => {
     const code = roomCode(Uint8Array.from([0, 1, 30, 31, 255, 128]));
@@ -48,6 +67,8 @@ describe("http status for room errors", () => {
     expect(httpStatus("full")).toBe(409);
     expect(httpStatus("setup")).toBe(400);
     expect(httpStatus("busy")).toBe(429);
+    expect(httpStatus("started")).toBe(409);
+    expect(httpStatus("host")).toBe(403);
   });
 });
 
