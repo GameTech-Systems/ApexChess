@@ -125,7 +125,7 @@ Glicko-2 per ruleset id for signed-in quick-match games. Blocked on D17, S19c, a
 ### S20 — Phase 7: Tournaments and growth · Opus 5.5 · high · `done`
 Plan only (the S20 default): design, privacy review, and sub-steps. Decisions: D19 and D20 (open). Record: `docs/decisions/0007-tournaments-growth.md`.
 
-### S20a — Phase 7: Clocks · Opus 5.5 · high · `todo`
+### S20a — Phase 7: Clocks · Opus 5.5 · high · `done`
 Server-kept Fischer clocks for rooms and quick match, using the D19 presets plus untimed. Covers flag fall, the insufficient-material draw (D8), the clock running while a player is disconnected, the time control in the archive record, and the Privacy text. Decisions: D19 (default).
 
 ### S20b — Phase 7: Share and replay · Sonnet 5.5 · medium · `todo`
