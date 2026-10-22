@@ -131,7 +131,7 @@ Server-kept Fischer clocks for rooms and quick match, using the D19 presets plus
 ### S20b — Phase 7: Share and replay · Sonnet 5.5 · medium · `done`
 Setup links open the builder with a setup code. Game links carry ruleset, setups, and moves and open a replay viewer. Links are made only in the player's browser and nothing is stored on the server. No decision needed.
 
-### S20c — Phase 7: Tournaments · Opus 5.5 · high · `todo`
+### S20c — Phase 7: Tournaments · Opus 5.5 · high · `done`
 Private events by link: event display names, round robin or Swiss pairing, byes, tiebreaks, crosstable, `noindex`, deletion 7 days after the last game, and the Privacy text. Needs S20a. Decisions: D20 (default), D19.
 
 ### S20d — Phase 7: Leaderboards · Opus 5.5 · high · `blocked`
