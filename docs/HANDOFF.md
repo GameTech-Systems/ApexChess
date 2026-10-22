@@ -1,26 +1,27 @@
 # Handoff
 
-Updated 2026-10-22 by S19b (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-10-22 by S20 (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Phase 6. A daily cron (00:07 UTC) aggregates the D1 archive with the 0003 measures into table `stats`; `/api/stats` serves the snapshots and the web app has a Statistics page. Verified on `wrangler dev`.
+- Phase 7 planned (plan only): `docs/decisions/0007-tournaments-growth.md` defines S20a clocks, S20b share and replay, S20c tournaments, and S20d leaderboards (blocked).
 - Not live: S16 hosting steps plus the D1 database (see 0004) are still open.
 
 ## Next session
-**S20 — Phase 7: Tournaments and growth** · Opus 5.5 · effort high
+**S20a — Phase 7: Clocks** · Opus 5.5 · effort high
 Set: `/model opus` · `/effort high`
-Why: S19c and S19d wait on owner decisions; S20 has no plan yet, so plan it first.
-Start with: `/start-session S20`
+Why: server-kept clocks are correctness-critical, and tournaments need them.
+Start with: `/start-session S20a`
 
 ## Decisions in effect for the next step
-- D18: aggregates only, N ≥ 30, games of at least 10 plies, daily (default, provisional, 0006).
-- D11: Cloudflare, archive and stats in D1 (provisional).
+- D19: Fischer presets 3+2, 5+3, 10+5, 15+10 plus untimed; running out of time loses unless the opponent has insufficient material (default, provisional, 0007).
+- D8: draws as decided; its insufficient-material test also decides flag-fall draws.
 
 ## Open questions for the owner
-- D16 sign-in, D17 ratings, minimum age: S19c and S19d stay blocked.
-- Before the first deploy: create D1 `apexchess-archive` (dashboard: Storage & Databases → D1) and send Claude its id.
+- D19 time controls and D20 tournament format: Claude uses the 0007 defaults if unanswered.
+- D16 sign-in, D17 ratings, minimum age: S19c, S19d, and S20d stay blocked.
+- Before the first deploy: create D1 `apexchess-archive` and send Claude its id.
 
 ## Notes for Claude
-- Measures: `aggregate` in `packages/sim/src/aggregate.ts`, used by the sim report and by `statsSnapshot` (`packages/online/src/stats.ts`). Job and reads: `apps/server/src/stats.ts`; tests run real SQL through `node:sqlite`.
-- Stats are rebuilt in full each day; if the archive outgrows Worker CPU limits, switch to per-day tallies (they add up).
-- Local cron: `wrangler dev --test-scheduled`, then `curl localhost:8787/cdn-cgi/handler/scheduled`. Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.
+- Rooms: `packages/online/src/room.ts` (pure) and the `Room` Durable Object in `apps/server`. Clock logic stays pure and is tested with injected time.
+- Add the time control and the `time` result reason to `archiveRecord`; a D1 migration may be needed.
+- Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.
