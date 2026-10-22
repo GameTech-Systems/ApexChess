@@ -104,8 +104,8 @@ Decisions: D11.
 
 ## Later phases
 
-### S18 — Phase 5: Online play with hidden setups · `todo`
-Rooms, matchmaking, the server holds both setups hidden until the start, server coin flip, reconnection, ruleset lock per game. Decisions: D13.
+### S18 — Phase 5: Online play with hidden setups · Opus 5.5 · high · `done`
+Rooms, matchmaking, the server holds both setups hidden until the start, server coin flip, reconnection, ruleset lock per game. Decisions: D13. Record: `docs/decisions/0005-online-play.md`.
 
 ### S19 — Phase 6: Accounts, ratings, and public setup statistics · `todo`
 

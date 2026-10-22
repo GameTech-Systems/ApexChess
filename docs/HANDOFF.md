@@ -1,30 +1,30 @@
 # Handoff
 
-Updated 2026-10-21 by S16 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-10-22 by S18 (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Phase 3 done; S16 repo work done: `wrangler.jsonc` (Workers Static Assets, SPA fallback), `.github/workflows/deploy.yml` (deploys on push to `main` once secrets exist), in-app Privacy page, error boundary, `index.html` load-failure fallback and noscript.
-- Not live yet: the owner must finish hosting setup (see questions). Details: `docs/decisions/0004-hosting.md`.
+- Phase 5 done. Online play: `packages/online` (protocol, room rules, quick-match queue, `follow`), `apps/server` (Worker, `Room` and `Lobby` Durable Objects), web `Online.tsx` (lock setup, quick match or private room code, reconnect, resign, draw offers, rematch). Checked end to end on `wrangler dev` in a real browser.
+- Not live yet: the S16 owner hosting steps are still open. Deploying now also creates the Durable Objects (migration `v1`).
 
 ## Next session
-**S18 — Online play with hidden setups** · Opus 5.5 · effort high
+**S19 — Accounts, ratings, and public setup statistics** · Opus 5.5 · effort high
 Set: `/model opus` · `/effort high`
-Why: Server design, hidden-setup protocol, and reconnection need careful reasoning.
-Start with: `/start-session S18`
+Why: Accounts and stored data need careful design and privacy review; plan section is still empty.
+Start with: `/start-session S19`
 
 ## Decisions in effect for the next step
-- D13: each player locks a saved setup before matchmaking; the server reveals both at the start, then flips the coin (decided).
-- D11: Cloudflare Workers; server pieces likely Durable Objects (provisional).
+- D13: setup locked before matchmaking; server reveals both, then flips the coin (decided).
+- D15: rematch needs both players; sides switch (decided).
+- D11: Cloudflare Workers + Durable Objects (provisional). Room retention 7 days, no forfeit for disconnects (provisional, 0005).
 
 ## Open questions for the owner
-- Owner steps for S16 to go live: create the Cloudflare account, add repo secrets `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`, attach apexchess.icu to the `apexchess` Worker. S18 can proceed without them.
-- S17 (outside testers) is an Owner step and waits on the deploy.
-- `standard` ruleset is still draft 0.1.0; make it official 1.0.0 when approved.
-- Self-play thresholds (0003) are provisional.
+- S19 has no scope in the plan: which sign-in (or none), what ratings, what stats go public. Default: plan only, no accounts code.
+- Disconnects: no clock or abandonment rule online. Default: game waits.
+- Hosting steps from S16 (Cloudflare account, two secrets, domain); S17 testers wait on them.
+- `standard` ruleset still draft 0.1.0; thresholds in 0003 provisional.
 
 ## Notes for Claude
-- Undo is for local play only; online play must not offer it.
-- The Privacy page says no accounts and no server storage; update it when online play or accounts add data.
-- Web tests are SSR and pure-function only (no jsdom).
+- `pnpm dev:server` runs `wrangler dev` on 8787; `pnpm dev` proxies `/api`. Never `pkill -f wrangler` (kills your own shell); use `pkill -f "[w]rangler"`.
+- Full replays are slow (~0.6 s for 200 plies); use `follow()` for incremental game state.
+- No rate limiting on `/api` yet. Web tests are SSR and pure-function only.
 - `pnpm lint` includes `prettier --check`; run `pnpm exec prettier --write .` first.
-- `pnpm sim` game records go to `sim-out/` (gitignored).
