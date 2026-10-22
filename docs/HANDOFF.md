@@ -1,30 +1,28 @@
 # Handoff
 
-Updated 2026-10-22 by S18 (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-10-22 by S19 (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Phase 5 done. Online play: `packages/online` (protocol, room rules, quick-match queue, `follow`), `apps/server` (Worker, `Room` and `Lobby` Durable Objects), web `Online.tsx` (lock setup, quick match or private room code, reconnect, resign, draw offers, rematch). Checked end to end on `wrangler dev` in a real browser.
-- Not live yet: the S16 owner hosting steps are still open. Deploying now also creates the Durable Objects (migration `v1`).
+- Phase 6 planned (S19, plan only). Design and privacy review are in `docs/decisions/0006-accounts-ratings-stats.md`. Sub-steps S19a to S19d are in `docs/BUILD-PLAN.md`.
+- Online play (S18) works on `wrangler dev`. Not live: the S16 owner hosting steps are still open.
 
 ## Next session
-**S19 — Accounts, ratings, and public setup statistics** · Opus 5.5 · effort high
+**S19a — Anonymous game archive** · Opus 5.5 · effort high
 Set: `/model opus` · `/effort high`
-Why: Accounts and stored data need careful design and privacy review; plan section is still empty.
-Start with: `/start-session S19`
+Why: New stored data format, a Privacy page change, and rate limiting; mistakes there are costly.
+Start with: `/start-session S19a`
 
 ## Decisions in effect for the next step
-- D13: setup locked before matchmaking; server reveals both, then flips the coin (decided).
-- D15: rematch needs both players; sides switch (decided).
-- D11: Cloudflare Workers + Durable Objects (provisional). Room retention 7 days, no forfeit for disconnects (provisional, 0005).
+- D18: aggregates only, N ≥ 30, archive records carry no identity (default, provisional, 0006).
+- D11: Cloudflare; use D1 for the archive (provisional).
+- No retroactive archiving: games are stored only after the new Privacy text ships (0006).
 
 ## Open questions for the owner
-- S19 has no scope in the plan: which sign-in (or none), what ratings, what stats go public. Default: plan only, no accounts code.
-- Disconnects: no clock or abandonment rule online. Default: game waits.
-- Hosting steps from S16 (Cloudflare account, two secrets, domain); S17 testers wait on them.
-- `standard` ruleset still draft 0.1.0; thresholds in 0003 provisional.
+- D16 sign-in, D17 ratings, and the minimum age; S19c and S19d are blocked on them. They don't block S19a or S19b.
+- Abandoned games: no clock or abandonment rule. Default: the game waits, and unfinished games are never rated.
+- S16 hosting steps (Cloudflare account, secrets, domain).
 
 ## Notes for Claude
-- `pnpm dev:server` runs `wrangler dev` on 8787; `pnpm dev` proxies `/api`. Never `pkill -f wrangler` (kills your own shell); use `pkill -f "[w]rangler"`.
-- Full replays are slow (~0.6 s for 200 plies); use `follow()` for incremental game state.
-- No rate limiting on `/api` yet. Web tests are SSR and pure-function only.
-- `pnpm lint` includes `prettier --check`; run `pnpm exec prettier --write .` first.
+- `pnpm dev:server` runs `wrangler dev` on 8787. Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.
+- Write archive records once, at the game's end in `Room`, and keep the record builder a pure, tested function in `packages/online`.
+- `docs/` and `*.md` are ignored by prettier.
