@@ -45,6 +45,8 @@ export interface SeatData {
   token: string;
   /** Locked setup, written for light. Absent in an event game until the player locks it. */
   setup?: Pieces;
+  /** Quick match only: the signed-in player's account id, kept so games can be rated (S19d). */
+  account?: string;
 }
 
 export interface RoomData {
