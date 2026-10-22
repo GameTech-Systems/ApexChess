@@ -338,6 +338,15 @@ function lockSeat(
 }
 
 /** What one player may see at `now`. While waiting there is no record, so nothing of the opponent's setup. */
+/**
+ * Whether games in this room count for ratings (S19d, D17 default, provisional): quick match between
+ * two different signed-in accounts, on a control with a clock or an abandonment rule (0006).
+ */
+export function isRated(room: RoomData): boolean {
+  const [a, b] = room.seats.map((s) => s.account);
+  return !!a && !!b && a !== b && !room.event && controlOf(room).kind !== "untimed";
+}
+
 export function viewFor(
   room: RoomData,
   seat: Seat,
@@ -378,6 +387,7 @@ export function viewFor(
         away: { who: away.seat === seat ? "you" : "opponent", left: Math.max(0, grace - now) },
       }),
     ...(event && { event }),
+    ...(isRated(room) && { rated: true }),
     ...(locking && {
       lock: {
         you: !!setup,

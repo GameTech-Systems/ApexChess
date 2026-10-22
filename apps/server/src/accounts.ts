@@ -1,9 +1,8 @@
 /**
  * Accounts (S19c, D16; docs/decisions/0006): a passkey plus a handle, stored in D1 (table layout in
  * migrations/0004_accounts.sql). Passkeys are checked by @simplewebauthn/server. Sessions and
- * recovery codes are stored as SHA-256 hashes only. Game rules never read this (quick match reads the
- * account behind a session, to rate games, S19d); anonymous play is
- * unchanged.
+ * recovery codes are stored as SHA-256 hashes only. Game rules never read this; quick match reads
+ * the account behind a session, to rate games (S19d). Anonymous play is unchanged.
  */
 import {
   generateAuthenticationOptions,

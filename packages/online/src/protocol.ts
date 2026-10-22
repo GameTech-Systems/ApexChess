@@ -97,6 +97,8 @@ export interface RoomView {
   away?: { who: "you" | "opponent"; left: number };
   /** Event game (D20): the event and its board. There is no rematch. */
   event?: EventRef;
+  /** Quick match between two signed-in players: results change both ratings (S19d). */
+  rated?: true;
   /** Event game while locking: who has locked, and ms left before an absent player loses. */
   lock?: { you: boolean; opponent: boolean; left: number };
 }
