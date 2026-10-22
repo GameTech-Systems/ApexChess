@@ -38,10 +38,10 @@ function code(fn: () => unknown): string | undefined {
   return undefined;
 }
 
-/** An event with `n` players named p0… holding tokens t0…. */
+/** An event with `n` players named pl0… holding tokens t0…. */
 function withPlayers(n: number, tc?: string): EventData {
-  let ev = createEvent("EVT234", ruleset, req("p0", tc ? { timeControl: tc } : {}), "t0");
-  for (let i = 1; i < n; i++) ev = joinEvent(ev, ruleset, req(`p${i}`), `t${i}`);
+  let ev = createEvent("EVT234", ruleset, req("pl0", tc ? { timeControl: tc } : {}), "t0");
+  for (let i = 1; i < n; i++) ev = joinEvent(ev, ruleset, req(`pl${i}`), `t${i}`);
   return ev;
 }
 
@@ -69,38 +69,38 @@ function playOut(ev: EventData): EventData {
 
 describe("creating and joining an event (D20)", () => {
   it("makes the creator the host and first player, on a clocked time control", () => {
-    const ev = createEvent("EVT234", ruleset, req(" Host  One "), "t0");
-    expect(ev.players).toEqual([{ name: "Host One", token: "t0" }]);
+    const ev = createEvent("EVT234", ruleset, req(" Host_One "), "t0");
+    expect(ev.players).toEqual([{ name: "Host_One", token: "t0" }]);
     expect(ev.timeControl).toBe("10+0");
     expect(ev.ruleset).toEqual(ref);
     expect(eventState(ev)).toBe("open");
-    expect(createEvent("E", ruleset, req("ab", { timeControl: "move1d" }), "t").timeControl).toBe(
+    expect(createEvent("E", ruleset, req("abc", { timeControl: "move1d" }), "t").timeControl).toBe(
       "move1d",
     );
   });
 
   it("refuses untimed and leave-only controls, other versions, old pages, and bad names", () => {
-    expect(code(() => createEvent("E", ruleset, req("ab", { timeControl: "untimed" }), "t"))).toBe(
+    expect(code(() => createEvent("E", ruleset, req("abc", { timeControl: "untimed" }), "t"))).toBe(
       "timeControl",
     );
-    expect(code(() => createEvent("E", ruleset, req("ab", { timeControl: "away5m" }), "t"))).toBe(
+    expect(code(() => createEvent("E", ruleset, req("abc", { timeControl: "away5m" }), "t"))).toBe(
       "timeControl",
     );
     expect(
       code(() =>
-        createEvent("E", ruleset, req("ab", { ruleset: { ...ref, version: "9.9.9" } }), "t"),
+        createEvent("E", ruleset, req("abc", { ruleset: { ...ref, version: "9.9.9" } }), "t"),
       ),
     ).toBe("ruleset");
-    expect(code(() => createEvent("E", ruleset, req("ab", { protocol: 0 }), "t"))).toBe("protocol");
+    expect(code(() => createEvent("E", ruleset, req("abc", { protocol: 0 }), "t"))).toBe("protocol");
     expect(code(() => createEvent("E", ruleset, req("admin"), "t"))).toBe("name");
   });
 
   it(`takes up to ${EVENT_MAX} players with names unique in the event`, () => {
     const ev = withPlayers(3);
-    expect(ev.players.map((p) => p.name)).toEqual(["p0", "p1", "p2"]);
-    expect(code(() => joinEvent(ev, ruleset, req("P-1"), "x"))).toBe("name");
+    expect(ev.players.map((p) => p.name)).toEqual(["pl0", "pl1", "pl2"]);
+    expect(code(() => joinEvent(ev, ruleset, req("PL-1"), "x"))).toBe("name");
     expect(code(() => joinEvent(withPlayers(EVENT_MAX), ruleset, req("late"), "x"))).toBe("full");
-    expect(code(() => joinEvent(ev, ruleset, req("ab", { protocol: 0 }), "x"))).toBe("protocol");
+    expect(code(() => joinEvent(ev, ruleset, req("abc", { protocol: 0 }), "x"))).toBe("protocol");
   });
 });
 
@@ -154,7 +154,7 @@ describe("playing an event", () => {
     const text = JSON.stringify(visitor);
     for (const secret of ["t0", "t1", "l00", "d00", "R00"])
       expect(text).not.toContain(`"${secret}"`);
-    expect(visitor.players).toEqual(["p0", "p1", "p2", "p3"]);
+    expect(visitor.players).toEqual(["pl0", "pl1", "pl2", "pl3"]);
     expect(eventView(ev, "t0").host).toBe(true);
     expect(eventView(ev, "t1").host).toBe(false);
   });
@@ -202,9 +202,9 @@ describe("playing an event", () => {
 
 describe("parsing event requests", () => {
   it("copies known fields and refuses odd shapes", () => {
-    const r = req("ab", { timeControl: "3+2" });
+    const r = req("abc", { timeControl: "3+2" });
     expect(parseEventRequest({ ...r, extra: 1 })).toEqual(r);
-    expect(parseEventRequest(req("ab"))).toEqual(req("ab"));
+    expect(parseEventRequest(req("abc"))).toEqual(req("abc"));
     expect(parseEventRequest({ ...r, name: 5 })).toBeUndefined();
     expect(parseEventRequest({ ...r, name: "x".repeat(200) })).toBeUndefined();
     expect(parseEventRequest({ ...r, ruleset: "standard" })).toBeUndefined();
