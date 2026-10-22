@@ -34,6 +34,8 @@ describe("parsing what clients send", () => {
     expect(parseLock({ ...lock, setup: [] })).toBeUndefined();
     expect(parseLock({ ...lock, ruleset: { id: "standard" } })).toBeUndefined();
     expect(parseLock({ ...lock, protocol: "1" })).toBeUndefined();
+    expect(parseLock({ ...lock, timeControl: "3+2" })).toEqual({ ...lock, timeControl: "3+2" });
+    expect(parseLock({ ...lock, timeControl: 3 })).toBeUndefined();
     const huge = Object.fromEntries(Array.from({ length: 200 }, (_, i) => [`s${i}`, "pawn"]));
     expect(parseLock({ ...lock, setup: huge })).toBeUndefined();
   });

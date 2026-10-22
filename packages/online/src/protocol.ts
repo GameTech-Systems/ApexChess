@@ -2,7 +2,7 @@
 import type { DrawReason, GameRecord, Pieces, Side } from "@apexchess/engine";
 
 /** Raise when messages change shape; an older client is told to reload. */
-export const PROTOCOL = 1;
+export const PROTOCOL = 2;
 
 export interface RulesetRef {
   id: string;
@@ -14,12 +14,18 @@ export interface Lock {
   protocol: number;
   ruleset: RulesetRef;
   setup: Pieces;
+  /** Time control id (D19) for a new room or a quick match; a joiner takes the room's. Default when absent. */
+  timeControl?: string;
 }
 
 export type End =
   | { status: "checkmate"; winner: Side }
-  | { status: "draw"; reason: DrawReason | "agreement" }
-  | { status: "resigned"; winner: Side };
+  | { status: "draw"; reason: DrawReason | "agreement" | "time" | "abandoned" }
+  | { status: "resigned"; winner: Side }
+  /** The loser ran out of time (D19). */
+  | { status: "time"; winner: Side }
+  /** The loser stayed away past the grace time of an abandonment-only control (D19). */
+  | { status: "abandoned"; winner: Side };
 
 /** Over a room socket. There is no undo online. */
 export type ClientMessage =
@@ -34,6 +40,7 @@ export type ErrorCode =
   | "protocol"
   | "ruleset"
   | "setup"
+  | "timeControl"
   | "notFound"
   | "full"
   | "token"
@@ -63,6 +70,12 @@ export interface RoomView {
   drawOffer?: "you" | "opponent";
   rematch: { you: boolean; opponent: boolean };
   opponentOnline: boolean;
+  /** Time control id (D19). */
+  timeControl: string;
+  /** Time left (ms) when this view was sent; `running` counts down. Absent when untimed. */
+  clock?: { light: number; dark: number; running?: Side };
+  /** Abandonment-only control: who is away, and ms left before they lose. */
+  away?: { who: "you" | "opponent"; left: number };
 }
 
 export type ServerMessage =
@@ -89,7 +102,8 @@ const isText = (v: unknown): v is string => typeof v === "string" && v.length <=
 /** A lock's shape (setup legality is the room's job), copied without extra fields; undefined if malformed. */
 export function parseLock(value: unknown): Lock | undefined {
   if (!isRecord(value) || typeof value.protocol !== "number") return undefined;
-  const { ruleset, setup } = value;
+  const { ruleset, setup, timeControl } = value;
+  if (timeControl !== undefined && !isText(timeControl)) return undefined;
   if (!isRecord(ruleset) || !isText(ruleset.id) || !isText(ruleset.version)) return undefined;
   if (!isRecord(setup)) return undefined;
   const entries = Object.entries(setup);
@@ -99,6 +113,7 @@ export function parseLock(value: unknown): Lock | undefined {
     protocol: value.protocol,
     ruleset: { id: ruleset.id, version: ruleset.version },
     setup: Object.fromEntries(entries) as Pieces,
+    ...(timeControl !== undefined && { timeControl }),
   };
 }
 
