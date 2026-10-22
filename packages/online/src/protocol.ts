@@ -52,6 +52,10 @@ export type ErrorCode =
   | "over"
   | "notOver"
   | "busy"
+  | "name"
+  | "started"
+  | "host"
+  | "players"
   | "turn"
   | "stale"
   | "illegal";

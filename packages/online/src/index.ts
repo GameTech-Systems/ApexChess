@@ -6,3 +6,7 @@ export * from "./lobby";
 export * from "./follow";
 export * from "./archive";
 export * from "./stats";
+export * from "./names";
+export * from "./pairing";
+export * from "./standings";
+export * from "./event";
