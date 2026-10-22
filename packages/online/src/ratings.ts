@@ -5,9 +5,8 @@
  * games"), so untimed games are unrated. Each finished game is its own rating period; a game that
  * never ends is never scored.
  */
-import { timeControl } from "./clock";
 import type { End } from "./protocol";
-import { sideOf, type RoomData, type Seat } from "./room";
+import { isRated, sideOf, type RoomData, type Seat } from "./room";
 
 export interface Rating {
   rating: number;
@@ -96,12 +95,6 @@ export function scoreOf(end: End): number | undefined {
   if (end.status === "noShow") return undefined;
   if (end.status === "draw") return 0.5;
   return end.winner === "light" ? 1 : 0;
-}
-
-/** Whether games in this room count for ratings (shown to both players). */
-export function isRated(room: RoomData): boolean {
-  const [a, b] = room.seats.map((s) => s.account);
-  return !!a && !!b && a !== b && !room.event && timeControl(room.timeControl)?.kind !== "untimed";
 }
 
 /** A rated game that `before` → `after` just ended: the pool, both accounts, and light's score. */

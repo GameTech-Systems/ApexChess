@@ -1,16 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { catalog, mirrorSetup, resolveRuleset } from "@apexchess/engine";
 import { PROTOCOL, type ClientMessage, type Lock } from "./protocol";
+import { NEW_RATING, glicko2, ratedGame, ratingText, scoreOf, type Rating } from "./ratings";
 import {
-  NEW_RATING,
-  glicko2,
+  act,
+  createRoom,
   isRated,
-  ratedGame,
-  ratingText,
-  scoreOf,
-  type Rating,
-} from "./ratings";
-import { act, createRoom, joinRoom, sideOf, type RoomData, type Seat } from "./room";
+  joinRoom,
+  sideOf,
+  viewFor,
+  type RoomData,
+  type Seat,
+} from "./room";
 
 describe("glicko2 (Glickman's worked example)", () => {
   it("matches the paper: 1500/200 beats 1400/30, loses to 1550/100 and 1700/300", () => {
@@ -132,6 +133,11 @@ describe("isRated and ratedGame (D17 default, provisional)", () => {
   it("rates every clocked control and the abandonment-only control", () => {
     for (const tc of ["1+0", "move1d", "away5m"])
       expect(isRated(room(["acct-a", "acct-b"], tc))).toBe(true);
+  });
+
+  it("tells both players whether the game is rated", () => {
+    expect(viewFor(room(["acct-a", "acct-b"]), 1, true, 0).rated).toBe(true);
+    expect(viewFor(room(["acct-a"]), 0, true, 0)).not.toHaveProperty("rated");
   });
 
   it("does not rate event games", () => {
