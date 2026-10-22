@@ -39,5 +39,11 @@ export function route(method: string, pathname: string): Route | undefined {
 export function httpStatus(code: ErrorCode): number {
   if (code === "notFound") return 404;
   if (code === "full") return 409;
+  if (code === "busy") return 429;
   return 400;
+}
+
+/** Rate limits count requests per connecting address; Cloudflare sets the header. */
+export function clientKey(headers: Headers): string {
+  return headers.get("cf-connecting-ip") ?? "unknown";
 }

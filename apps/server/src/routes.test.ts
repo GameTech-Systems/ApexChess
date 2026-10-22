@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ROOM_ALPHABET, httpStatus, normalizeCode, roomCode, route } from "./routes";
+import { ROOM_ALPHABET, clientKey, httpStatus, normalizeCode, roomCode, route } from "./routes";
 
 describe("api routes", () => {
   it("maps each api path and nothing else", () => {
@@ -34,5 +34,13 @@ describe("http status for room errors", () => {
     expect(httpStatus("notFound")).toBe(404);
     expect(httpStatus("full")).toBe(409);
     expect(httpStatus("setup")).toBe(400);
+    expect(httpStatus("busy")).toBe(429);
+  });
+});
+
+describe("rate limit key", () => {
+  it("is the connecting address, or one shared key when there is none", () => {
+    expect(clientKey(new Headers({ "cf-connecting-ip": "203.0.113.7" }))).toBe("203.0.113.7");
+    expect(clientKey(new Headers())).toBe("unknown");
   });
 });
