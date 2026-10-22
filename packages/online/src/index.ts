@@ -11,3 +11,4 @@ export * from "./accounts";
 export * from "./pairing";
 export * from "./standings";
 export * from "./event";
+export * from "./ratings";
