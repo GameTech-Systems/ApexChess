@@ -16,6 +16,9 @@ import {
   type Side,
 } from "@apexchess/engine";
 import { Board } from "./Board";
+import { Online } from "./Online";
+import { loadTicket } from "./online";
+import type { KeyValueStore } from "./savedSetups";
 import { Privacy } from "./Privacy";
 import { Rules } from "./Rules";
 import { piecesInDanger, playSound, undoMoves } from "./playAids";
@@ -52,10 +55,20 @@ function describe(res: ReturnType<typeof result>): string {
 /** Seeds differ per game; the engine stays deterministic for a given seed. */
 const newRandom = () => seededRandom(Math.floor(Math.random() * 2 ** 32));
 
-type Mode = "hotseat" | "computer";
+type Mode = "hotseat" | "computer" | "online";
 
-export function App({ initialMode }: { initialMode?: Mode }) {
-  const [mode, setMode] = useState(initialMode);
+/** `storage` is this device's store; tests pass their own. */
+export function App({
+  initialMode,
+  storage = store,
+}: {
+  initialMode?: Mode;
+  storage?: KeyValueStore;
+}) {
+  // A saved room ticket means a game in progress: go straight back to it.
+  const [mode, setMode] = useState(
+    () => initialMode ?? (loadTicket(storage) ? "online" : undefined),
+  );
   const [level, setLevel] = useState<Level>(DEFAULT_LEVEL);
   const [showRules, setShowRules] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
@@ -81,6 +94,9 @@ export function App({ initialMode }: { initialMode?: Mode }) {
           <button type="button" onClick={() => setMode("computer")}>
             Play the computer
           </button>
+          <button type="button" onClick={() => setMode("online")}>
+            Play online
+          </button>
           <label>
             Computer{" "}
             <select value={level} onChange={(e) => setLevel(e.target.value as Level)}>
@@ -101,6 +117,15 @@ export function App({ initialMode }: { initialMode?: Mode }) {
       </main>
     );
   }
+  if (mode === "online")
+    return (
+      <Online
+        ruleset={ruleset}
+        presets={presets}
+        store={storage}
+        onExit={() => setMode(undefined)}
+      />
+    );
   return mode === "computer" ? (
     <VsComputer level={level} onChangeSetups={() => setMode(undefined)} />
   ) : (

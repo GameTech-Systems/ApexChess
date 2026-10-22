@@ -54,6 +54,9 @@ importers:
       '@apexchess/engine':
         specifier: workspace:*
         version: link:../../packages/engine
+      '@apexchess/online':
+        specifier: workspace:*
+        version: link:../../packages/online
       react:
         specifier: ^18.3.1
         version: 18.3.1
