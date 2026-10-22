@@ -110,7 +110,7 @@ Rooms, matchmaking, the server holds both setups hidden until the start, server 
 ### S19 — Phase 6: Accounts, ratings, and public setup statistics · Opus 5.5 · high · `done`
 Plan only (the S19 default): design, privacy review, and sub-steps. Decisions: D16 to D18 (open). Record: `docs/decisions/0006-accounts-ratings-stats.md`.
 
-### S19a — Phase 6: Anonymous game archive · Opus 5.5 · high · `todo`
+### S19a — Phase 6: Anonymous game archive · Opus 5.5 · high · `done`
 Finished online games go to D1 as anonymous records (ruleset id and version, setups, moves, result, end day). Privacy page updated in the same PR, with no archiving of earlier games. Adds rate limiting on `/api`. Decisions: D18 (default).
 
 ### S19b — Phase 6: Public setup statistics · Opus 5.5 · high · `todo`
