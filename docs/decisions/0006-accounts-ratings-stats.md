@@ -31,5 +31,5 @@ Public setup statistics do not need accounts, so they come first. Accounts and r
 ## Not decided here
 
 - **Abandoned games.** Rated play needs a clock or an abandonment rule. D19 (0007) gives one: a time loss or an abandonment forfeit is scored like any result. A game that never ends is never scored (provisional until the owner confirms).
-- **Profiles and leaderboards.** Private by default; a public leaderboard would be opt-in (S20 or later).
+- **Profiles and leaderboards.** Private by default. Built in S20d (provisional): one opt-in switch per account (`accounts.listed`, migration 0006), off by default. A listed account shows its handle, rounded rating, and rated-game count on one board per ruleset id, only where RD ≤ 110; top 50 per board. Boards are computed on each request (`no-store`, `noindex`), so opting out or deleting the account removes the player at once and no copy is kept. No profiles.
 - **Why this order:** the project's question is which setups do well. Anonymous records answer it with the least personal data, and accounts add value mainly for ratings.
