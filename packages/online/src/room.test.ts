@@ -12,8 +12,10 @@ import { PROTOCOL, type ClientMessage, type Lock } from "./protocol";
 import {
   RoomError,
   act as actAt,
+  createEventRoom,
   createRoom,
   deadline,
+  eventScore,
   joinRoom as joinAt,
   presence,
   seatOf,
@@ -325,5 +327,99 @@ describe("abandonment only (D19)", () => {
     expect(presence(fischer, [false, true], 5)).toBe(fischer);
     const over = act(timed("away5m"), ruleset, 0, { type: "resign" });
     expect(presence(over, [false, true], 5)).toBe(over);
+  });
+});
+
+describe("event games (D20)", () => {
+  const ev = { id: "EVT234", round: 1, board: 2 };
+  const open = (tc = "10+0", now = 1000) =>
+    createEventRoom("G", ruleset, tc, ["tl", "td"], ev, now);
+  const lockMsg = (setup: Pieces, over: Partial<Lock> = {}): ClientMessage => ({
+    type: "lock",
+    lock: lock(setup, over),
+  });
+
+  it("seats both players with sides set by pairing, setups still to lock", () => {
+    const room = open();
+    expect(seatOf(room, "tl")).toBe(0);
+    expect(seatOf(room, "td")).toBe(1);
+    expect(sideOf(room, 0)).toBe("light");
+    expect(sideOf(room, 1)).toBe("dark");
+    const view = viewFor(room, 1, true, 61_000);
+    expect(view.phase).toBe("locking");
+    expect(view.side).toBe("dark");
+    expect(view.event).toEqual(ev);
+    expect(view.setup).toBeUndefined();
+    expect(view.lock).toEqual({ you: false, opponent: false, left: 540_000 });
+    expect(deadline(room)).toBe(601_000);
+  });
+
+  it("needs a clock: an untimed or leave-only control could never end a round", () => {
+    expect(code(() => open("untimed"))).toBe("timeControl");
+    expect(code(() => open("away5m"))).toBe("timeControl");
+    expect(open("move1d").event!.lockBy).toBe(1000 + 86_400_000);
+  });
+
+  it("keeps a locked setup hidden, then starts the game and clock when both have locked", () => {
+    const one = act(open(), ruleset, 1, lockMsg(second), 5000);
+    expect(viewFor(one, 1, true, 5000)).toMatchObject({
+      phase: "locking",
+      setup: second,
+      lock: { you: true, opponent: false },
+    });
+    const other = viewFor(one, 0, true, 5000);
+    expect(other.lock).toMatchObject({ you: false, opponent: true });
+    expect(other.record).toBeUndefined();
+    expect(other.setup).toBeUndefined();
+    const both = act(one, ruleset, 0, lockMsg(first), 9000);
+    expect(both.record!.setups).toEqual({ light: first, dark: second });
+    expect(both.clock).toEqual({ light: 600_000, dark: 600_000, running: "light", since: 9000 });
+    expect(viewFor(both, 0, true, 9000).phase).toBe("playing");
+    expect(viewFor(both, 0, true, 9000).lock).toBeUndefined();
+  });
+
+  it("refuses a second lock, an illegal setup, another version, moves before the start, and locks in other rooms", () => {
+    const one = act(open(), ruleset, 0, lockMsg(first));
+    expect(code(() => act(one, ruleset, 0, lockMsg(first)))).toBe("over");
+    const missingKing = Object.fromEntries(Object.entries(first).filter(([sq]) => sq !== "h1"));
+    expect(code(() => act(open(), ruleset, 0, lockMsg(missingKing)))).toBe("setup");
+    expect(
+      code(() =>
+        act(open(), ruleset, 0, lockMsg(first, { ruleset: { ...ref, version: "9.9.9" } })),
+      ),
+    ).toBe("ruleset");
+    expect(code(() => act(open(), ruleset, 0, lockMsg(first, { protocol: 0 })))).toBe("protocol");
+    expect(code(() => act(one, ruleset, 1, { type: "resign" }))).toBe("notStarted");
+    expect(code(() => act(started(), ruleset, 0, lockMsg(first)))).toBe("over");
+  });
+
+  it("a player absent when the round starts loses on time; if both are absent, both lose", () => {
+    const one = act(open(), ruleset, 1, lockMsg(second));
+    expect(tick(one, ruleset, 600_999)).toBe(one);
+    const lost = tick(one, ruleset, 601_000);
+    expect(lost.end).toEqual({ status: "time", winner: "dark" });
+    expect(lost.record).toBeUndefined();
+    expect(viewFor(lost, 0, true, 601_000).phase).toBe("over");
+    expect(deadline(lost)).toBeUndefined();
+    expect(tick(open(), ruleset, 601_000).end).toEqual({ status: "noShow" });
+    // A late lock finds the round already lost.
+    expect(act(one, ruleset, 0, lockMsg(first), 700_000).end).toEqual({
+      status: "time",
+      winner: "dark",
+    });
+  });
+
+  it("has no rematch", () => {
+    let room = act(open(), ruleset, 0, lockMsg(first));
+    room = act(room, ruleset, 1, lockMsg(second));
+    room = act(room, ruleset, 0, { type: "resign" });
+    expect(code(() => act(room, ruleset, 1, { type: "rematch" }))).toBe("over");
+  });
+
+  it("scores each end for the event as [light, dark]", () => {
+    expect(eventScore({ status: "checkmate", winner: "light" })).toEqual([1, 0]);
+    expect(eventScore({ status: "time", winner: "dark" })).toEqual([0, 1]);
+    expect(eventScore({ status: "draw", reason: "agreement" })).toEqual([0.5, 0.5]);
+    expect(eventScore({ status: "noShow" })).toEqual([0, 0]);
   });
 });

@@ -25,7 +25,9 @@ export type End =
   /** The loser ran out of time (D19). */
   | { status: "time"; winner: Side }
   /** The loser stayed away past the grace time of an abandonment-only control (D19). */
-  | { status: "abandoned"; winner: Side };
+  | { status: "abandoned"; winner: Side }
+  /** Event game: neither player locked a setup in time, so both lose (D20). */
+  | { status: "noShow" };
 
 /** Over a room socket. There is no undo online. */
 export type ClientMessage =
@@ -33,7 +35,9 @@ export type ClientMessage =
   | { type: "resign" }
   | { type: "offerDraw" }
   | { type: "declineDraw" }
-  | { type: "rematch" };
+  | { type: "rematch" }
+  /** Event game: lock this game's setup (D13); sides are already set by pairing (D20). */
+  | { type: "lock"; lock: Lock };
 
 export type ErrorCode =
   | "bad"
@@ -52,14 +56,22 @@ export type ErrorCode =
   | "stale"
   | "illegal";
 
+/** Which event game a room plays (D20): rounds and boards count from 0. */
+export interface EventRef {
+  id: string;
+  round: number;
+  board: number;
+}
+
 /** One player's view of a room. */
 export interface RoomView {
   type: "state";
   room: string;
   ruleset: RulesetRef;
-  /** Your locked setup, written for light. */
-  setup: Pieces;
-  phase: "waiting" | "playing" | "over";
+  /** Your locked setup, written for light. Absent in an event game until you lock it. */
+  setup?: Pieces;
+  /** "locking": an event game waiting for both players to lock a setup. */
+  phase: "waiting" | "locking" | "playing" | "over";
   /** Game number from 0; sides alternate each rematch (D15). */
   game: number;
   /** Your side; set by the coin flip at the start. */
@@ -76,6 +88,10 @@ export interface RoomView {
   clock?: { light: number; dark: number; running?: Side };
   /** Abandonment-only control: who is away, and ms left before they lose. */
   away?: { who: "you" | "opponent"; left: number };
+  /** Event game (D20): the event and its board. There is no rematch. */
+  event?: EventRef;
+  /** Event game while locking: who has locked, and ms left before an absent player loses. */
+  lock?: { you: boolean; opponent: boolean; left: number };
 }
 
 export type ServerMessage =
@@ -137,6 +153,10 @@ export function parseClientMessage(text: string): ClientMessage | undefined {
     case "declineDraw":
     case "rematch":
       return { type: value.type };
+    case "lock": {
+      const lock = parseLock(value.lock);
+      return lock && { type: "lock", lock };
+    }
     default:
       return undefined;
   }

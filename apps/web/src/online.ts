@@ -139,5 +139,6 @@ export function endText(end: End, you: Side): string {
     return end.winner === you
       ? "Your opponent left the game. You win."
       : "You were away too long. You lose.";
+  if (end.status === "noShow") return "Neither player locked a setup in time. Both lose this game.";
   return `Checkmate. You ${end.winner === you ? "win" : "lose"}.`;
 }

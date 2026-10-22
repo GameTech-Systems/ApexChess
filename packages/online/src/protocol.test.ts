@@ -10,7 +10,14 @@ describe("parsing what clients send", () => {
     });
     for (const type of ["resign", "offerDraw", "declineDraw", "rematch"])
       expect(parseClientMessage(JSON.stringify({ type }))).toEqual({ type });
+    const lock = { protocol: PROTOCOL, ruleset: { id: "standard", version: "0.1.0" }, setup: {} };
+    expect(parseClientMessage(JSON.stringify({ type: "lock", lock, x: 1 }))).toEqual({
+      type: "lock",
+      lock,
+    });
     for (const bad of [
+      '{"type":"lock"}',
+      '{"type":"lock","lock":{"protocol":2}}',
       "not json",
       "null",
       '{"type":"undo"}',
