@@ -15,13 +15,12 @@
       { "name": "EVENTS", "class_name": "Tournament" },
     ],
   },
-  // Anonymous game archive (S19a). database_id is a placeholder until the owner runs
-  // `wrangler d1 create apexchess-archive` (docs/decisions/0004-hosting.md); local dev ignores it.
+  // Anonymous game archive (S19a), accounts, and ratings in D1 (docs/decisions/0004-hosting.md).
   "d1_databases": [
     {
       "binding": "ARCHIVE",
       "database_name": "apexchess-archive",
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "9b97be24-4b0e-4806-a253-bb20393c8021",
       "migrations_dir": "./apps/server/migrations",
     },
   ],
