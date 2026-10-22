@@ -12,6 +12,19 @@ describe("api routes", () => {
     expect(route("GET", "/api/rooms/ABC234/../x")).toBeUndefined();
     expect(route("GET", "/index.html")).toBeUndefined();
   });
+
+  it("maps the statistics paths, reading only well-formed ruleset ids and versions", () => {
+    expect(route("GET", "/api/stats")).toEqual({ kind: "stats" });
+    expect(route("GET", "/api/stats/standard/1.2.0")).toEqual({
+      kind: "snapshot",
+      ruleset: { id: "standard", version: "1.2.0" },
+    });
+    expect(route("POST", "/api/stats")).toBeUndefined();
+    expect(route("GET", "/api/stats/standard")).toBeUndefined();
+    expect(route("GET", "/api/stats/Standard/1.2.0")).toBeUndefined();
+    expect(route("GET", "/api/stats/standard/1.2")).toBeUndefined();
+    expect(route("GET", "/api/stats/standard/1.2.0/x")).toBeUndefined();
+  });
 });
 
 describe("room codes", () => {

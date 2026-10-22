@@ -68,7 +68,11 @@ export function statsSnapshot(
   const games: ScoredGame[] = [];
   for (const row of rows) {
     const score = lightScore(row);
-    if (row.format !== ARCHIVE_FORMAT || Number(row.plies) < options.minPlies || score === undefined)
+    if (
+      row.format !== ARCHIVE_FORMAT ||
+      Number(row.plies) < options.minPlies ||
+      score === undefined
+    )
       continue;
     games.push({ light: at(row.setup_light), dark: at(row.setup_dark), score });
   }

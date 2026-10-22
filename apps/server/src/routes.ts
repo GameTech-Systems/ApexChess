@@ -1,11 +1,13 @@
 /** Pure helpers for the Worker: api routes, room codes, and error statuses. */
-import type { ErrorCode } from "@apexchess/online";
+import type { ErrorCode, RulesetRef } from "@apexchess/online";
 
 export type Route =
   | { kind: "create" }
   | { kind: "join"; room: string }
   | { kind: "socket"; room: string }
-  | { kind: "match" };
+  | { kind: "match" }
+  | { kind: "stats" }
+  | { kind: "snapshot"; ruleset: RulesetRef };
 
 /** No 0, O, 1, I, or L, so a code read aloud or typed is hard to get wrong. */
 export const ROOM_ALPHABET = "23456789ABCDEFGHJKMNPQRSTUVWXYZ";
@@ -29,6 +31,13 @@ export function normalizeCode(text: string): string | undefined {
 export function route(method: string, pathname: string): Route | undefined {
   if (pathname === "/api/rooms") return method === "POST" ? { kind: "create" } : undefined;
   if (pathname === "/api/match") return method === "GET" ? { kind: "match" } : undefined;
+  if (pathname === "/api/stats") return method === "GET" ? { kind: "stats" } : undefined;
+  // Ruleset id and version as rules/schema/rulesets.schema.json allows them.
+  const s = /^\/api\/stats\/([a-z][a-z0-9-]*)\/(\d+\.\d+\.\d+)$/.exec(pathname);
+  if (s)
+    return method === "GET"
+      ? { kind: "snapshot", ruleset: { id: s[1]!, version: s[2]! } }
+      : undefined;
   const m = /^\/api\/rooms\/([^/]+)\/(join|socket)$/.exec(pathname);
   const room = m && normalizeCode(m[1]!);
   if (!room) return undefined;

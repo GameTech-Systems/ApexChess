@@ -68,7 +68,10 @@ describe("public setup statistics", () => {
 
   it("counts a setup and its mirror image as one family, and same-family games apart", () => {
     const m = mirrorSetup(ruleset.board, "light", d);
-    const s = snap([...times(15, () => row(d, m, lightMates)), ...times(15, () => row(m, d, draw))]);
+    const s = snap([
+      ...times(15, () => row(d, m, lightMates)),
+      ...times(15, () => row(m, d, draw)),
+    ]);
     expect(s.families).toEqual([]);
     expect(s.firstMove.sameSetup).toMatchObject({ n: 30, wins: 15, draws: 15 });
   });
