@@ -113,7 +113,7 @@ Plan only (the S19 default): design, privacy review, and sub-steps. Decisions: D
 ### S19a — Phase 6: Anonymous game archive · Opus 5.5 · high · `done`
 Finished online games go to D1 as anonymous records (ruleset id and version, setups, moves, result, end day). Privacy page updated in the same PR, with no archiving of earlier games. Adds rate limiting on `/api`. Decisions: D18 (default).
 
-### S19b — Phase 6: Public setup statistics · Opus 5.5 · high · `todo`
+### S19b — Phase 6: Public setup statistics · Opus 5.5 · high · `done`
 A daily aggregate of the archive using the 0003 measures (N ≥ 30, Bonferroni bar); a JSON snapshot per ruleset version and a Stats page. Decisions: D18 (default).
 
 ### S19c — Phase 6: Accounts · Opus 5.5 · high · `blocked`

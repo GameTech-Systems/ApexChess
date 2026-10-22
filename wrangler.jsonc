@@ -15,7 +15,7 @@
     ],
   },
   // Anonymous game archive (S19a). database_id is a placeholder until the owner runs
-  // `wrangler d1 create apexchess-archive` (docs/DEV-WORKFLOW.md); local dev ignores it.
+  // `wrangler d1 create apexchess-archive` (docs/decisions/0004-hosting.md); local dev ignores it.
   "d1_databases": [
     {
       "binding": "ARCHIVE",

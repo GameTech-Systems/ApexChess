@@ -1,26 +1,26 @@
 # Handoff
 
-Updated 2026-10-22 by S19a (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-10-22 by S19b (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Phase 6. Finished online games are archived to D1 table `games` (anonymous, end day only); `/api` is rate-limited (60 per address per minute). Privacy page updated. Verified on `wrangler dev`.
+- Phase 6. A daily cron (00:07 UTC) aggregates the D1 archive with the 0003 measures into table `stats`; `/api/stats` serves the snapshots and the web app has a Statistics page. Verified on `wrangler dev`.
 - Not live: S16 hosting steps plus the D1 database (see 0004) are still open.
 
 ## Next session
-**S19b — Public setup statistics** · Opus 5.5 · effort high
+**S20 — Phase 7: Tournaments and growth** · Opus 5.5 · effort high
 Set: `/model opus` · `/effort high`
-Why: Statistics measures and a scheduled job; correctness of published numbers matters.
-Start with: `/start-session S19b`
+Why: S19c and S19d wait on owner decisions; S20 has no plan yet, so plan it first.
+Start with: `/start-session S20`
 
 ## Decisions in effect for the next step
-- D18: aggregates only, N ≥ 30, finished games of at least 10 plies, daily, no dataset published (default, provisional, 0006).
-- D11: Cloudflare; archive in D1 (provisional). Rate limit 60/min per address (provisional).
+- D18: aggregates only, N ≥ 30, games of at least 10 plies, daily (default, provisional, 0006).
+- D11: Cloudflare, archive and stats in D1 (provisional).
 
 ## Open questions for the owner
-- D16 sign-in, D17 ratings, minimum age: S19c and S19d stay blocked. None blocking S19b.
-- Owner: `wrangler d1 create apexchess-archive`, put its id in `wrangler.jsonc` before the first deploy (deploy fails on the placeholder).
+- D16 sign-in, D17 ratings, minimum age: S19c and S19d stay blocked.
+- Before the first deploy: create D1 `apexchess-archive` (dashboard: Storage & Databases → D1) and send Claude its id.
 
 ## Notes for Claude
-- Archive rows: `archiveRecord`/`archiveRow` in `packages/online/src/archive.ts`; columns in `apps/server/migrations/0001_archive.sql` (a test keeps them in step). Filter plies ≥ 10 at aggregation, not at write.
-- `pnpm dev:server` applies local D1 migrations first. Query: `pnpm dlx wrangler@4 d1 execute apexchess-archive --local --command "SELECT ..."`.
-- Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`. `docs/` and `*.md` are ignored by prettier.
+- Measures: `aggregate` in `packages/sim/src/aggregate.ts`, used by the sim report and by `statsSnapshot` (`packages/online/src/stats.ts`). Job and reads: `apps/server/src/stats.ts`; tests run real SQL through `node:sqlite`.
+- Stats are rebuilt in full each day; if the archive outgrows Worker CPU limits, switch to per-day tallies (they add up).
+- Local cron: `wrangler dev --test-scheduled`, then `curl localhost:8787/cdn-cgi/handler/scheduled`. Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.
