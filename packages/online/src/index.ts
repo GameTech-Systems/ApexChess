@@ -4,3 +4,4 @@ export * from "./room";
 export * from "./lobby";
 export * from "./follow";
 export * from "./archive";
+export * from "./stats";
