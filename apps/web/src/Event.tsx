@@ -277,50 +277,50 @@ export function EventScreen({
           </>
         )}
 
-        {state !== "open" && (
-          <>
-            <h2>Round {round + 1}</h2>
-            <ol aria-label="Pairings">
-              {games[round]!.map((g, b) => (
-                <li key={b}>
-                  {g.dark === undefined
-                    ? `${players[g.light]}: bye`
-                    : `${players[g.light]} (light) – ${players[g.dark]} (dark): ${resultText(g.score)}`}
-                </li>
-              ))}
-            </ol>
-            <table aria-label="Standings">
-              <caption>{state === "over" ? "Final standings" : "Standings"}</caption>
-              <thead>
-                <tr>
-                  <th scope="col">Rank</th>
-                  <th scope="col">Player</th>
-                  <th scope="col">Points</th>
-                  <th scope="col">{tiebreak}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {view.standings.map((s) => (
-                  <tr key={s.player}>
-                    <td>{s.rank}</td>
-                    <th scope="row">
-                      {players[s.player]}
-                      {s.player === you ? " (you)" : ""}
-                    </th>
-                    <td>{pointsText(s.score)}</td>
-                    <td>{pointsText(s.tiebreak)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-            <Crosstable view={view} />
-          </>
-        )}
         <button type="button" onClick={onExit}>
           Back
         </button>
         {error && <p role="alert">{error}</p>}
       </section>
+      {state !== "open" && (
+        <section aria-label="Results" className="event">
+          <h2>Round {round + 1}</h2>
+          <ol aria-label="Pairings">
+            {games[round]!.map((g, b) => (
+              <li key={b}>
+                {g.dark === undefined
+                  ? `${players[g.light]}: bye`
+                  : `${players[g.light]} (light) – ${players[g.dark]} (dark): ${resultText(g.score)}`}
+              </li>
+            ))}
+          </ol>
+          <table aria-label="Standings">
+            <caption>{state === "over" ? "Final standings" : "Standings"}</caption>
+            <thead>
+              <tr>
+                <th scope="col">Rank</th>
+                <th scope="col">Player</th>
+                <th scope="col">Points</th>
+                <th scope="col">{tiebreak}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {view.standings.map((s) => (
+                <tr key={s.player}>
+                  <td>{s.rank}</td>
+                  <th scope="row">
+                    {players[s.player]}
+                    {s.player === you ? " (you)" : ""}
+                  </th>
+                  <td>{pointsText(s.score)}</td>
+                  <td>{pointsText(s.tiebreak)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          <Crosstable view={view} />
+        </section>
+      )}
     </main>
   );
 }
