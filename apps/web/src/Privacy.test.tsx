@@ -46,8 +46,17 @@ describe("Privacy screen", () => {
   it("describes ratings: what is kept, the room link until deletion, and no game history", () => {
     const html = renderToStaticMarkup(<Privacy onClose={() => undefined} />);
     expect(html).toContain("Ratings");
-    expect(html).toContain("rating, how sure it is, and how many rated games");
+    expect(html).toContain("rating, how sure it is, how many rated games");
     expect(html).toContain("account id with your seat until the room is deleted");
     expect(html).not.toContain("Games are not linked to accounts");
+  });
+
+  it("describes leaderboards: opt-in, what is shown, leaving at once, no indexing", () => {
+    const html = renderToStaticMarkup(<Privacy onClose={() => undefined} />);
+    expect(html).toContain("Leaderboards");
+    expect(html).toContain("only if you turn it on");
+    expect(html).toContain("your handle, rating, and number of rated games");
+    expect(html).toContain("at once");
+    expect(html).toContain("not indexed");
   });
 });

@@ -135,6 +135,7 @@ export function AccountScreen({
   onNewCodes,
   onSignOut,
   onDelete,
+  onListing,
 }: {
   view: AccountView;
   busy: boolean;
@@ -142,6 +143,7 @@ export function AccountScreen({
   onNewCodes: () => void;
   onSignOut: () => void;
   onDelete: () => void;
+  onListing: (listed: boolean) => void;
 }) {
   const [confirm, setConfirm] = useState("");
   return (
@@ -169,6 +171,21 @@ export function AccountScreen({
       <p>
         Quick-match games against another signed-in player count, one rating per rule set. Untimed
         games do not.
+      </p>
+      <h2>Leaderboards</h2>
+      <label>
+        <input
+          type="checkbox"
+          checked={view.listed}
+          disabled={busy}
+          onChange={(e) => onListing(e.target.checked)}
+        />{" "}
+        List me on the public leaderboards
+      </label>
+      <p>
+        Off unless you turn it on. Anyone can see the leaderboards: they show your handle, rating,
+        and number of rated games for each rule set where your rating has settled. Turn this off to
+        leave them at once.
       </p>
       <button type="button" onClick={onAddPasskey} disabled={busy}>
         Add a passkey on this device
@@ -322,6 +339,12 @@ export function Account({
                 await api.remove(session.token);
                 signedOut();
                 setMessage("Your account was deleted.");
+              })
+            }
+            onListing={(listed) =>
+              run(async () => {
+                await api.setListed(session.token, listed);
+                setView({ ...view, listed });
               })
             }
           />
