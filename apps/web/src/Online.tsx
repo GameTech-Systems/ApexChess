@@ -42,10 +42,12 @@ interface Props {
   presets: Preset[];
   store: KeyValueStore;
   onExit: () => void;
+  /** Leaving an event game (D20) goes back to its event page. */
+  onEvent?: (code: string) => void;
 }
 
 /** Online play: lock a setup (D13), find an opponent, play. A saved ticket rejoins the room after a reload. */
-export function Online({ ruleset, presets, store, onExit }: Props) {
+export function Online({ ruleset, presets, store, onExit, onEvent }: Props) {
   const [ticket, setTicket] = useState(() => loadTicket(store));
   const [setup, setSetup] = useState<Pieces>();
   const [notice, setNotice] = useState<string>();
@@ -55,10 +57,13 @@ export function Online({ ruleset, presets, store, onExit }: Props) {
       <OnlineRoom
         ticket={ticket}
         ruleset={ruleset}
-        onLeave={(why) => {
+        presets={presets}
+        store={store}
+        onLeave={(why, event) => {
           clearTicket(store);
           setTicket(undefined);
-          setNotice(why);
+          if (event && onEvent) onEvent(event);
+          else setNotice(why);
         }}
       />
     );
@@ -229,11 +234,16 @@ const FINAL: Record<number, string> = {
 function OnlineRoom({
   ticket,
   ruleset,
+  presets,
+  store,
   onLeave,
 }: {
   ticket: Ticket;
   ruleset: ResolvedRuleset;
-  onLeave: (why?: string) => void;
+  presets: Preset[];
+  store: KeyValueStore;
+  /** `event` is the event to go back to after an event game. */
+  onLeave: (why?: string, event?: string) => void;
 }) {
   const [view, setView] = useState<RoomView>();
   const [error, setError] = useState<string>();
@@ -288,8 +298,24 @@ function OnlineRoom({
       {error && <p role="alert">{error}</p>}
       {view?.phase === "waiting" ? (
         <RoomWaiting room={view.room} timeControl={view.timeControl} onLeave={() => onLeave()} />
+      ) : view?.phase === "locking" ? (
+        <EventLock
+          view={view}
+          ruleset={ruleset}
+          presets={presets}
+          store={store}
+          send={send}
+          onLeave={() => onLeave(undefined, view.event?.id)}
+        />
+      ) : view && !view.record ? (
+        <EventNoGame view={view} onLeave={() => onLeave(undefined, view.event?.id)} />
       ) : view ? (
-        <OnlineGame view={view} ruleset={ruleset} send={send} onLeave={() => onLeave()} />
+        <OnlineGame
+          view={view}
+          ruleset={ruleset}
+          send={send}
+          onLeave={() => onLeave(undefined, view.event?.id)}
+        />
       ) : null}
     </>
   );
@@ -329,7 +355,7 @@ function useCountdown(view: RoomView): (ms: number, running: boolean) => number 
     const at = Date.now();
     setReceived(at);
     setNow(at);
-    if (!view.clock?.running && !view.away) return;
+    if (!view.clock?.running && !view.away && !view.lock) return;
     const timer = setInterval(() => setNow(Date.now()), 100);
     return () => clearInterval(timer);
   }, [view]);
@@ -362,6 +388,73 @@ function Clocks({ view, side }: { view: RoomView; side: "light" | "dark" }) {
         </p>
       )}
     </div>
+  );
+}
+
+/** An event game before it starts (D20): lock this game's setup; sides are set by pairing. */
+export function EventLock({
+  view,
+  ruleset,
+  presets,
+  store,
+  send,
+  onLeave,
+}: {
+  view: RoomView;
+  ruleset: ResolvedRuleset;
+  presets: Preset[];
+  store: KeyValueStore;
+  send: (msg: ClientMessage) => void;
+  onLeave: () => void;
+}) {
+  const left = useCountdown(view);
+  const lock = view.lock!;
+  const round = (view.event?.round ?? 0) + 1;
+  const timer = <span role="timer">{clockText(left(lock.left, true))}</span>;
+  return (
+    <main>
+      {lock.you ? (
+        <section aria-label="Waiting for your opponent" className="controls">
+          <h1>Round {round}</h1>
+          <p>
+            Your setup is locked. Waiting for your opponent: they lose on time in {timer} unless
+            they lock theirs.
+          </p>
+        </section>
+      ) : (
+        <>
+          <SetupBuilder
+            ruleset={ruleset}
+            title={`Lock your setup for round ${round}. You play ${view.side}. Your opponent sees it only when the game starts.`}
+            presets={presets}
+            store={store}
+            onDone={(pieces) => send({ type: "lock", lock: lockFor(ruleset, pieces) })}
+          />
+          <p role="status">
+            Lock it within {timer} or you lose this game on time.
+            {lock.opponent ? " Your opponent has locked theirs." : ""}
+          </p>
+        </>
+      )}
+      <p>Time control: {tcLabel(view.timeControl)}.</p>
+      <button type="button" onClick={onLeave}>
+        Back to the event
+      </button>
+    </main>
+  );
+}
+
+/** An event game that ended before it started: someone did not lock a setup in time. */
+export function EventNoGame({ view, onLeave }: { view: RoomView; onLeave: () => void }) {
+  return (
+    <main>
+      <p role="status" className="status">
+        {view.end ? endText(view.end, view.side!) : ""}
+      </p>
+      <button type="button" onClick={onLeave}>
+        Back to the event
+      </button>
+    </main>
   );
 }
 
@@ -450,7 +543,10 @@ export function OnlineGame({
       </p>
       <Clocks view={view} side={side} />
       <p className="seats">
-        You play {side}. Room {view.room}, game {view.game + 1}.
+        You play {side}.{" "}
+        {view.event
+          ? `Event ${view.event.id}, round ${view.event.round + 1}.`
+          : `Room ${view.room}, game ${view.game + 1}.`}
       </p>
       {pending && (
         <div role="group" aria-label="Promote to" className="promo">
@@ -473,16 +569,18 @@ export function OnlineGame({
       )}
       <div className="controls">
         {over ? (
-          <>
-            <button
-              type="button"
-              onClick={() => send({ type: "rematch" })}
-              disabled={view.rematch.you}
-            >
-              {view.rematch.you ? "Rematch asked" : "Rematch (you switch sides)"}
-            </button>
-            {view.rematch.opponent && !view.rematch.you && <p>Your opponent wants a rematch.</p>}
-          </>
+          !view.event && (
+            <>
+              <button
+                type="button"
+                onClick={() => send({ type: "rematch" })}
+                disabled={view.rematch.you}
+              >
+                {view.rematch.you ? "Rematch asked" : "Rematch (you switch sides)"}
+              </button>
+              {view.rematch.opponent && !view.rematch.you && <p>Your opponent wants a rematch.</p>}
+            </>
+          )
         ) : (
           <>
             {confirmResign ? (
@@ -526,7 +624,7 @@ export function OnlineGame({
           {copied ? "Link copied" : "Copy game link"}
         </button>
         <button type="button" onClick={onLeave}>
-          Leave room
+          {view.event ? "Back to the event" : "Leave room"}
         </button>
         <label>
           <input

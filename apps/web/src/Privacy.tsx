@@ -18,8 +18,8 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         opponent can see them. The server keeps each room (both setups, the moves, and how the game
         ended) until 7 days after its last move, then deletes it. In a timed game it also keeps each
         player's time left and when the current turn began, so it can run the clock; these go with
-        the room. No names or accounts are involved. This browser keeps a random room ticket so you
-        can rejoin after a reload; leaving the room removes it.
+        the room. No accounts are involved, and no names outside events (below). This browser keeps
+        a random room ticket so you can rejoin after a reload; leaving the room removes it.
       </p>
       <h2>Game archive</h2>
       <p>
@@ -29,6 +29,16 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         of day, so it cannot be linked back to you, and it is kept after the room is deleted.
         Statistics are published only as totals, never as single games. Games that ended before this
         notice was published were not archived.
+      </p>
+      <h2>Tournaments</h2>
+      <p>
+        When you create or join an event, the server keeps the name you give for that event, the
+        pairings, and the results. Pick a nickname, not your real name: everyone with the event link
+        can see it. The event, with its names, is deleted 7 days after its last game. Event pages
+        open only for people who have the link; they are not listed or indexed by search engines.
+        This browser keeps a random event ticket for each event you join, so you can come back to
+        it. Event games go to the game archive like any other online game, without names or the
+        event.
       </p>
       <h2>Share links</h2>
       <p>

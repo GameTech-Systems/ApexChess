@@ -16,8 +16,10 @@ import {
   type Side,
 } from "@apexchess/engine";
 import { Board } from "./Board";
+import { Events } from "./Event";
+import { parseEventHash } from "./event";
 import { Online } from "./Online";
-import { loadTicket } from "./online";
+import { loadTicket, saveTicket } from "./online";
 import type { KeyValueStore } from "./savedSetups";
 import { Privacy } from "./Privacy";
 import { Replay } from "./Replay";
@@ -81,6 +83,11 @@ export function App({
   const [shared, setShared] = useState(() =>
     parseShare(ruleset, typeof window === "undefined" ? "" : window.location.hash),
   );
+  // An event link (D20) opens its event page; `{}` is the tournaments start screen.
+  const [events, setEvents] = useState<{ code?: string } | undefined>(() => {
+    const code = parseEventHash(typeof window === "undefined" ? "" : window.location.hash);
+    return code ? { code } : undefined;
+  });
   const closeShared = () => {
     history.replaceState(null, "", window.location.pathname + window.location.search);
     setShared(undefined);
@@ -103,6 +110,22 @@ export function App({
           onDone={closeShared}
         />
       </main>
+    );
+  if (events)
+    return (
+      <Events
+        initial={events.code}
+        ruleset={ruleset}
+        store={storage}
+        onPlay={(ticket) => {
+          // The game takes over the page; a reload rejoins it from the saved ticket.
+          history.replaceState(null, "", window.location.pathname + window.location.search);
+          saveTicket(storage, ticket);
+          setEvents(undefined);
+          setMode("online");
+        }}
+        onExit={() => setEvents(undefined)}
+      />
     );
   if (showRules)
     return (
@@ -145,6 +168,9 @@ export function App({
               ))}
             </select>
           </label>
+          <button type="button" onClick={() => setEvents({})}>
+            Tournaments
+          </button>
           <button type="button" onClick={() => setShowRules(true)}>
             Rules
           </button>
@@ -165,6 +191,10 @@ export function App({
         presets={presets}
         store={storage}
         onExit={() => setMode(undefined)}
+        onEvent={(code) => {
+          setMode(undefined);
+          setEvents({ code });
+        }}
       />
     );
   return mode === "computer" ? (

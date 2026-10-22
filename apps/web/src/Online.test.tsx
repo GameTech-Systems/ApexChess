@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { catalog, mirrorSetup, newRecord, resolveRuleset } from "@apexchess/engine";
 import type { RoomView } from "@apexchess/online";
 import { App } from "./App";
-import { OnlineGame, RoomWaiting } from "./Online";
+import { EventLock, EventNoGame, OnlineGame, RoomWaiting } from "./Online";
 
 const ruleset = resolveRuleset(catalog, "standard");
 const setup = catalog.setups[0]!.pieces;
@@ -88,6 +88,69 @@ describe("online play screens", () => {
     expect(html).toContain("Rematch");
     expect(html).toContain("wants a rematch");
     expect(html).not.toContain("Resign");
+  });
+});
+
+describe("event games (D20)", () => {
+  const event = { id: "EVT234", round: 1, board: 0 };
+  const locking: RoomView = {
+    ...view,
+    phase: "locking",
+    setup: undefined,
+    record: undefined,
+    event,
+    lock: { you: false, opponent: true, left: 300_000 },
+  };
+  const memory = { getItem: () => null, setItem: () => undefined };
+
+  it("asks for this game's setup, naming your side and the time left", () => {
+    const html = renderToStaticMarkup(
+      <EventLock
+        view={locking}
+        ruleset={ruleset}
+        presets={[]}
+        store={memory}
+        send={() => undefined}
+        onLeave={() => undefined}
+      />,
+    );
+    expect(html).toContain("Lock your setup for round 2");
+    expect(html).toContain("You play dark");
+    expect(html).toContain("5:00");
+    expect(html).toContain("Your opponent has locked");
+  });
+
+  it("waits once your setup is locked", () => {
+    const html = renderToStaticMarkup(
+      <EventLock
+        view={{ ...locking, setup, lock: { you: true, opponent: false, left: 9000 } }}
+        ruleset={ruleset}
+        presets={[]}
+        store={memory}
+        send={() => undefined}
+        onLeave={() => undefined}
+      />,
+    );
+    expect(html).toContain("Your setup is locked");
+    expect(html).toContain("Back to the event");
+  });
+
+  it("has no rematch, and leads back to the event", () => {
+    const html = game({ phase: "over", end: { status: "resigned", winner: "dark" }, event });
+    expect(html).not.toContain("Rematch");
+    expect(html).toContain("Back to the event");
+    expect(html).toContain("round 2");
+  });
+
+  it("explains a game lost before it started", () => {
+    const html = renderToStaticMarkup(
+      <EventNoGame
+        view={{ ...locking, phase: "over", lock: undefined, end: { status: "noShow" } }}
+        onLeave={() => undefined}
+      />,
+    );
+    expect(html).toContain("Neither player locked a setup in time");
+    expect(html).toContain("Back to the event");
   });
 });
 
