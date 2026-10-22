@@ -65,6 +65,8 @@ Check and checkmate work as in standard chess. Checkmate wins; a player may also
 
 Online games can use a time control *(D19)*: a clock with an increment (Fischer), a fixed time per move, untimed with a leaving rule (a player who stays away for the grace time while the opponent is connected loses), or untimed. A player who runs out of time loses, unless the opponent could not checkmate under the insufficient-material cases, which is a draw. The presets are data in `rules/timeControls.json`.
 
+Events *(D20, provisional)*: 4 to 32 players; a round robin up to 8, otherwise Swiss with ⌈log₂ n⌉ + 1 rounds and no repeat pairings. Pairing sets the sides (a coin settles round 1) and each game locks a new setup. A win scores 1, a draw ½, and a bye 1 (at most once per player). A player who has not locked a setup when the time control's starting time has passed loses on time; if neither has, both lose. Ties are broken by Sonneborn-Berger (round robin) or Buchholz (Swiss). Events need a clock: untimed and leaving-rule controls are not offered.
+
 ## 7. Opening lines
 
 With custom setups, nine lines between the two front chords can be open at the start (for example e2 to e8 along the file, and f3 to c6 along the central ray), so the player who moves first may be able to capture on move 1. This is allowed by default; a ruleset may forbid captures on each side's first move (parameter `firstMoveCaptures`, D7). The default setup has no such capture.

@@ -26,6 +26,16 @@ Tournaments need clocks: without them a round cannot end when a player walks awa
 | D19 | Time controls | none; Fischer increment; fixed time per move; abandonment rule only | **Decided by the owner, 2026-10-22:** the proposal below, with every option offered as a setting and a default consistent with common online chess. Claude's choices (provisional): the usual online grid 1+0, 2+1, 3+0, 3+2, 5+0, 5+3, 10+0, 10+5, 15+10, 30+0, 30+20, default 10+0; per move 30 s, 1 min, 1 day, 3 days; abandonment grace 5 minutes, counted only while the opponent is connected. Proposal: Fischer presets 3+2, 5+3, 10+5, 15+10 plus untimed. Quick match pairs only within the same preset. The clock starts with the game and keeps running while a player is disconnected. Running out of time loses, except that it is a draw when the opponent could not checkmate under D8's insufficient-material test. |
 | D20 | Tournaments | none; round robin; Swiss; arena. Setups: one per event, or a new one each round | Private events by link, 4 to 32 players, one ruleset id and version and one D19 preset per event. Round robin up to 8 players, otherwise Swiss with ⌈log₂ n⌉ + 1 rounds (no repeat pairings, side balance). A player who cannot be paired gets a 1-point bye, at most once. Tiebreaks: Sonneborn-Berger (round robin), Buchholz (Swiss). Each game locks a new setup under D13, but pairing decides sides; the coin flip is used only to settle round 1. A player absent when the round starts loses on time. |
 
+## S20c implementation (provisional choices)
+
+Built on the D20 default. Claude's choices, open to the owner:
+- **Clocked controls only.** Untimed and abandonment-only controls are not offered for events: a round could not end if both players left (see "Order of work").
+- **Absent at the start.** Each game opens when its round is paired. A player who has not locked a setup by the time control's starting time (for example 10 minutes at 10+0, 1 day at 1 day per move) loses on time; if neither has, both score 0.
+- **Swiss details.** Ranked by score, then joining order; paired top down with no repeat pairings and no player more than two games off even sides; bye to the lowest-ranked player without one. A bye adds nothing to Buchholz or Sonneborn-Berger.
+- **Round robin** uses Berger tables (circle method); with an odd number, each player gets one bye.
+- **Names.** Until the S19c handle policy: 2 to 20 letters, digits, spaces, and - _ . ', a short reserved list, unique within the event. There is no report path yet; it comes with S19c.
+- **Host.** The creator is the first player and the only one who can start; nobody joins after the start. No withdrawals: an absent player loses each game on time.
+
 ## Not decided here
 
 - **Rated events** wait on S19d. Until then, event games are unrated.
