@@ -12,4 +12,13 @@ describe("Privacy screen", () => {
     expect(html).toContain("Online games");
     expect(html).toContain("7 days");
   });
+
+  it("describes the anonymous game archive and rate limiting", () => {
+    const html = renderToStaticMarkup(<Privacy onClose={() => undefined} />);
+    expect(html).toContain("Game archive");
+    expect(html).toContain("the day it ended");
+    expect(html).toContain("no room code, ticket, IP address, or time of day");
+    expect(html).toContain("Games that ended before");
+    expect(html).toContain("not stored");
+  });
 });

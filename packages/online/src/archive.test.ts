@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { catalog, legalMoves, mirrorSetup, moveText, replay, resolveRuleset } from "@apexchess/engine";
+import {
+  catalog,
+  legalMoves,
+  mirrorSetup,
+  moveText,
+  replay,
+  resolveRuleset,
+} from "@apexchess/engine";
 import { ARCHIVE_FORMAT, archiveRecord, archiveRow } from "./archive";
 import { PROTOCOL, type Lock } from "./protocol";
 import { act, createRoom, joinRoom, sideOf, type RoomData } from "./room";
@@ -13,7 +20,13 @@ const lock = (setup: Lock["setup"]): Lock => ({
   setup,
 });
 const started = (): RoomData =>
-  joinRoom(createRoom("ABC234", ruleset, lock(first), "seat-zero-token"), ruleset, lock(second), "seat-one-token", () => 0.9);
+  joinRoom(
+    createRoom("ABC234", ruleset, lock(first), "seat-zero-token"),
+    ruleset,
+    lock(second),
+    "seat-one-token",
+    () => 0.9,
+  );
 const toMove = (room: RoomData) =>
   sideOf(room, 0) === replay(ruleset, room.record!).position.turn ? 0 : 1;
 function play(room: RoomData, plies: number): RoomData {
