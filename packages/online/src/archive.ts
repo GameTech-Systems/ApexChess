@@ -55,7 +55,7 @@ export function archiveRow(rec: ArchiveRecord): ArchiveRow {
     moves: JSON.stringify(rec.moves),
     plies: rec.moves.length,
     status: rec.end.status,
-    winner: rec.end.status === "draw" ? null : rec.end.winner,
+    winner: "winner" in rec.end ? rec.end.winner : null,
     reason: rec.end.status === "draw" ? rec.end.reason : null,
     end_day: rec.endDay,
     time_control: rec.timeControl,

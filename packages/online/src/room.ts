@@ -1,7 +1,8 @@
 /**
  * One online room as plain data, changed only by these functions. Setups are locked on entry and
  * stay hidden until both players are in (D13); then the server flips the coin. The ruleset id and
- * version and the time control (D19) are locked for the room's games. Time comes in as `now` (ms).
+ * version and the time control (D19) are locked for the room's games. An event game (D20) seats both
+ * players at once with sides set by pairing; each then locks a setup. Time comes in as `now` (ms).
  */
 import {
   checkSetup,
@@ -31,6 +32,7 @@ import {
   type ClientMessage,
   type End,
   type ErrorCode,
+  type EventRef,
   type Lock,
   type RoomView,
   type RulesetRef,
@@ -41,8 +43,8 @@ export type Seat = 0 | 1;
 export interface SeatData {
   /** Secret that lets the player back in after a dropped connection. */
   token: string;
-  /** Locked setup, written for light. */
-  setup: Pieces;
+  /** Locked setup, written for light. Absent in an event game until the player locks it. */
+  setup?: Pieces;
 }
 
 export interface RoomData {
@@ -62,6 +64,8 @@ export interface RoomData {
   clock?: ClockData;
   /** Abandonment-only control: the seat that left while the opponent was connected, and when. */
   away?: { seat: Seat; since: number };
+  /** Event game (D20): seat 0 plays light; a player without a locked setup at `lockBy` loses on time. */
+  event?: EventRef & { lockBy: number };
 }
 
 export class RoomError extends Error {
@@ -76,7 +80,12 @@ export class RoomError extends Error {
 const sameRuleset = (ruleset: ResolvedRuleset, ref: RulesetRef) =>
   ruleset.id === ref.id && ruleset.version === ref.version;
 
-function checkLock(ruleset: ResolvedRuleset, lock: Lock): void {
+/** A lock's protocol, ruleset, and setup; the setup must be legal for each of `sides`. */
+function checkLock(
+  ruleset: ResolvedRuleset,
+  lock: Lock,
+  sides: readonly Side[] = ["light", "dark"],
+): void {
   if (lock.protocol !== PROTOCOL)
     throw new RoomError("protocol", "This page is out of date. Reload to play online.");
   if (!sameRuleset(ruleset, lock.ruleset))
@@ -84,8 +93,8 @@ function checkLock(ruleset: ResolvedRuleset, lock: Lock): void {
       "ruleset",
       `This game uses ${ruleset.id}@${ruleset.version}, not ${lock.ruleset.id}@${lock.ruleset.version}. Reload to update.`,
     );
-  // The coin has not been flipped yet, so the setup must be legal for either side.
-  for (const side of ["light", "dark"] as const) {
+  // Outside events the coin has not been flipped yet, so the setup must be legal for either side.
+  for (const side of sides) {
     const errors = checkSetup(ruleset, side, lock.setup);
     if (errors.length) throw new RoomError("setup", `Setup not allowed: ${errors[0]!.message}`);
   }
@@ -142,6 +151,42 @@ export function joinRoom(
   );
 }
 
+/**
+ * An event game (D20): `tokens` are light's then dark's. Each player locks a setup; one still missing
+ * when the time control's starting time has passed loses on time (D20 "absent when the round starts";
+ * the window is Claude's choice, provisional). Controls without a clock are refused: a round could
+ * never end (0007).
+ */
+export function createEventRoom(
+  id: string,
+  ruleset: ResolvedRuleset,
+  timeControlId: string,
+  tokens: [string, string],
+  event: EventRef,
+  now: number,
+): RoomData {
+  const tc = timeControl(timeControlId);
+  const window = tc && startClock(tc, "light", now)?.light;
+  if (!window) throw new RoomError("timeControl", "Events need a time control with a clock.");
+  return {
+    id,
+    ruleset: { id: ruleset.id, version: ruleset.version },
+    seats: tokens.map((token) => ({ token })),
+    firstLight: 0,
+    game: 0,
+    rematch: [],
+    timeControl: timeControlId,
+    event: { ...event, lockBy: now + window },
+  };
+}
+
+/** Points for [light, dark] in an event (D20): a win 1, a draw ½; a no-show loses for both. */
+export function eventScore(end: End): [number, number] {
+  if (end.status === "noShow") return [0, 0];
+  if (end.status === "draw") return [0.5, 0.5];
+  return end.winner === "light" ? [1, 0] : [0, 1];
+}
+
 export function seatOf(room: RoomData, token: string): Seat | undefined {
   const at = room.seats.findIndex((s) => s.token === token);
   return at === 0 || at === 1 ? at : undefined;
@@ -164,7 +209,7 @@ function startGame(room: RoomData, ruleset: ResolvedRuleset, now: number): RoomD
     ...room,
     record: {
       ruleset: { ...room.ruleset },
-      setups: { light: room.seats[light]!.setup, dark: room.seats[other(light)]!.setup },
+      setups: { light: room.seats[light]!.setup!, dark: room.seats[other(light)]!.setup! },
       moves: [],
     },
     end: undefined,
@@ -177,7 +222,8 @@ function startGame(room: RoomData, ruleset: ResolvedRuleset, now: number): RoomD
 
 /** When the game ends unless someone acts: the running flag, or an absent player's grace time. */
 export function deadline(room: RoomData): number | undefined {
-  if (!room.record || room.end) return undefined;
+  if (room.end) return undefined;
+  if (!room.record) return room.event?.lockBy;
   const tc = controlOf(room);
   if (room.clock) return clockDeadline(room.clock);
   if (tc.kind === "abandonment" && room.away) return room.away.since + tc.graceSeconds * 1000;
@@ -188,6 +234,13 @@ export function deadline(room: RoomData): number | undefined {
 export function tick(room: RoomData, ruleset: ResolvedRuleset, now: number): RoomData {
   const due = deadline(room);
   if (due === undefined || now < due) return room;
+  if (!room.record) {
+    // An event game nobody started: whoever locked wins on time.
+    const locked = room.seats.findIndex((s) => s.setup);
+    const end: End =
+      locked < 0 ? { status: "noShow" } : { status: "time", winner: sideOf(room, locked as Seat)! };
+    return { ...room, end };
+  }
   const pos = follow(ruleset, room.record!).position;
   const end = room.clock
     ? timeoutEnd(ruleset, pos, room.clock.running, "time")
@@ -226,12 +279,14 @@ export function act(
   const timed = tick(room, ruleset, now);
   if (timed !== room && msg.type !== "rematch") return timed;
   room = timed;
+  if (msg.type === "lock") return lockSeat(room, ruleset, seat, msg.lock, now);
   const record = room.record;
   const side = sideOf(room, seat);
   if (!record || !side) throw new RoomError("notStarted", "The game has not started.");
 
   if (msg.type === "rematch") {
     if (!room.end) throw new RoomError("notOver", "The game is still on.");
+    if (room.event) throw new RoomError("over", "Event games have no rematch.");
     const rematch = room.rematch.includes(seat) ? room.rematch : [...room.rematch, seat];
     return rematch.length < 2
       ? { ...room, rematch }
@@ -264,6 +319,22 @@ export function act(
   }
 }
 
+/** An event game: the seat locks its setup for its own side; the game starts once both have. */
+function lockSeat(
+  room: RoomData,
+  ruleset: ResolvedRuleset,
+  seat: Seat,
+  lock: Lock,
+  now: number,
+): RoomData {
+  if (!room.event || room.record || room.end || room.seats[seat]!.setup)
+    throw new RoomError("over", "Your setup for this game is already locked.");
+  checkLock(ruleset, lock, [sideOf(room, seat)!]);
+  const seats = room.seats.map((s, i) => (i === seat ? { ...s, setup: lock.setup } : s));
+  const next = { ...room, seats };
+  return seats.every((s) => s.setup) ? startGame(next, ruleset, now) : next;
+}
+
 /** What one player may see at `now`. While waiting there is no record, so nothing of the opponent's setup. */
 export function viewFor(
   room: RoomData,
@@ -274,12 +345,19 @@ export function viewFor(
   const side = sideOf(room, seat);
   const { clock, away } = room;
   const grace = controlOf(room).kind === "abandonment" ? deadline(room) : undefined;
+  const { setup } = room.seats[seat]!;
+  const event = room.event && {
+    id: room.event.id,
+    round: room.event.round,
+    board: room.event.board,
+  };
+  const locking = room.event && !room.record && !room.end;
   return {
     type: "state",
     room: room.id,
     ruleset: room.ruleset,
-    setup: room.seats[seat]!.setup,
-    phase: !room.record ? "waiting" : room.end ? "over" : "playing",
+    ...(setup && { setup }),
+    phase: room.end ? "over" : !room.record ? (room.event ? "locking" : "waiting") : "playing",
     game: room.game,
     ...(side && { side }),
     ...(room.record && { record: room.record }),
@@ -297,5 +375,13 @@ export function viewFor(
       grace !== undefined && {
         away: { who: away.seat === seat ? "you" : "opponent", left: Math.max(0, grace - now) },
       }),
+    ...(event && { event }),
+    ...(locking && {
+      lock: {
+        you: !!setup,
+        opponent: !!room.seats[other(seat)]!.setup,
+        left: Math.max(0, room.event!.lockBy - now),
+      },
+    }),
   };
 }

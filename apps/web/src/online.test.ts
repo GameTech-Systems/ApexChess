@@ -164,5 +164,8 @@ describe("how a game ended, for each player", () => {
     expect(endText({ status: "draw", reason: "abandoned" }, "dark")).toBe(
       "Draw: a player left, but the other side could not checkmate.",
     );
+    expect(endText({ status: "noShow" }, "dark")).toBe(
+      "Neither player locked a setup in time. Both lose this game.",
+    );
   });
 });
