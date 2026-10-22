@@ -1,6 +1,6 @@
 # 0007: Tournaments and growth
 
-Date: 2026-10-22 · Status: proposed (S20, plan only). D19 and D20 are open; their defaults below are provisional until the owner decides.
+Date: 2026-10-22 · Status: proposed (S20, plan only). D19 decided 2026-10-22 (below); D20 is open and its default stays provisional.
 
 ## Order of work
 
@@ -23,7 +23,7 @@ Tournaments need clocks: without them a round cannot end when a player walks awa
 
 | ID | Question | Options | Default (provisional) |
 |---|---|---|---|
-| D19 | Time controls | none; Fischer increment; fixed time per move; abandonment rule only | Fischer increment, presets 3+2, 5+3, 10+5, 15+10 (minutes + seconds) plus untimed. Quick match pairs only within the same preset. The clock keeps running while a player is disconnected. Running out of time loses, except that it is a draw when the opponent could not checkmate under D8's insufficient-material test. |
+| D19 | Time controls | none; Fischer increment; fixed time per move; abandonment rule only | **Decided by the owner, 2026-10-22:** the proposal below, with every option offered as a setting and a default consistent with common online chess. Claude's choices (provisional): the usual online grid 1+0, 2+1, 3+0, 3+2, 5+0, 5+3, 10+0, 10+5, 15+10, 30+0, 30+20, default 10+0; per move 30 s, 1 min, 1 day, 3 days; abandonment grace 5 minutes, counted only while the opponent is connected. Proposal: Fischer presets 3+2, 5+3, 10+5, 15+10 plus untimed. Quick match pairs only within the same preset. The clock starts with the game and keeps running while a player is disconnected. Running out of time loses, except that it is a draw when the opponent could not checkmate under D8's insufficient-material test. |
 | D20 | Tournaments | none; round robin; Swiss; arena. Setups: one per event, or a new one each round | Private events by link, 4 to 32 players, one ruleset id and version and one D19 preset per event. Round robin up to 8 players, otherwise Swiss with ⌈log₂ n⌉ + 1 rounds (no repeat pairings, side balance). A player who cannot be paired gets a 1-point bye, at most once. Tiebreaks: Sonneborn-Berger (round robin), Buchholz (Swiss). Each game locks a new setup under D13, but pairing decides sides; the coin flip is used only to settle round 1. A player absent when the round starts loses on time. |
 
 ## Not decided here

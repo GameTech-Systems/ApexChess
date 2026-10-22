@@ -8,5 +8,5 @@ Date: 2026-10-22 · Status: D13 decided; server details provisional (S18, D11 de
 - **Moves:** the server checks turn, ply, and legality with the engine. Draws by agreement (D8) and resignation end the game; there is no undo online. Rematch needs both players and the sides switch (D15).
 - **Reconnection:** each seat has a secret token kept in the browser (`apexchess.online.v1`). A reconnect gets the whole game; the client retries with backoff (0.5 s doubling, 15 s cap). A newer socket for the same seat replaces the older one.
 - **Retention (provisional):** a room is deleted 7 days after its last change (Durable Object alarm). Stated on the Privacy page.
-- **Disconnects (provisional, owner question):** a game with an absent player just waits; there is no clock and no forfeit for leaving. Time controls or abandonment rules need an owner decision.
+- **Disconnects:** superseded by D19 (0007, S20a): the room's time control decides. Untimed games wait; timed clocks keep running; the abandonment-only control forfeits a player away for its grace time.
 - **Local dev:** `pnpm dev:server` (builds the app, runs `wrangler dev` on 8787); `pnpm dev` proxies `/api` to it.

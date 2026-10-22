@@ -161,7 +161,7 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D16 | Sign-in | Open; default: passkey + handle, no email (0006) | S19c |
 | D17 | Ratings | Open; default: Glicko-2, one pool per ruleset id, signed-in quick match only (0006) | S19d |
 | D18 | Public setup statistics | Open; default (provisional): aggregates only, N ≥ 30, from anonymous archived games (0006) | S19a |
-| D19 | Time controls | Open; default (provisional): Fischer presets 3+2, 5+3, 10+5, 15+10 plus untimed; a player who runs out of time loses unless the opponent has insufficient material (0007) | S20a |
+| D19 | Time controls | Decided 2026-10-22: all options offered (untimed, Fischer, fixed time per move, abandonment only), default 10+0; presets in `rules/timeControls.json` (Claude's choice, provisional); running out of time loses unless the opponent has insufficient material (0007) | S20a |
 | D20 | Tournaments | Open; default (provisional): private events by link; round robin up to 8 players, Swiss above; sides set by pairing (0007) | S20c |
 
 ## Ledger sync format

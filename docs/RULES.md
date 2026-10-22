@@ -63,6 +63,8 @@ Dark pawns work the same way in the opposite direction: a dark pawn on a4 moves 
 
 Check and checkmate work as in standard chess. Checkmate wins; a player may also resign. Stalemate, threefold repetition, the fifty-move rule, insufficient material, and agreement are draws *(D8)*.
 
+Online games can use a time control *(D19)*: a clock with an increment (Fischer), a fixed time per move, untimed with a leaving rule (a player who stays away for the grace time while the opponent is connected loses), or untimed. A player who runs out of time loses, unless the opponent could not checkmate under the insufficient-material cases, which is a draw. The presets are data in `rules/timeControls.json`.
+
 ## 7. Opening lines
 
 With custom setups, nine lines between the two front chords can be open at the start (for example e2 to e8 along the file, and f3 to c6 along the central ray), so the player who moves first may be able to capture on move 1. This is allowed by default; a ruleset may forbid captures on each side's first move (parameter `firstMoveCaptures`, D7). The default setup has no such capture.
