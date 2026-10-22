@@ -7,7 +7,7 @@ describe("Privacy screen", () => {
     const html = renderToStaticMarkup(<Privacy onClose={() => undefined} />);
     expect(html).toContain("Privacy");
     expect(html).toContain("this browser");
-    expect(html).toContain("No accounts");
+    expect(html).toContain("Accounts are optional");
     expect(html).toContain("Close");
     expect(html).toContain("Online games");
     expect(html).toContain("7 days");
@@ -31,5 +31,15 @@ describe("Privacy screen", () => {
     expect(html).toContain("7 days after its last game");
     expect(html).toContain("not listed or indexed");
     expect(html).toContain("without names or the event");
+  });
+
+  it("describes accounts: what is kept, no email, the device token, deletion, and reports", () => {
+    const html = renderToStaticMarkup(<Privacy onClose={() => undefined} />);
+    expect(html).toContain("Accounts");
+    expect(html).toContain("No email");
+    expect(html).toContain("public key");
+    expect(html).toContain("deletes your handle, passkeys, recovery codes, and sessions");
+    expect(html).toContain("Handle reports");
+    expect(html).toContain("not who sent it");
   });
 });

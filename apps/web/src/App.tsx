@@ -15,6 +15,7 @@ import {
   type Move,
   type Side,
 } from "@apexchess/engine";
+import { Account } from "./Account";
 import { Board } from "./Board";
 import { Events } from "./Event";
 import { parseEventHash } from "./event";
@@ -26,6 +27,7 @@ import { Replay } from "./Replay";
 import { Rules } from "./Rules";
 import { copyText, gameLink, parseShare } from "./share";
 import { Stats } from "./Stats";
+import { Terms } from "./Terms";
 import { piecesInDanger, playSound, undoMoves } from "./playAids";
 import { SetupBuilder } from "./SetupBuilder";
 import { DEFAULT_LEVEL, computerMove, levels, type Level } from "./computer";
@@ -79,6 +81,8 @@ export function App({
   const [showRules, setShowRules] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
   const [showStats, setShowStats] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
+  const [showAccount, setShowAccount] = useState(false);
   // A share link opens straight to its setup or replay; the fragment never reaches the server.
   const [shared, setShared] = useState(() =>
     parseShare(ruleset, typeof window === "undefined" ? "" : window.location.hash),
@@ -145,6 +149,20 @@ export function App({
         <Stats onClose={() => setShowStats(false)} current={current} />
       </main>
     );
+  if (showTerms)
+    return (
+      <main>
+        <Terms onClose={() => setShowTerms(false)} />
+      </main>
+    );
+  if (showAccount)
+    return (
+      <Account
+        store={storage}
+        onClose={() => setShowAccount(false)}
+        onTerms={() => setShowTerms(true)}
+      />
+    );
   if (!mode) {
     return (
       <main>
@@ -177,8 +195,14 @@ export function App({
           <button type="button" onClick={() => setShowStats(true)}>
             Statistics
           </button>
+          <button type="button" onClick={() => setShowAccount(true)}>
+            Account
+          </button>
           <button type="button" onClick={() => setShowPrivacy(true)}>
             Privacy
+          </button>
+          <button type="button" onClick={() => setShowTerms(true)}>
+            Terms
           </button>
         </section>
       </main>

@@ -24,6 +24,10 @@ Third-party dependencies keep their own licenses.
 
   - React and React DOM (MIT): web app runtime.
   - @cloudflare/workers-types (MIT OR Apache-2.0): server type definitions, build time only.
+  - @simplewebauthn/server and @simplewebauthn/browser (MIT): passkey sign-in (S19c). The server
+    package brings @peculiar/asn1-* and @peculiar/x509, @hexagon/base64, @levischuck/tiny-cbor,
+    pvtsutils, pvutils, tsyringe (MIT), asn1js (BSD-3-Clause), reflect-metadata (Apache-2.0),
+    and tslib (0BSD).
 
 Build and test tools (TypeScript, Vite, Vitest, ESLint, Prettier, Ajv, Wrangler) are
 not shipped; each keeps its own permissive license.
