@@ -21,6 +21,7 @@ import { loadTicket } from "./online";
 import type { KeyValueStore } from "./savedSetups";
 import { Privacy } from "./Privacy";
 import { Rules } from "./Rules";
+import { Stats } from "./Stats";
 import { piecesInDanger, playSound, undoMoves } from "./playAids";
 import { SetupBuilder } from "./SetupBuilder";
 import { DEFAULT_LEVEL, computerMove, levels, type Level } from "./computer";
@@ -35,6 +36,7 @@ import {
 import "./board.css";
 
 const ruleset = resolveRuleset(catalog, "standard");
+const current = { id: ruleset.id, version: ruleset.version };
 const presets = catalog.setups
   .filter((s) => s.status === "official")
   .map((s) => ({ name: s.name, pieces: s.pieces }));
@@ -72,6 +74,7 @@ export function App({
   const [level, setLevel] = useState<Level>(DEFAULT_LEVEL);
   const [showRules, setShowRules] = useState(false);
   const [showPrivacy, setShowPrivacy] = useState(false);
+  const [showStats, setShowStats] = useState(false);
   if (showRules)
     return (
       <main>
@@ -82,6 +85,12 @@ export function App({
     return (
       <main>
         <Privacy onClose={() => setShowPrivacy(false)} />
+      </main>
+    );
+  if (showStats)
+    return (
+      <main>
+        <Stats onClose={() => setShowStats(false)} current={current} />
       </main>
     );
   if (!mode) {
@@ -109,6 +118,9 @@ export function App({
           </label>
           <button type="button" onClick={() => setShowRules(true)}>
             Rules
+          </button>
+          <button type="button" onClick={() => setShowStats(true)}>
+            Statistics
           </button>
           <button type="button" onClick={() => setShowPrivacy(true)}>
             Privacy
