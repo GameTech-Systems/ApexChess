@@ -1,28 +1,28 @@
 # Handoff
 
-Updated 2026-10-22 by S20c (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-10-22 by S19c (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Phase 7. Private events by link (D20 default): `#event=CODE` page, display names per event, round robin up to 8 / Swiss above, byes, Sonneborn-Berger / Buchholz, crosstable, `noindex`, deletion 7 days after the last game.
-- Each board is an event room: sides by pairing, each player locks a setup; no lock by the starting time loses on time (both: 0–0). Clocked controls only.
-- Not live: S16 hosting steps plus the D1 database (see 0004) are still open. Every remaining Code step is blocked on owner decisions.
+- Phase 6. Optional accounts (D16 decided): passkey + handle, no email, 13+ via Terms checkbox; 8 recovery codes; sign-out, delete, handle reports. Account and Terms pages; Privacy text updated.
+- Handle policy (provisional) now also governs event names: 3 to 20 ASCII letters, digits, _ and -.
+- Checked end to end in `wrangler dev` + Chromium virtual authenticator (sign up, sign in, recover, delete).
+- Not live: S16 hosting steps plus the D1 database (0004) are still open.
 
 ## Next session
-**S19c — Phase 6: Accounts** · Opus 5.5 · effort high
+**S19d — Phase 6: Ratings** · Opus 5.5 · effort high
 Set: `/model opus` · `/effort high`
-Why: blocked until the owner decides D16 and the minimum age.
-Start with: `/start-session S19c`
+Why: blocked until the owner confirms D17 and an abandoned-game rule.
+Start with: `/start-session S19d`
 
 ## Decisions in effect for the next step
-- D16: passkey + handle, no email (0006, default; owner must confirm before S19c).
-- D20: S20c choices listed in 0007 "S20c implementation" (provisional).
+- D16: passkey + handle, no email; minimum age 13 (decided).
+- D17: Glicko-2, one pool per ruleset id, signed-in quick match only (0006, default).
 
 ## Open questions for the owner
-- D16 and minimum age (S19c); D17 (S19d). S20d waits on both.
-- D20: confirm or change the S20c choices in 0007 (clocked controls only, no-show rule, name policy).
-- Before the first deploy: create D1 `apexchess-archive` and send Claude its id; apply migrations 0001 to 0003. Deploy adds Durable Object migration v2 (`Tournament`).
+- D17 ratings and the abandoned-game rule (default: unfinished rated games are never scored).
+- Before the first deploy: create D1 `apexchess-archive`, send Claude its id, apply migrations 0001 to 0004.
 
 ## Notes for Claude
-- Event logic: `packages/online/src/{pairing,standings,names,event}.ts` (pure); server `Tournament` DO in `apps/server/src/worker.ts`; rooms report results with retry.
-- S19c should replace `names.ts` policy with the handle policy and add the report path.
+- Accounts: `apps/server/src/accounts.ts` (tests use node:sqlite), routes in `routes.ts`, web `apps/web/src/{account.ts,Account.tsx}`.
+- Games are not linked to accounts yet; S19d adds a separate link table that account deletion must also clear.
 - Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.
