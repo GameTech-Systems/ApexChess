@@ -18,3 +18,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-10-21 | S14 | Sonnet 5.5 · medium | done | 11 | Play aids (legal moves, danger, undo, sound), rules screen, phone layout |
 | 2026-10-21 | S15 | Opus 5.5 · high | done | 12 | Self-play harness (packages/sim), measures doc 0003, first 640-game setup report |
 | 2026-10-21 | S16 | Sonnet 5.5 · medium | done | 13 | Wrangler config, deploy workflow, privacy page, error fallbacks; owner must add secrets |
+| 2026-10-22 | S18 | Opus 5.5 · high | done | (see PR) | Online play: Worker + Durable Objects, hidden setups, coin flip, quick match, reconnect, rematch |
