@@ -119,8 +119,8 @@ A daily aggregate of the archive using the 0003 measures (N ≥ 30, Bonferroni b
 ### S19c — Phase 6: Accounts · Opus 5.5 · high · `done`
 Passkey plus handle, recovery codes, account deletion, handle policy, Terms. D16 decided (passkey + handle, no email); minimum age 13. Built as recorded in 0006.
 
-### S19d — Phase 6: Ratings · Opus 5.5 · high · `blocked`
-Glicko-2 per ruleset id for signed-in quick-match games. Blocked on D17, S19c, and a rule for abandoned games.
+### S19d — Phase 6: Ratings · Opus 5.5 · high · `done`
+Glicko-2 per ruleset id for signed-in quick-match games. Built on the D17 default (provisional), with D19's time and abandonment rules for unfinished games. Record: 0006.
 
 ### S20 — Phase 7: Tournaments and growth · Opus 5.5 · high · `done`
 Plan only (the S20 default): design, privacy review, and sub-steps. Decisions: D19 and D20 (open). Record: `docs/decisions/0007-tournaments-growth.md`.
