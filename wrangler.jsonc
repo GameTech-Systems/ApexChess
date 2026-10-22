@@ -24,6 +24,8 @@
       "migrations_dir": "./apps/server/migrations",
     },
   ],
+  // Daily public setup statistics (S19b): rebuilt shortly after midnight UTC.
+  "triggers": { "crons": ["7 0 * * *"] },
   // Rate limit on /api: 60 requests per address per minute (provisional).
   "ratelimits": [
     { "name": "LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },

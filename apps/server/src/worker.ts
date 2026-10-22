@@ -28,11 +28,12 @@ import {
 } from "@apexchess/online";
 import { insertGame } from "./archive";
 import { clientKey, httpStatus, roomCode, route } from "./routes";
+import { getStats, listStats, refreshStats } from "./stats";
 
 interface Env {
   ROOMS: DurableObjectNamespace<Room>;
   LOBBY: DurableObjectNamespace<Lobby>;
-  /** Anonymous archive of finished games (S19a; docs/decisions/0006). */
+  /** Anonymous archive of finished games (S19a) and its statistics (S19b); docs/decisions/0006. */
   ARCHIVE: D1Database;
   /** Requests per address per minute on /api (limit in wrangler.jsonc; provisional). */
   LIMITER: RateLimit;
@@ -55,6 +56,11 @@ const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
     status,
     headers: { "content-type": "application/json", "cache-control": "no-store" },
+  });
+/** Statistics change once a day, so browsers and Cloudflare may keep them for an hour. */
+const publicJson = (text: string) =>
+  new Response(text, {
+    headers: { "content-type": "application/json", "cache-control": "public, max-age=3600" },
   });
 const errorResponse = (e: RoomError) => json(fail(e.code, e.message), httpStatus(e.code));
 
@@ -120,6 +126,13 @@ export default {
     try {
       if (r.kind === "create") return json(await openRoom(env, await readLock(req)));
       if (r.kind === "join") return json(await enterRoom(env, r.room, await readLock(req)));
+      if (r.kind === "stats") return publicJson(JSON.stringify(await listStats(env.ARCHIVE)));
+      if (r.kind === "snapshot") {
+        const text = await getStats(env.ARCHIVE, r.ruleset.id, r.ruleset.version);
+        if (text === null)
+          return json(fail("notFound", "No statistics for that ruleset yet."), 404);
+        return publicJson(text);
+      }
       if (req.headers.get("upgrade") !== "websocket")
         return json(fail("bad", "Expected a WebSocket."), 426);
       if (r.kind === "socket") return env.ROOMS.get(env.ROOMS.idFromName(r.room)).fetch(req);
@@ -128,6 +141,12 @@ export default {
       if (e instanceof RoomError) return errorResponse(e);
       throw e;
     }
+  },
+
+  /** The daily statistics job (cron in wrangler.jsonc). */
+  async scheduled(controller: ScheduledController, env: Env): Promise<void> {
+    const written = await refreshStats(env.ARCHIVE, controller.scheduledTime);
+    console.log("stats: wrote", written, "snapshots");
   },
 } satisfies ExportedHandler<Env>;
 
