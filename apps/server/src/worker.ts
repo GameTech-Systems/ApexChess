@@ -25,7 +25,9 @@ import {
   parseClientMessage,
   parseEventRequest,
   parseLock,
+  parseSeek,
   presence,
+  ratedGame,
   recordResult,
   seatOf,
   seek,
@@ -41,11 +43,13 @@ import {
   type RoomData,
   type RulesetRef,
   type Seat,
+  type Seek,
   type ServerMessage,
   type Ticket,
 } from "@apexchess/online";
-import { accountAction, cleanUpAccounts } from "./accounts";
+import { accountAction, cleanUpAccounts, sessionAccount } from "./accounts";
 import { insertGame } from "./archive";
+import { rateGame } from "./ratings";
 import { bearerToken, clientKey, httpStatus, passkeyOrigin, roomCode, route } from "./routes";
 import { getStats, listStats, refreshStats } from "./stats";
 
@@ -139,12 +143,15 @@ async function callRoom(env: Env, code: string, path: "create" | "join", body: u
   return data;
 }
 
-/** A new room with this player waiting in it. Retries on the rare code already in use. */
-async function openRoom(env: Env, lock: Lock): Promise<Ticket> {
+/**
+ * A new room with this player waiting in it. Retries on the rare code already in use. Only quick
+ * match passes `account` (a signed-in player, so the game can be rated, S19d).
+ */
+async function openRoom(env: Env, lock: Lock, account?: string): Promise<Ticket> {
   for (let i = 0; i < 5; i++) {
     const code = roomCode(crypto.getRandomValues(new Uint8Array(6)));
     try {
-      return await callRoom(env, code, "create", { code, lock, token: newToken() });
+      return await callRoom(env, code, "create", { code, lock, token: newToken(), account });
     } catch (e) {
       if (!(e instanceof RoomError && e.code === "full")) throw e;
     }
@@ -152,8 +159,14 @@ async function openRoom(env: Env, lock: Lock): Promise<Ticket> {
   throw new RoomError("full", "Could not open a room. Try again.");
 }
 
-const enterRoom = (env: Env, code: string, lock: Lock) =>
-  callRoom(env, code, "join", { lock, token: newToken() });
+const enterRoom = (env: Env, code: string, lock: Lock, account?: string) =>
+  callRoom(env, code, "join", { lock, token: newToken(), account });
+
+/** The room with a signed-in player's account on `seat` (quick match only, S19d). */
+const withAccount = (room: RoomData, seat: Seat, account: string | undefined): RoomData =>
+  account
+    ? { ...room, seats: room.seats.map((s, i) => (i === seat ? { ...s, account } : s)) }
+    : room;
 
 /** POST to a Durable Object; an error answer becomes a RoomError. */
 async function callObject<T>(
@@ -311,6 +324,7 @@ export class Room extends DurableObject<Env> {
     await this.save(after);
     this.broadcast(after, closing);
     await this.archive(before, after);
+    await this.rate(before, after);
     await this.report(after);
   }
 
@@ -359,13 +373,16 @@ export class Room extends DurableObject<Env> {
     const path = new URL(req.url).pathname;
     try {
       if (path === "/create") {
-        const { code, lock, token } = (await req.json()) as {
+        const { code, lock, token, account } = (await req.json()) as {
           code: string;
           lock: Lock;
           token: string;
+          account?: string;
         };
         if (await this.load()) throw new RoomError("full", "That room code is in use.");
-        await this.save(createRoom(code, rulesetFor(lock.ruleset), lock, token));
+        await this.save(
+          withAccount(createRoom(code, rulesetFor(lock.ruleset), lock, token), 0, account),
+        );
         return json({ room: code, token } satisfies Ticket);
       }
       if (path === "/event") {
@@ -383,10 +400,18 @@ export class Room extends DurableObject<Env> {
         return json({ room: code });
       }
       if (path === "/join") {
-        const { lock, token } = (await req.json()) as { lock: Lock; token: string };
+        const { lock, token, account } = (await req.json()) as {
+          lock: Lock;
+          token: string;
+          account?: string;
+        };
         const room = await this.load();
         if (!room) throw new RoomError("notFound", "No room has that code.");
-        const joined = joinRoom(room, rulesetFor(lock.ruleset), lock, token, random, Date.now());
+        const joined = withAccount(
+          joinRoom(room, rulesetFor(lock.ruleset), lock, token, random, Date.now()),
+          1,
+          account,
+        );
         await this.save(joined);
         this.broadcast(joined);
         return json({ room: room.id, token } satisfies Ticket);
@@ -428,6 +453,17 @@ export class Room extends DurableObject<Env> {
     } catch (e) {
       if (!(e instanceof RoomError)) throw e;
       send(ws, fail(e.code, e.message));
+    }
+  }
+
+  /** Update both ratings once, as a rated game ends (S19d). A failed write is logged and never stops play. */
+  private async rate(before: RoomData, after: RoomData): Promise<void> {
+    const game = ratedGame(before, after);
+    if (!game) return;
+    try {
+      await rateGame(this.env.ARCHIVE, game);
+    } catch (e) {
+      console.error("rating update failed", e);
     }
   }
 
@@ -482,6 +518,8 @@ interface Waiting {
   ruleset: string;
   timeControl: string;
   lock: Lock;
+  /** A signed-in player's account id (S19d); absent for anonymous players. */
+  account?: string;
 }
 
 /** Quick match: each socket sends one locked setup, waits, and is told its room when paired. */
@@ -500,27 +538,35 @@ export class Lobby extends DurableObject<Env> {
 
   override async webSocketMessage(ws: WebSocket, data: string | ArrayBuffer): Promise<void> {
     const ticket = this.ctx.getTags(ws)[0]!;
-    let lock: Lock | undefined;
+    let wanted: Seek | undefined;
     try {
       const value: unknown =
         typeof data === "string" && data.length <= MAX_BODY && JSON.parse(data);
-      lock = parseLock(value);
+      wanted = parseSeek(value);
     } catch {
-      lock = undefined;
+      wanted = undefined;
     }
-    if (!lock) return send(ws, fail("bad", "That message was not understood."));
+    if (!wanted) return send(ws, fail("bad", "That message was not understood."));
+    const { lock } = wanted;
     try {
       // Check the setup now, so a bad one never reaches a room.
       createRoom("check", rulesetFor(lock.ruleset), lock, ticket);
       const key = `${lock.ruleset.id}@${lock.ruleset.version}`;
       const timeControl = lockTimeControl(lock).id;
-      const seeker = { ticket, ruleset: key, timeControl, lock };
+      const account = wanted.session && (await this.accountOf(wanted.session));
+      const seeker: Waiting = {
+        ticket,
+        ruleset: key,
+        timeControl,
+        lock,
+        ...(account && { account }),
+      };
       const { queue, pair } = seek(await this.queue(), seeker);
       await this.ctx.storage.put("queue", queue);
       if (!pair) return send(ws, { type: "seeking" });
       const [first, second] = pair;
-      const opened = await openRoom(this.env, first.lock);
-      const joined = await enterRoom(this.env, opened.room, second.lock);
+      const opened = await openRoom(this.env, first.lock, first.account);
+      const joined = await enterRoom(this.env, opened.room, second.lock, second.account);
       for (const [w, t] of [
         [first, opened],
         [second, joined],
@@ -532,6 +578,16 @@ export class Lobby extends DurableObject<Env> {
     } catch (e) {
       if (!(e instanceof RoomError)) throw e;
       send(ws, fail(e.code, e.message));
+    }
+  }
+
+  /** The signed-in account, or undefined; if D1 fails the player still plays, unrated. */
+  private async accountOf(session: string): Promise<string | undefined> {
+    try {
+      return await sessionAccount(this.env.ARCHIVE, session, Date.now());
+    } catch (e) {
+      console.error("session lookup failed", e);
+      return undefined;
     }
   }
 
