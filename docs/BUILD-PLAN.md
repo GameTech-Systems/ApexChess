@@ -134,8 +134,8 @@ Setup links open the builder with a setup code. Game links carry ruleset, setups
 ### S20c — Phase 7: Tournaments · Opus 5.5 · high · `done`
 Private events by link: event display names, round robin or Swiss pairing, byes, tiebreaks, crosstable, `noindex`, deletion 7 days after the last game, and the Privacy text. Needs S20a. Decisions: D20 (default), D19.
 
-### S20d — Phase 7: Leaderboards · Opus 5.5 · high · `blocked`
-Opt-in leaderboards per ruleset id. Blocked on S19c and S19d.
+### S20d — Phase 7: Leaderboards · Opus 5.5 · high · `todo`
+Opt-in leaderboards per ruleset id. Needs S19c and S19d (both done).
 
 ## Decision defaults
 
