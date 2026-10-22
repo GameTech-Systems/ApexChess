@@ -41,6 +41,7 @@ describe("Stats screen", () => {
     expect(html).toContain("at least 30 games");
     expect(html).toContain("at least 10 plies");
     expect(html).toContain("light ahead");
+    expect(html).toContain('<th scope="col">Stands out</th>');
   });
 
   it("says when there are not enough games for any row", () => {
