@@ -8,16 +8,20 @@ import {
   resolveRuleset,
   type Pieces,
 } from "@apexchess/engine";
-import { PROTOCOL, type Lock } from "./protocol";
+import { PROTOCOL, type ClientMessage, type Lock } from "./protocol";
 import {
   RoomError,
-  act,
+  act as actAt,
   createRoom,
-  joinRoom,
+  deadline,
+  joinRoom as joinAt,
+  presence,
   seatOf,
   sideOf,
-  viewFor,
+  tick,
+  viewFor as viewAt,
   type RoomData,
+  type Seat,
 } from "./room";
 
 const ruleset = resolveRuleset(catalog, "standard");
@@ -31,6 +35,13 @@ const lock = (setup: Pieces, over: Partial<Lock> = {}): Lock => ({
   ...over,
 });
 const coin = (value: number) => () => value;
+// Most tests play at time 0; the clock tests pass the time.
+const act = (room: RoomData, rs: typeof ruleset, seat: Seat, msg: ClientMessage, now = 0) =>
+  actAt(room, rs, seat, msg, now);
+const joinRoom = (room: RoomData, rs: typeof ruleset, l: Lock, token: string, random: () => number) =>
+  joinAt(room, rs, l, token, random, 0);
+const viewFor = (room: RoomData, seat: Seat, online: boolean, now = 0) =>
+  viewAt(room, seat, online, now);
 
 function started(heads = 0.1): RoomData {
   const room = createRoom("ABC234", ruleset, lock(first), "t0");
@@ -204,5 +215,110 @@ describe("reconnection", () => {
     expect(view.record!.moves).toEqual(room.record!.moves);
     expect(view.opponentOnline).toBe(false);
     expect(replay(ruleset, view.record!).position.ply).toBe(2);
+  });
+});
+
+function timed(id: string, at = 1000, heads = 0.1): RoomData {
+  const room = createRoom("T", ruleset, lock(first, { timeControl: id }), "t0");
+  return joinAt(room, ruleset, lock(second, { timeControl: "untimed" }), "t1", coin(heads), at);
+}
+
+describe("time controls (D19)", () => {
+  it("locks the creator's time control, the default when none is sent, and refuses unknown ids", () => {
+    expect(createRoom("R", ruleset, lock(first), "t").timeControl).toBe("10+0");
+    expect(timed("3+2").timeControl).toBe("3+2");
+    expect(code(() => createRoom("R", ruleset, lock(first, { timeControl: "9+9" }), "t"))).toBe(
+      "timeControl",
+    );
+  });
+
+  it("starts the clock for the first mover when the game starts and shows it to both", () => {
+    const room = timed("3+2");
+    expect(room.clock).toEqual({ light: 180_000, dark: 180_000, running: "light", since: 1000 });
+    expect(viewFor(room, 0, true, 11_000).clock).toEqual({
+      light: 170_000,
+      dark: 180_000,
+      running: "light",
+    });
+    expect(viewFor(room, 1, true, 11_000).timeControl).toBe("3+2");
+    expect(deadline(room)).toBe(181_000);
+  });
+
+  it("has no clock and no deadline when untimed", () => {
+    const room = timed("untimed");
+    expect(room.clock).toBeUndefined();
+    expect(viewFor(room, 0, true).clock).toBeUndefined();
+    expect(deadline(room)).toBeUndefined();
+    expect(tick(room, ruleset, 10 ** 12)).toBe(room);
+  });
+
+  it("adds the increment after a move and passes the clock", () => {
+    let room = timed("3+2");
+    room = act(room, ruleset, seatToMove(room), nextMove(room), 11_000);
+    expect(room.clock).toEqual({ light: 172_000, dark: 180_000, running: "dark", since: 11_000 });
+  });
+
+  it("ends the game on time when the flag falls, by alarm or by a late move", () => {
+    const room = timed("1+0");
+    expect(tick(room, ruleset, 60_999)).toBe(room);
+    const flagged = tick(room, ruleset, 61_000);
+    expect(flagged.end).toEqual({ status: "time", winner: "dark" });
+    expect(viewFor(flagged, 0, true, 61_000).clock).toEqual({ light: 0, dark: 60_000 });
+    expect(deadline(flagged)).toBeUndefined();
+    const late = act(room, ruleset, seatToMove(room), nextMove(room), 70_000);
+    expect(late.end).toEqual({ status: "time", winner: "dark" });
+    expect(late.record!.moves).toEqual([]);
+    // A resignation after the flag fell is too late too.
+    expect(act(room, ruleset, 1, { type: "resign" }, 70_000).end).toEqual(flagged.end);
+  });
+
+  it("per move: a move in time resets the time, a slow one loses", () => {
+    let room = timed("move30s", 0);
+    room = act(room, ruleset, seatToMove(room), nextMove(room), 25_000);
+    expect(deadline(room)).toBe(55_000);
+    expect(tick(room, ruleset, 55_000).end).toEqual({ status: "time", winner: "light" });
+  });
+
+  it("keeps running while a player is away", () => {
+    const room = timed("5+0", 0);
+    expect(presence(room, [false, true], 1000)).toBe(room);
+    expect(tick(room, ruleset, 300_000).end?.status).toBe("time");
+  });
+
+  it("restarts both clocks on a rematch", () => {
+    let room = tick(timed("1+0"), ruleset, 61_000);
+    room = act(room, ruleset, 0, { type: "rematch" }, 62_000);
+    room = act(room, ruleset, 1, { type: "rematch" }, 63_000);
+    expect(room.clock).toEqual({ light: 60_000, dark: 60_000, running: "light", since: 63_000 });
+  });
+});
+
+describe("abandonment only (D19)", () => {
+  it("counts an absence only while the opponent is connected", () => {
+    const room = timed("away5m", 0);
+    expect(room.clock).toBeUndefined();
+    expect(presence(room, [true, true], 10)).toBe(room);
+    expect(presence(room, [false, false], 10)).toBe(room);
+    const away = presence(room, [false, true], 1000);
+    expect(away.away).toEqual({ seat: 0, since: 1000 });
+    expect(presence(away, [false, true], 5000)).toBe(away);
+    expect(deadline(away)).toBe(301_000);
+    expect(viewFor(away, 1, false, 61_000).away).toEqual({ who: "opponent", left: 240_000 });
+    expect(viewFor(away, 0, true, 61_000).away).toEqual({ who: "you", left: 240_000 });
+    expect(presence(away, [true, true], 2000).away).toBeUndefined();
+    expect(presence(away, [false, false], 2000).away).toBeUndefined();
+  });
+
+  it("ends the game when the grace time runs out", () => {
+    const away = presence(timed("away5m", 0, 0.1), [true, false], 1000);
+    expect(tick(away, ruleset, 300_999)).toBe(away);
+    expect(tick(away, ruleset, 301_000).end).toEqual({ status: "abandoned", winner: "light" });
+  });
+
+  it("ignores presence in other controls and after the end", () => {
+    const fischer = timed("3+2");
+    expect(presence(fischer, [false, true], 5)).toBe(fischer);
+    const over = act(timed("away5m"), ruleset, 0, { type: "resign" });
+    expect(presence(over, [false, true], 5)).toBe(over);
   });
 });

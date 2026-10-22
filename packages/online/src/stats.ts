@@ -41,16 +41,23 @@ export interface StatsListing {
   games: number;
 }
 
-/** An archive row as read back: `format`, `setup_light`, `setup_dark`, `plies`, `status`, `winner`. */
+/** An archive row as read back: `format`, `setup_light`, `setup_dark`, `plies`, `status`, `winner`, `reason`. */
 export type StatsInput = Record<string, unknown>;
 
 const json = (s: Summary): StatsSummary => ({ ...s, z: Number.isFinite(s.z) ? s.z : null });
 const jsonRow = (r: Row): StatsRow => ({ ...r, summary: json(r.summary) });
 
-/** Light's score, or undefined for a row statistics cannot read. */
+/** Archive formats read here: 2 added the time control (S20a), which statistics do not split by. */
+const READ_FORMATS: unknown[] = [1, ARCHIVE_FORMAT];
+
+/**
+ * Light's score, or undefined for a row statistics cannot read. Abandoned games (D19) say nothing
+ * about the setups, so they are skipped; a loss on time counts like any other result.
+ */
 function lightScore(row: StatsInput): number | undefined {
-  if (row.status === "draw") return 0.5;
-  if (row.status !== "checkmate" && row.status !== "resigned") return undefined;
+  if (row.status === "draw") return row.reason === "abandoned" ? undefined : 0.5;
+  if (row.status !== "checkmate" && row.status !== "resigned" && row.status !== "time")
+    return undefined;
   return row.winner === "light" ? 1 : row.winner === "dark" ? 0 : undefined;
 }
 
@@ -76,7 +83,7 @@ export function statsSnapshot(
   for (const row of rows) {
     const score = lightScore(row);
     if (
-      row.format !== ARCHIVE_FORMAT ||
+      !READ_FORMATS.includes(row.format) ||
       Number(row.plies) < options.minPlies ||
       score === undefined
     )
