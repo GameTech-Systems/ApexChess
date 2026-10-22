@@ -63,6 +63,12 @@ importers:
 
   packages/engine: {}
 
+  packages/online:
+    dependencies:
+      '@apexchess/engine':
+        specifier: workspace:*
+        version: link:../engine
+
   packages/sim:
     dependencies:
       '@apexchess/engine':
