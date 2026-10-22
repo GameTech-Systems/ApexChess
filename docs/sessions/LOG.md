@@ -27,3 +27,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-10-22 | S20b | Sonnet 5.5 · medium | done | (see PR) | Client-only setup/game share links (URL fragment) and replay viewer; Privacy text |
 | 2026-10-22 | S20c | Opus 5.5 · high | done | (see PR) | Private events: RR/Swiss pairing, byes, SB/Buchholz, crosstable, Event DO, Privacy text |
 | 2026-10-22 | S19c | Opus 5.5 · high | done | (see PR) | Passkey + handle accounts, recovery codes, delete, reports, Terms 13+, handle policy |
+| 2026-10-22 | S19d | Opus 5.5 · high | done | (see PR) | Glicko-2 ratings per ruleset id for signed-in quick match; Account list; Privacy text |
