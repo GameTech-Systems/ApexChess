@@ -9,7 +9,9 @@ import {
   type ResolvedRuleset,
 } from "@apexchess/engine";
 import {
+  TIME_CONTROLS,
   follow,
+  timeControl,
   type ClientMessage,
   type Lock,
   type RoomView,
@@ -21,13 +23,16 @@ import { promotionChoices, targetsFrom } from "./hotseat";
 import {
   apiUrl,
   clearTicket,
+  clockText,
   endText,
   loadTicket,
+  loadTimeControl,
   lockFor,
   parseServerMessage,
   reconnectDelay,
   requestTicket,
   saveTicket,
+  saveTimeControl,
 } from "./online";
 import type { KeyValueStore } from "./savedSetups";
 
@@ -43,6 +48,7 @@ export function Online({ ruleset, presets, store, onExit }: Props) {
   const [ticket, setTicket] = useState(() => loadTicket(store));
   const [setup, setSetup] = useState<Pieces>();
   const [notice, setNotice] = useState<string>();
+  const [tc, setTc] = useState(() => loadTimeControl(store));
   if (ticket)
     return (
       <OnlineRoom
@@ -72,7 +78,11 @@ export function Online({ ruleset, presets, store, onExit }: Props) {
     );
   return (
     <OnlineLobby
-      lock={lockFor(ruleset, setup)}
+      lock={lockFor(ruleset, setup, tc)}
+      onTimeControl={(id) => {
+        saveTimeControl(store, id);
+        setTc(id);
+      }}
       notice={notice}
       onTicket={(t) => {
         saveTicket(store, t);
@@ -84,14 +94,26 @@ export function Online({ ruleset, presets, store, onExit }: Props) {
   );
 }
 
+/** D19 kinds, in the order the picker groups them. */
+const KINDS = [
+  ["fischer", "Clock with increment"],
+  ["perMove", "Fixed time per move"],
+  ["abandonment", "Untimed, with a leaving rule"],
+  ["untimed", "Untimed"],
+] as const;
+
+const tcLabel = (id: string) => timeControl(id)?.label ?? id;
+
 function OnlineLobby({
   lock,
+  onTimeControl,
   notice,
   onTicket,
   onChangeSetup,
   onExit,
 }: {
   lock: Lock;
+  onTimeControl: (id: string) => void;
   notice?: string;
   onTicket: (t: Ticket) => void;
   onChangeSetup: () => void;
@@ -140,6 +162,24 @@ function OnlineLobby({
           </>
         ) : (
           <>
+            <label>
+              Time control{" "}
+              <select value={lock.timeControl} onChange={(e) => onTimeControl(e.target.value)}>
+                {KINDS.map(([kind, name]) => (
+                  <optgroup key={kind} label={name}>
+                    {TIME_CONTROLS.filter((c) => c.kind === kind).map((c) => (
+                      <option key={c.id} value={c.id}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </optgroup>
+                ))}
+              </select>
+            </label>
+            <p>
+              Quick match pairs you with someone on the same time control. A room you join keeps the
+              time control its creator chose.
+            </p>
             <button type="button" onClick={quickMatch} disabled={busy}>
               Quick match
             </button>
@@ -246,7 +286,7 @@ function OnlineRoom({
       {!connected && <p role="status">Connecting to the game server…</p>}
       {error && <p role="alert">{error}</p>}
       {view?.phase === "waiting" ? (
-        <RoomWaiting room={view.room} onLeave={() => onLeave()} />
+        <RoomWaiting room={view.room} timeControl={view.timeControl} onLeave={() => onLeave()} />
       ) : view ? (
         <OnlineGame view={view} ruleset={ruleset} send={send} onLeave={() => onLeave()} />
       ) : null}
@@ -254,7 +294,15 @@ function OnlineRoom({
   );
 }
 
-export function RoomWaiting({ room, onLeave }: { room: string; onLeave: () => void }) {
+export function RoomWaiting({
+  room,
+  timeControl,
+  onLeave,
+}: {
+  room: string;
+  timeControl: string;
+  onLeave: () => void;
+}) {
   return (
     <main>
       <section aria-label="Waiting for your opponent" className="controls">
@@ -263,11 +311,56 @@ export function RoomWaiting({ room, onLeave }: { room: string; onLeave: () => vo
           Give this code to your opponent. Both setups stay hidden until the game starts; then a
           coin flip decides who plays light.
         </p>
+        <p>Time control: {tcLabel(timeControl)}.</p>
         <button type="button" onClick={onLeave}>
           Leave room
         </button>
       </section>
     </main>
+  );
+}
+
+/** Counts down from what the server last sent; the server's clock decides. */
+function useCountdown(view: RoomView): (ms: number, running: boolean) => number {
+  const [received, setReceived] = useState(() => Date.now());
+  const [now, setNow] = useState(received);
+  useEffect(() => {
+    const at = Date.now();
+    setReceived(at);
+    setNow(at);
+    if (!view.clock?.running && !view.away) return;
+    const timer = setInterval(() => setNow(Date.now()), 100);
+    return () => clearInterval(timer);
+  }, [view]);
+  return (ms, running) => (running ? ms - (now - received) : ms);
+}
+
+function Clocks({ view, side }: { view: RoomView; side: "light" | "dark" }) {
+  const left = useCountdown(view);
+  const { clock, away } = view;
+  const opponent = side === "light" ? "dark" : "light";
+  return (
+    <div className="clocks" aria-label="Clocks">
+      <p>Time control: {tcLabel(view.timeControl)}.</p>
+      {clock &&
+        (
+          [
+            ["Opponent", opponent],
+            ["You", side],
+          ] as const
+        ).map(([who, s]) => (
+          <p key={s} className={`clock-${s}${clock.running === s ? " running" : ""}`}>
+            {who}: <span role="timer">{clockText(left(clock[s], clock.running === s))}</span>
+          </p>
+        ))}
+      {away && (
+        <p role="alert">
+          {away.who === "opponent"
+            ? `Your opponent left. They lose in ${clockText(left(away.left, true))} unless they return.`
+            : `You were away. Stay connected: you lose in ${clockText(left(away.left, true))}.`}
+        </p>
+      )}
+    </div>
   );
 }
 
@@ -345,8 +438,15 @@ export function OnlineGame({
         {view.end
           ? endText(view.end, side)
           : `${yourTurn ? "Your move" : "Your opponent's move"}${checked ? " (check)" : ""}.`}
-        {!view.opponentOnline && " Your opponent is offline; the game waits for them."}
+        {!view.opponentOnline &&
+          !over &&
+          (view.clock
+            ? " Your opponent is offline; their clock keeps running."
+            : timeControl(view.timeControl)?.kind === "abandonment"
+              ? ""
+              : " Your opponent is offline; the game waits for them.")}
       </p>
+      <Clocks view={view} side={side} />
       <p className="seats">
         You play {side}. Room {view.room}, game {view.game + 1}.
       </p>

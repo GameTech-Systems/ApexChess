@@ -4,13 +4,16 @@ import { PROTOCOL } from "@apexchess/online";
 import {
   apiUrl,
   clearTicket,
+  clockText,
   endText,
   loadTicket,
+  loadTimeControl,
   lockFor,
   parseServerMessage,
   reconnectDelay,
   requestTicket,
   saveTicket,
+  saveTimeControl,
 } from "./online";
 
 const memory = () => {
@@ -48,6 +51,29 @@ describe("the room ticket on this device", () => {
   });
 });
 
+describe("the chosen time control on this device (D19)", () => {
+  it("defaults to 10+0, remembers a known choice, and ignores unknown ones", () => {
+    const store = memory();
+    expect(loadTimeControl(store)).toBe("10+0");
+    saveTimeControl(store, "move1d");
+    expect(loadTimeControl(store)).toBe("move1d");
+    store.setItem("apexchess.timeControl.v1", "9+9");
+    expect(loadTimeControl(store)).toBe("10+0");
+  });
+});
+
+describe("clock text", () => {
+  it("shows minutes and seconds, tenths in the last ten seconds, and days for long controls", () => {
+    expect(clockText(600_000)).toBe("10:00");
+    expect(clockText(61_500)).toBe("1:01");
+    expect(clockText(9_440)).toBe("0:09.4");
+    expect(clockText(-5)).toBe("0:00.0");
+    expect(clockText(3_723_000)).toBe("1:02:03");
+    expect(clockText(86_400_000)).toBe("1d 0:00:00");
+    expect(clockText(259_199_000)).toBe("2d 23:59:59");
+  });
+});
+
 describe("connections", () => {
   it("waits longer after each failed reconnect, up to a cap", () => {
     expect(reconnectDelay(0)).toBe(500);
@@ -69,10 +95,11 @@ describe("connections", () => {
 
   it("locks the setup with this app's ruleset id, version, and protocol", () => {
     const ruleset = resolveRuleset(catalog, "standard");
-    expect(lockFor(ruleset, { h1: "king" })).toEqual({
+    expect(lockFor(ruleset, { h1: "king" }, "3+2")).toEqual({
       protocol: PROTOCOL,
       ruleset: { id: ruleset.id, version: ruleset.version },
       setup: { h1: "king" },
+      timeControl: "3+2",
     });
   });
 
@@ -119,5 +146,23 @@ describe("how a game ended, for each player", () => {
     );
     expect(endText({ status: "draw", reason: "agreement" }, "dark")).toBe("Draw by agreement.");
     expect(endText({ status: "draw", reason: "stalemate" }, "dark")).toBe("Draw by stalemate.");
+    expect(endText({ status: "time", winner: "dark" }, "light")).toBe(
+      "You ran out of time. You lose.",
+    );
+    expect(endText({ status: "time", winner: "dark" }, "dark")).toBe(
+      "Your opponent ran out of time. You win.",
+    );
+    expect(endText({ status: "abandoned", winner: "dark" }, "dark")).toBe(
+      "Your opponent left the game. You win.",
+    );
+    expect(endText({ status: "abandoned", winner: "dark" }, "light")).toBe(
+      "You were away too long. You lose.",
+    );
+    expect(endText({ status: "draw", reason: "time" }, "dark")).toBe(
+      "Draw: time ran out, but the other side could not checkmate.",
+    );
+    expect(endText({ status: "draw", reason: "abandoned" }, "dark")).toBe(
+      "Draw: a player left, but the other side could not checkmate.",
+    );
   });
 });

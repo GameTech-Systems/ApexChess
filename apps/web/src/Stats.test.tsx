@@ -16,6 +16,7 @@ const row = (end: End) =>
     moves: Array(10).fill("e2e3"),
     end,
     endDay: "2026-10-21",
+    timeControl: "10+0",
   });
 const games = (n: number, end: End) => Array.from({ length: n }, () => row(end));
 

@@ -11,12 +11,16 @@ import {
   archiveRecord,
   archiveRow,
   createRoom,
+  deadline,
   joinRoom,
   leave,
+  lockTimeControl,
   parseClientMessage,
   parseLock,
+  presence,
   seatOf,
   seek,
+  tick,
   viewFor,
   type ErrorCode,
   type Lock,
@@ -152,7 +156,10 @@ export default {
 
 const seatTag = (seat: Seat) => `seat:${seat}`;
 
-/** One room: its data in storage, one socket per seat (a new one replaces the old), hibernating between messages. */
+/**
+ * One room: its data in storage, one socket per seat (a new one replaces the old), hibernating
+ * between messages. One alarm serves both the clock (a flag falls, D19) and retention.
+ */
 export class Room extends DurableObject<Env> {
   private room?: RoomData;
 
@@ -161,10 +168,31 @@ export class Room extends DurableObject<Env> {
     return this.room;
   }
 
+  /** Store a change; the room expires KEEP_MS after it. The alarm fires at expiry or the deadline. */
   private async save(room: RoomData): Promise<void> {
     this.room = room;
-    await this.ctx.storage.put("room", room);
-    await this.ctx.storage.setAlarm(Date.now() + KEEP_MS);
+    const expires = Date.now() + KEEP_MS;
+    await this.ctx.storage.put({ room, expires });
+    await this.ctx.storage.setAlarm(Math.min(expires, deadline(room) ?? Infinity));
+  }
+
+  /** Save, send, and archive a change from `before` to `after`. */
+  private async commit(before: RoomData, after: RoomData, closing?: WebSocket): Promise<void> {
+    await this.save(after);
+    this.broadcast(after, closing);
+    await this.archive(before, after);
+  }
+
+  /** Who is connected, without a socket on its way out. */
+  private online(closing?: WebSocket): [boolean, boolean] {
+    return [this.sockets(0, closing).length > 0, this.sockets(1, closing).length > 0];
+  }
+
+  /** Abandonment-only rooms (D19) track who is away; other rooms are unchanged. */
+  private async seePresence(room: RoomData, closing?: WebSocket): Promise<RoomData> {
+    const next = presence(room, this.online(closing), Date.now());
+    if (next !== room) await this.save(next);
+    return next;
   }
 
   private sockets(seat: Seat, except?: WebSocket): WebSocket[] {
@@ -173,9 +201,10 @@ export class Room extends DurableObject<Env> {
 
   /** Send each connected player their own view. `closing` is a socket on its way out. */
   private broadcast(room: RoomData, closing?: WebSocket): void {
+    const now = Date.now();
     for (const seat of [0, 1] as const) {
       const online = this.sockets(seat === 0 ? 1 : 0, closing).length > 0;
-      for (const ws of this.sockets(seat, closing)) send(ws, viewFor(room, seat, online));
+      for (const ws of this.sockets(seat, closing)) send(ws, viewFor(room, seat, online, now));
     }
   }
 
@@ -196,7 +225,7 @@ export class Room extends DurableObject<Env> {
         const { lock, token } = (await req.json()) as { lock: Lock; token: string };
         const room = await this.load();
         if (!room) throw new RoomError("notFound", "No room has that code.");
-        const joined = joinRoom(room, rulesetFor(lock.ruleset), lock, token, random);
+        const joined = joinRoom(room, rulesetFor(lock.ruleset), lock, token, random, Date.now());
         await this.save(joined);
         this.broadcast(joined);
         return json({ room: room.id, token } satisfies Ticket);
@@ -222,7 +251,7 @@ export class Room extends DurableObject<Env> {
     }
     for (const old of this.sockets(seat)) old.close(4001, "opened elsewhere");
     this.ctx.acceptWebSocket(server, [seatTag(seat)]);
-    this.broadcast(room);
+    this.broadcast(await this.seePresence(room));
     return new Response(null, { status: 101, webSocket: client });
   }
 
@@ -233,11 +262,8 @@ export class Room extends DurableObject<Env> {
       typeof data === "string" && data.length <= MAX_MESSAGE ? parseClientMessage(data) : undefined;
     if (!room || !msg) return send(ws, fail("bad", "That message was not understood."));
     try {
-      const next = act(room, rulesetFor(room.ruleset), seat, msg);
-      if (next === room) return;
-      await this.save(next);
-      this.broadcast(next);
-      await this.archive(room, next);
+      const next = act(room, rulesetFor(room.ruleset), seat, msg, Date.now());
+      if (next !== room) await this.commit(room, next);
     } catch (e) {
       if (!(e instanceof RoomError)) throw e;
       send(ws, fail(e.code, e.message));
@@ -260,15 +286,29 @@ export class Room extends DurableObject<Env> {
 
   override async webSocketClose(ws: WebSocket): Promise<void> {
     const room = await this.load();
-    if (room) this.broadcast(room, ws);
+    if (room) this.broadcast(await this.seePresence(room, ws), ws);
   }
 
   override async webSocketError(ws: WebSocket): Promise<void> {
     await this.webSocketClose(ws);
   }
 
-  /** Retention: the room and its game are deleted. */
+  /** A deadline (the game ends on time) or retention (the room and its game are deleted). */
   override async alarm(): Promise<void> {
+    const room = await this.load();
+    const expires = (await this.ctx.storage.get<number>("expires")) ?? 0;
+    const now = Date.now();
+    if (room && now < expires) {
+      let next = room;
+      try {
+        next = tick(room, rulesetFor(room.ruleset), now);
+      } catch (e) {
+        if (!(e instanceof RoomError)) throw e;
+      }
+      if (next !== room) return this.commit(room, next);
+      // Early or nothing due: wait for whichever comes first again.
+      return this.ctx.storage.setAlarm(Math.min(expires, deadline(room) ?? Infinity));
+    }
     for (const ws of this.ctx.getWebSockets()) ws.close(4002, "room expired");
     this.room = undefined;
     await this.ctx.storage.deleteAll();
@@ -278,6 +318,7 @@ export class Room extends DurableObject<Env> {
 interface Waiting {
   ticket: string;
   ruleset: string;
+  timeControl: string;
   lock: Lock;
 }
 
@@ -310,7 +351,9 @@ export class Lobby extends DurableObject<Env> {
       // Check the setup now, so a bad one never reaches a room.
       createRoom("check", rulesetFor(lock.ruleset), lock, ticket);
       const key = `${lock.ruleset.id}@${lock.ruleset.version}`;
-      const { queue, pair } = seek(await this.queue(), { ticket, ruleset: key, lock });
+      const timeControl = lockTimeControl(lock).id;
+      const seeker = { ticket, ruleset: key, timeControl, lock };
+      const { queue, pair } = seek(await this.queue(), seeker);
       await this.ctx.storage.put("queue", queue);
       if (!pair) return send(ws, { type: "seeking" });
       const [first, second] = pair;

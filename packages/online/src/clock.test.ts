@@ -26,7 +26,8 @@ describe("time control data (D19)", () => {
   });
 
   it("keeps the presets proposed in 0007", () => {
-    for (const id of ["3+2", "5+3", "10+5", "15+10", "untimed"]) expect(timeControl(id)).toBeTruthy();
+    for (const id of ["3+2", "5+3", "10+5", "15+10", "untimed"])
+      expect(timeControl(id)).toBeTruthy();
   });
 });
 
@@ -84,7 +85,10 @@ describe("running out of time (D19 with D8)", () => {
   });
 
   it("draws when the opponent could not checkmate, whatever the loser has", () => {
-    const loneKing = pos({ ...kings, g1: { piece: "queen", side: "light" } } as Position["squares"]);
+    const loneKing = pos({
+      ...kings,
+      g1: { piece: "queen", side: "light" },
+    } as Position["squares"]);
     expect(timeoutEnd(ruleset, loneKing, "light", "time")).toEqual({
       status: "draw",
       reason: "time",

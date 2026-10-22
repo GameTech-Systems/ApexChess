@@ -38,8 +38,13 @@ const coin = (value: number) => () => value;
 // Most tests play at time 0; the clock tests pass the time.
 const act = (room: RoomData, rs: typeof ruleset, seat: Seat, msg: ClientMessage, now = 0) =>
   actAt(room, rs, seat, msg, now);
-const joinRoom = (room: RoomData, rs: typeof ruleset, l: Lock, token: string, random: () => number) =>
-  joinAt(room, rs, l, token, random, 0);
+const joinRoom = (
+  room: RoomData,
+  rs: typeof ruleset,
+  l: Lock,
+  token: string,
+  random: () => number,
+) => joinAt(room, rs, l, token, random, 0);
 const viewFor = (room: RoomData, seat: Seat, online: boolean, now = 0) =>
   viewAt(room, seat, online, now);
 

@@ -67,6 +67,18 @@ main {
   align-items: center;
   margin: 0.5rem 0;
 }
+.clocks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  font-variant-numeric: tabular-nums;
+}
+.clocks p {
+  margin: 0.25rem 0;
+}
+.clocks .running {
+  font-weight: bold;
+}
 .moves {
   display: flex;
   flex-wrap: wrap;
