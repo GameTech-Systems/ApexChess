@@ -30,6 +30,13 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         Statistics are published only as totals, never as single games. Games that ended before this
         notice was published were not archived.
       </p>
+      <h2>Share links</h2>
+      <p>
+        A setup or game link is made in your browser and holds the rules version, the setups, and
+        the moves, after a # in the address. Browsers do not send that part to a server, so the site
+        never receives or stores it. Anyone you give the link to can read what is in it. It holds no
+        names, room codes, or tickets.
+      </p>
       <h2>Limits on requests</h2>
       <p>
         To stop abuse, the game server counts requests from each IP address over about a minute and

@@ -24,3 +24,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-10-22 | S19b | Opus 5.5 · high | done | (see PR) | Daily setup stats from D1 archive (0003 measures, N ≥ 30), /api/stats, Statistics page |
 | 2026-10-22 | S20 | Opus 5.5 · high | done | (see PR) | Plan only: 0007 clocks/share/tournaments, sub-steps S20a-d, D19-D20 |
 | 2026-10-22 | S20a | Opus 5.5 · high | done | (see PR) | Server clocks: all D19 kinds, default 10+0, flag alarm, archive format 2 + migration 0003 |
+| 2026-10-22 | S20b | Sonnet 5.5 · medium | done | (see PR) | Client-only setup/game share links (URL fragment) and replay viewer; Privacy text |

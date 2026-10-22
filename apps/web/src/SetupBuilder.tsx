@@ -2,6 +2,7 @@ import { useMemo, useState } from "react";
 import { setupArea, type Pieces, type Position, type ResolvedRuleset } from "@apexchess/engine";
 import { Board } from "./Board";
 import { clearSquare, placePiece, remaining, setupErrors } from "./setupBuilder";
+import { copyText, setupLink } from "./share";
 import { deleteSetup, loadSetups, saveSetup, type KeyValueStore } from "./savedSetups";
 
 export interface Preset {
@@ -15,6 +16,8 @@ interface Props {
   presets: Preset[];
   store: KeyValueStore;
   onDone: (pieces: Pieces) => void;
+  /** Arrangement to start from, e.g. one opened from a setup link. */
+  initial?: Pieces;
 }
 
 /** Held piece: picked from the tray (no `from`) or lifted off a square. */
@@ -23,8 +26,9 @@ interface Held {
   from?: string;
 }
 
-export function SetupBuilder({ ruleset, title, presets, store, onDone }: Props) {
-  const [pieces, setPieces] = useState<Pieces>({});
+export function SetupBuilder({ ruleset, title, presets, store, onDone, initial }: Props) {
+  const [pieces, setPieces] = useState<Pieces>(() => ({ ...initial }));
+  const [copied, setCopied] = useState(false);
   const [held, setHeld] = useState<Held>();
   const [saved, setSaved] = useState(() => loadSetups(store));
   const [name, setName] = useState("");
@@ -127,6 +131,16 @@ export function SetupBuilder({ ruleset, title, presets, store, onDone }: Props) 
           }}
         >
           Save on this device
+        </button>
+        <button
+          type="button"
+          disabled={errors.length > 0}
+          onClick={async () => {
+            const url = location.origin + location.pathname + setupLink(ruleset, pieces);
+            setCopied(await copyText(url));
+          }}
+        >
+          {copied ? "Link copied" : "Copy setup link"}
         </button>
       </div>
       {saved.length > 0 && (
