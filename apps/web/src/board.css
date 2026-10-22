@@ -163,20 +163,29 @@ main {
     font-size: 0.85rem;
   }
 }
-.stats table {
+.stats table,
+.event table {
   border-collapse: collapse;
+  margin-bottom: 1rem;
   display: block;
   overflow-x: auto;
   font-variant-numeric: tabular-nums;
 }
 .stats th,
-.stats td {
+.stats td,
+.event th,
+.event td {
   padding: 0.2rem 0.5rem;
   border-bottom: 1px solid #ccc;
   text-align: right;
   white-space: nowrap;
 }
 .stats th:first-child,
-.stats td:first-child {
+.stats td:first-child,
+.event th[scope="row"] {
   text-align: left;
+}
+.event caption {
+  text-align: left;
+  font-weight: bold;
 }
