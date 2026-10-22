@@ -39,6 +39,7 @@ export type AccountAction =
   | "passkeyFinish"
   | "codes"
   | "signOut"
+  | "listing"
   | "view"
   | "delete"
   | "report";
@@ -139,11 +140,11 @@ async function signedIn(deps: AccountDeps, token: string | undefined) {
   if (!token) throw signInError("Sign in first.");
   const row = await deps.db
     .prepare(
-      "SELECT a.id, a.handle, a.created_day FROM sessions s JOIN accounts a ON a.id = s.account_id" +
+      "SELECT a.id, a.handle, a.created_day, a.listed FROM sessions s JOIN accounts a ON a.id = s.account_id" +
         " WHERE s.token_hash = ? AND s.expires > ?",
     )
     .bind(await sha256(token), deps.now)
-    .first<{ id: string; handle: string; created_day: string }>();
+    .first<{ id: string; handle: string; created_day: string; listed: number }>();
   if (!row) throw signInError();
   return row;
 }
@@ -373,6 +374,16 @@ export async function accountAction(
           .run();
       return {};
     }
+    case "listing": {
+      const account = await signedIn(deps, token);
+      const listed = (body as { listed?: unknown } | undefined)?.listed;
+      if (typeof listed !== "boolean") throw bad();
+      await db
+        .prepare("UPDATE accounts SET listed = ? WHERE id = ?")
+        .bind(listed ? 1 : 0, account.id)
+        .run();
+      return { listed };
+    }
     case "view": {
       const account = await signedIn(deps, token);
       const count = (table: string) =>
@@ -386,6 +397,7 @@ export async function accountAction(
         created: account.created_day,
         passkeys: await count("passkeys"),
         codes: await count("recovery_codes"),
+        listed: account.listed === 1,
         ratings: await ratingsOf(db, account.id),
       };
     }

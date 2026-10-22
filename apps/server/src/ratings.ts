@@ -1,5 +1,13 @@
 /** Ratings in D1 (S19d; table in migrations/0005_ratings.sql). The maths is glicko2 in @apexchess/online. */
-import { NEW_RATING, glicko2, ratingText, type RatedGame, type Rating } from "@apexchess/online";
+import {
+  NEW_RATING,
+  SHOW_RD,
+  glicko2,
+  ratingText,
+  type Leaderboard,
+  type RatedGame,
+  type Rating,
+} from "@apexchess/online";
 
 type Db = Pick<D1Database, "prepare" | "batch">;
 type Row = { id: string; rating: number | null; rd: number; volatility: number; games: number };
@@ -52,4 +60,30 @@ export async function ratingsOf(db: Db, accountId: string) {
     games: r.games,
     text: ratingText(r),
   }));
+}
+
+/** Players per leaderboard (S20d, provisional). */
+export const LEADERBOARD_SIZE = 50;
+
+/**
+ * One leaderboard per ruleset id (S20d): accounts that turned listing on, with a settled rating
+ * (RD ≤ 110), best first. Each entry is the handle, the rounded rating, and the rated-game count.
+ */
+export async function leaderboards(db: Db, size = LEADERBOARD_SIZE): Promise<Leaderboard[]> {
+  const { results } = await db
+    .prepare(
+      "SELECT ruleset_id, handle, rating, games FROM (SELECT r.ruleset_id, a.handle, r.rating," +
+        " r.games, ROW_NUMBER() OVER (PARTITION BY r.ruleset_id ORDER BY r.rating DESC," +
+        " a.handle_key) AS place FROM ratings r JOIN accounts a ON a.id = r.account_id" +
+        " WHERE a.listed = 1 AND r.rd <= ?) WHERE place <= ? ORDER BY ruleset_id, place",
+    )
+    .bind(SHOW_RD, size)
+    .all<{ ruleset_id: string; handle: string; rating: number; games: number }>();
+  const boards: Leaderboard[] = [];
+  for (const r of results) {
+    if (boards.at(-1)?.ruleset !== r.ruleset_id)
+      boards.push({ ruleset: r.ruleset_id, players: [] });
+    boards.at(-1)!.players.push({ handle: r.handle, rating: Math.round(r.rating), games: r.games });
+  }
+  return boards;
 }

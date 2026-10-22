@@ -14,6 +14,7 @@ export type Route =
   | { kind: "startEvent"; event: string }
   | { kind: "event"; event: string }
   | { kind: "account"; action: AccountAction }
+  | { kind: "leaderboard" }
   | { kind: "report" };
 
 /** Account paths under /api/account, by method (S19c). */
@@ -28,6 +29,7 @@ const ACCOUNT: Record<string, [string, AccountAction]> = {
   "passkey/finish": ["POST", "passkeyFinish"],
   codes: ["POST", "codes"],
   signout: ["POST", "signOut"],
+  listing: ["POST", "listing"],
 };
 
 /** No 0, O, 1, I, or L, so a code read aloud or typed is hard to get wrong. */
@@ -59,6 +61,8 @@ export function route(method: string, pathname: string): Route | undefined {
     return method === "GET"
       ? { kind: "snapshot", ruleset: { id: s[1]!, version: s[2]! } }
       : undefined;
+  if (pathname === "/api/leaderboard")
+    return method === "GET" ? { kind: "leaderboard" } : undefined;
   if (pathname === "/api/reports") return method === "POST" ? { kind: "report" } : undefined;
   if (pathname === "/api/account" && method === "DELETE")
     return { kind: "account", action: "delete" };

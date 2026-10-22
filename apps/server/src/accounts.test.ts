@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { RECOVERY_CODES, RoomError, formatRecoveryCode, type ErrorCode } from "@apexchess/online";
 import accountsTable from "../migrations/0004_accounts.sql?raw";
 import ratingsTable from "../migrations/0005_ratings.sql?raw";
+import listingColumn from "../migrations/0006_leaderboards.sql?raw";
 import {
   accountAction,
   cleanUpAccounts,
@@ -10,7 +11,7 @@ import {
   sha256,
   type AccountDeps,
 } from "./accounts";
-import { rateGame } from "./ratings";
+import { LEADERBOARD_SIZE, leaderboards, rateGame } from "./ratings";
 
 // node:sqlite stands in for D1: same SQL, same migration.
 type Sqlite = {
@@ -66,6 +67,7 @@ beforeEach(() => {
   sqlite = new DatabaseSync(":memory:");
   sqlite.exec(accountsTable);
   sqlite.exec(ratingsTable);
+  sqlite.exec(listingColumn);
   nextCredential = "cred-1";
   deps = {
     db: d1(sqlite),
@@ -167,6 +169,7 @@ describe("signing up (passkey + handle)", () => {
         handle: "RookLover",
         handle_key: "rooklover",
         created_day: "2026-10-22",
+        listed: 0,
       },
     ]);
     expect(rows("passkeys")).toHaveLength(1);
@@ -261,6 +264,7 @@ describe("signing in", () => {
       created: "2026-10-22",
       passkeys: 1,
       codes: RECOVERY_CODES,
+      listed: false,
       ratings: [],
     });
   });
@@ -445,5 +449,76 @@ describe("ratings (S19d)", () => {
     await accountAction("delete", undefined, b.token, deps);
     await rateGame(deps.db, { ruleset: "standard", light: a.id, dark: b.id, score: 1 });
     expect(rows("ratings")).toEqual([]);
+  });
+});
+
+describe("leaderboards (S20d)", () => {
+  async function players(handles: string[]) {
+    const out: { token: string; id: string }[] = [];
+    for (const [i, handle] of handles.entries()) {
+      nextCredential = `cred-${i + 1}`;
+      const { token } = await signUp(handle);
+      out.push({ token, id: rows("accounts").find((r) => r.handle === handle)!.id as string });
+    }
+    return out;
+  }
+  /** Enough games that both ratings settle (RD ≤ 110); `better` wins 3 of every 4. */
+  async function settle(ruleset: string, better: string, worse: string) {
+    for (let i = 0; i < 40; i++)
+      await rateGame(deps.db, { ruleset, light: better, dark: worse, score: i % 4 < 3 ? 1 : 0 });
+  }
+  const listing = (token: string | undefined, body: unknown) =>
+    accountAction("listing", body, token, deps);
+  const view = (token: string) =>
+    accountAction("view", undefined, token, deps) as Promise<{ listed: boolean }>;
+
+  it("is off until the player turns it on, and needs a signed-in player", async () => {
+    const [a] = await players(["RookLover"]);
+    expect((await view(a!.token)).listed).toBe(false);
+    expect(await code(listing(undefined, { listed: true }))).toBe("signIn");
+    expect(await code(listing(a!.token, { listed: "yes" }))).toBe("bad");
+    expect(await listing(a!.token, { listed: true })).toEqual({ listed: true });
+    expect((await view(a!.token)).listed).toBe(true);
+    expect(await listing(a!.token, { listed: false })).toEqual({ listed: false });
+    expect((await view(a!.token)).listed).toBe(false);
+  });
+
+  it("lists only opted-in players with a settled rating, best first, one board per ruleset id", async () => {
+    const [a, b, c] = await players(["RookLover", "Other", "Third"]);
+    await settle("standard", a!.id, b!.id);
+    await settle("elbow-room", c!.id, a!.id);
+    await rateGame(deps.db, { ruleset: "unsettled", light: a!.id, dark: c!.id, score: 1 });
+    expect(await leaderboards(deps.db)).toEqual([]);
+    await listing(a!.token, { listed: true });
+    await listing(c!.token, { listed: true });
+    const boards = await leaderboards(deps.db);
+    expect(boards.map((x) => x.ruleset)).toEqual(["elbow-room", "standard"]);
+    const [elbow, standard] = boards;
+    expect(elbow!.players.map((p) => p.handle)).toEqual(["Third", "RookLover"]);
+    expect(standard!.players.map((p) => p.handle)).toEqual(["RookLover"]);
+    // Handle, rounded rating, and rated games only: no account id, RD, or volatility.
+    expect(Object.keys(standard!.players[0]!).sort()).toEqual(["games", "handle", "rating"]);
+    expect(Number.isInteger(standard!.players[0]!.rating)).toBe(true);
+    expect(standard!.players[0]!.games).toBe(40);
+  });
+
+  it("drops a player at once when they turn listing off or delete the account", async () => {
+    const [a, b] = await players(["RookLover", "Other"]);
+    await settle("standard", a!.id, b!.id);
+    await listing(a!.token, { listed: true });
+    await listing(b!.token, { listed: true });
+    expect((await leaderboards(deps.db))[0]!.players).toHaveLength(2);
+    await listing(a!.token, { listed: false });
+    expect((await leaderboards(deps.db))[0]!.players.map((p) => p.handle)).toEqual(["Other"]);
+    await accountAction("delete", undefined, b!.token, deps);
+    expect(await leaderboards(deps.db)).toEqual([]);
+  });
+
+  it(`shows at most ${LEADERBOARD_SIZE} players per board`, async () => {
+    const [a, b] = await players(["RookLover", "Other"]);
+    await settle("standard", a!.id, b!.id);
+    await listing(a!.token, { listed: true });
+    await listing(b!.token, { listed: true });
+    expect((await leaderboards(deps.db, 1))[0]!.players.map((p) => p.handle)).toHaveLength(1);
   });
 });

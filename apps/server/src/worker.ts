@@ -49,7 +49,7 @@ import {
 } from "@apexchess/online";
 import { accountAction, cleanUpAccounts, sessionAccount } from "./accounts";
 import { insertGame } from "./archive";
-import { rateGame } from "./ratings";
+import { leaderboards, rateGame } from "./ratings";
 import { bearerToken, clientKey, httpStatus, passkeyOrigin, roomCode, route } from "./routes";
 import { getStats, listStats, refreshStats } from "./stats";
 
@@ -255,6 +255,15 @@ export default {
         );
         return json(result);
       }
+      if (r.kind === "leaderboard")
+        return new Response(JSON.stringify(await leaderboards(env.ARCHIVE)), {
+          headers: {
+            "content-type": "application/json",
+            // Never cached, so turning listing off takes effect at once; never indexed (S20d).
+            "cache-control": "no-store",
+            "x-robots-tag": "noindex",
+          },
+        });
       if (r.kind === "stats") return publicJson(JSON.stringify(await listStats(env.ARCHIVE)));
       if (r.kind === "snapshot") {
         const text = await getStats(env.ARCHIVE, r.ruleset.id, r.ruleset.version);

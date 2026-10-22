@@ -67,6 +67,7 @@ describe("account routes (S19c)", () => {
       ["POST", "/api/account/passkey/finish", "passkeyFinish"],
       ["POST", "/api/account/codes", "codes"],
       ["POST", "/api/account/signout", "signOut"],
+      ["POST", "/api/account/listing", "listing"],
       ["GET", "/api/account", "view"],
       ["DELETE", "/api/account", "delete"],
     ];
@@ -75,6 +76,12 @@ describe("account routes (S19c)", () => {
     expect(route("GET", "/api/account/register")).toBeUndefined();
     expect(route("POST", "/api/account")).toBeUndefined();
     expect(route("POST", "/api/account/other")).toBeUndefined();
+  });
+
+  it("maps the leaderboard path (S20d)", () => {
+    expect(route("GET", "/api/leaderboard")).toEqual({ kind: "leaderboard" });
+    expect(route("POST", "/api/leaderboard")).toBeUndefined();
+    expect(route("GET", "/api/leaderboard/standard")).toBeUndefined();
   });
 
   it("maps the handle report path", () => {

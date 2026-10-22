@@ -88,6 +88,12 @@ export function glicko2(player: Rating, results: readonly Result[], tau = TAU): 
 }
 
 /** What players see: "?" while the rating is still uncertain (D17), else the rounded rating. */
+/** A public leaderboard for one ruleset id (S20d): opted-in players with a settled rating, best first. */
+export interface Leaderboard {
+  ruleset: string;
+  players: { handle: string; rating: number; games: number }[];
+}
+
 export const ratingText = (r: Rating) => (r.rd > SHOW_RD ? "?" : String(Math.round(r.rating)));
 
 /** Light's score for a finished game, or undefined for a result that has none. */
