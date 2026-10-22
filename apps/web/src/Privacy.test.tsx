@@ -38,8 +38,16 @@ describe("Privacy screen", () => {
     expect(html).toContain("Accounts");
     expect(html).toContain("No email");
     expect(html).toContain("public key");
-    expect(html).toContain("deletes your handle, passkeys, recovery codes, and sessions");
+    expect(html).toContain("deletes your handle, passkeys, recovery codes, sessions, and ratings");
     expect(html).toContain("Handle reports");
     expect(html).toContain("not who sent it");
+  });
+
+  it("describes ratings: what is kept, the room link until deletion, and no game history", () => {
+    const html = renderToStaticMarkup(<Privacy onClose={() => undefined} />);
+    expect(html).toContain("Ratings");
+    expect(html).toContain("rating, how sure it is, and how many rated games");
+    expect(html).toContain("account id with your seat until the room is deleted");
+    expect(html).not.toContain("Games are not linked to accounts");
   });
 });

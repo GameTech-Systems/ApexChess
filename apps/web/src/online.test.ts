@@ -10,6 +10,7 @@ import {
   loadTimeControl,
   lockFor,
   parseServerMessage,
+  seekMessage,
   reconnectDelay,
   requestTicket,
   saveTicket,
@@ -167,5 +168,15 @@ describe("how a game ended, for each player", () => {
     expect(endText({ status: "noShow" }, "dark")).toBe(
       "Neither player locked a setup in time. Both lose this game.",
     );
+  });
+});
+
+describe("seekMessage (S19d)", () => {
+  const lock = lockFor(resolveRuleset(catalog, "standard"), {}, "10+0");
+  it("sends a signed-in player's session so the game can be rated", () => {
+    expect(JSON.parse(seekMessage(lock, "tok"))).toEqual({ type: "seek", ...lock, session: "tok" });
+  });
+  it("sends no session for an anonymous player", () => {
+    expect(JSON.parse(seekMessage(lock))).toEqual({ type: "seek", ...lock });
   });
 });

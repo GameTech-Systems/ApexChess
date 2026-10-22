@@ -18,9 +18,9 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         opponent can see them. The server keeps each room (both setups, the moves, and how the game
         ended) until 7 days after its last move, then deletes it. In a timed game it also keeps each
         player's time left and when the current turn began, so it can run the clock; these go with
-        the room. Games are not linked to accounts, and no names are shown outside events (below).
-        This browser keeps a random room ticket so you can rejoin after a reload; leaving the room
-        removes it.
+        the room. Only a rated game (below) links a room to accounts, and no names are shown outside
+        events (below). This browser keeps a random room ticket so you can rejoin after a reload;
+        leaving the room removes it.
       </p>
       <h2>Game archive</h2>
       <p>
@@ -48,8 +48,16 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         private key stays on your device), a hash of each unused recovery code, and a hash of each
         session's token with its expiry. This browser keeps the session token and your handle until
         you sign out. Signing out deletes that session; expired sessions are deleted daily. Delete
-        account deletes your handle, passkeys, recovery codes, and sessions at once. Your games were
-        never linked to your account, so they stay in the anonymous archive.
+        account deletes your handle, passkeys, recovery codes, sessions, and ratings at once. The
+        archive never names an account, so your games stay in it anonymously.
+      </p>
+      <h2>Ratings</h2>
+      <p>
+        When you are signed in, quick match sends your session token so the game can be rated. In a
+        rated game the room keeps your account id with your seat until the room is deleted. When a
+        rated game ends, the server updates your rating for that rule set: it keeps the rating, how
+        sure it is, and how many rated games you have played. It keeps no list of your games or
+        opponents.
       </p>
       <h2>Handle reports</h2>
       <p>

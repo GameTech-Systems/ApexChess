@@ -67,6 +67,10 @@ export function lockFor(ruleset: ResolvedRuleset, setup: Pieces, timeControl?: s
   };
 }
 
+/** The quick-match message: the lock, plus the session token of a signed-in player (S19d, ratings). */
+export const seekMessage = (lock: Lock, session?: string) =>
+  JSON.stringify({ type: "seek", ...lock, ...(session && { session }) });
+
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /** "10:00", "0:09.4" in the last ten seconds, "1:02:03", "2d 23:59:59". */
