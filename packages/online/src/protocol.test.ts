@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { PROTOCOL, parseClientMessage, parseLock } from "./protocol";
+import { PROTOCOL, parseClientMessage, parseLock, parseSeek } from "./protocol";
 
 describe("parsing what clients send", () => {
   it("accepts each known message and nothing else", () => {
@@ -45,5 +45,18 @@ describe("parsing what clients send", () => {
     expect(parseLock({ ...lock, timeControl: 3 })).toBeUndefined();
     const huge = Object.fromEntries(Array.from({ length: 200 }, (_, i) => [`s${i}`, "pawn"]));
     expect(parseLock({ ...lock, setup: huge })).toBeUndefined();
+  });
+});
+
+describe("parsing a quick-match seek (S19d)", () => {
+  const lock = { protocol: PROTOCOL, ruleset: { id: "standard", version: "0.1.0" }, setup: {} };
+  it("reads a lock with an optional session token", () => {
+    expect(parseSeek(lock)).toEqual({ lock });
+    expect(parseSeek({ ...lock, session: "abc" })).toEqual({ lock, session: "abc" });
+  });
+  it("refuses a bad lock or a session that is not a short string", () => {
+    expect(parseSeek({ session: "abc" })).toBeUndefined();
+    expect(parseSeek({ ...lock, session: 5 })).toBeUndefined();
+    expect(parseSeek({ ...lock, session: "x".repeat(65) })).toBeUndefined();
   });
 });

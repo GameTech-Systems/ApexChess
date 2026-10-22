@@ -142,6 +142,25 @@ export function parseLock(value: unknown): Lock | undefined {
   };
 }
 
+/**
+ * What a quick-match socket sends: a lock, plus a signed-in player's session token so the game can be
+ * rated (S19d). The token sits in the message, not the URL, so it stays out of request logs.
+ */
+export interface Seek {
+  lock: Lock;
+  session?: string;
+}
+
+const MAX_TOKEN = 64;
+
+export function parseSeek(value: unknown): Seek | undefined {
+  const lock = parseLock(value);
+  if (!lock || !isRecord(value)) return undefined;
+  const { session } = value;
+  if (session === undefined) return { lock };
+  return typeof session === "string" && session.length <= MAX_TOKEN ? { lock, session } : undefined;
+}
+
 /** A room-socket message from raw text; undefined if malformed or unknown. */
 export function parseClientMessage(text: string): ClientMessage | undefined {
   let value: unknown;
