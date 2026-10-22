@@ -61,7 +61,7 @@ const seatToMove = (room: RoomData) =>
 
 describe("locking setups", () => {
   it("rejects an illegal setup, another ruleset version, and an old protocol", () => {
-    const { h1: _, ...missingKing } = first;
+    const missingKing = Object.fromEntries(Object.entries(first).filter(([sq]) => sq !== "h1"));
     expect(code(() => createRoom("R", ruleset, lock(missingKing), "t"))).toBe("setup");
     expect(
       code(() =>
