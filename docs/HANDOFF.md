@@ -1,27 +1,27 @@
 # Handoff
 
-Updated 2026-10-22 by S20 (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-10-22 by S20a (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Phase 7 planned (plan only): `docs/decisions/0007-tournaments-growth.md` defines S20a clocks, S20b share and replay, S20c tournaments, and S20d leaderboards (blocked).
+- Phase 7. Online rooms and quick match have server-kept time controls (D19 decided): untimed, Fischer grid 1+0…30+20 (default 10+0), per move (30 s to 3 days), abandonment only (5 min). Presets are data in `rules/timeControls.json`.
+- Flag fall ends the game by Durable Object alarm or on a late message; archive format 2 adds `time_control` (migration 0003). Protocol is 2.
 - Not live: S16 hosting steps plus the D1 database (see 0004) are still open.
 
 ## Next session
-**S20a — Phase 7: Clocks** · Opus 5.5 · effort high
-Set: `/model opus` · `/effort high`
-Why: server-kept clocks are correctness-critical, and tournaments need them.
-Start with: `/start-session S20a`
+**S20b — Phase 7: Share and replay** · Sonnet 5.5 · effort medium
+Set: `/model sonnet` · `/effort medium`
+Why: client-only links and a replay viewer; no server or decision work.
+Start with: `/start-session S20b`
 
 ## Decisions in effect for the next step
-- D19: Fischer presets 3+2, 5+3, 10+5, 15+10 plus untimed; running out of time loses unless the opponent has insufficient material (default, provisional, 0007).
-- D8: draws as decided; its insufficient-material test also decides flag-fall draws.
+- D18: no individual games published by the site; share links live only in the player's browser (0007).
 
 ## Open questions for the owner
-- D19 time controls and D20 tournament format: Claude uses the 0007 defaults if unanswered.
-- D16 sign-in, D17 ratings, minimum age: S19c, S19d, and S20d stay blocked.
-- Before the first deploy: create D1 `apexchess-archive` and send Claude its id.
+- D19 preset list and grace time are Claude's choice (provisional); change `rules/timeControls.json` to adjust.
+- D20 tournament format: Claude uses the 0007 defaults if unanswered. D16, D17, minimum age: S19c, S19d, S20d stay blocked.
+- Before the first deploy: create D1 `apexchess-archive` and send Claude its id; apply migrations 0001 to 0003.
 
 ## Notes for Claude
-- Rooms: `packages/online/src/room.ts` (pure) and the `Room` Durable Object in `apps/server`. Clock logic stays pure and is tested with injected time.
-- Add the time control and the `time` result reason to `archiveRecord`; a D1 migration may be needed.
+- Clock logic: `packages/online/src/clock.ts` (pure); `room.ts` `tick`, `deadline`, `presence` take `now`. Stats skip abandoned games, count losses on time.
+- Smoke test: `pnpm dev:server`, then create and join a `move30s` room; it ends on time after 30 s.
 - Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.
