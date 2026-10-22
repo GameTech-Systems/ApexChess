@@ -20,5 +20,10 @@ Anything in this repository that is not clearly code, rules text, rule data, or
 documentation should be treated as reserved unless the Owner states otherwise in writing.
 
 THIRD-PARTY COMPONENTS
-Third-party dependencies keep their own licenses. They will be listed here as they
-are added.
+Third-party dependencies keep their own licenses.
+
+  - React and React DOM (MIT): web app runtime.
+  - @cloudflare/workers-types (MIT OR Apache-2.0): server type definitions, build time only.
+
+Build and test tools (TypeScript, Vite, Vitest, ESLint, Prettier, Ajv, Wrangler) are
+not shipped; each keeps its own permissive license.

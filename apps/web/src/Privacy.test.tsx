@@ -9,5 +9,7 @@ describe("Privacy screen", () => {
     expect(html).toContain("this browser");
     expect(html).toContain("No accounts");
     expect(html).toContain("Close");
+    expect(html).toContain("Online games");
+    expect(html).toContain("7 days");
   });
 });

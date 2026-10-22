@@ -43,10 +43,10 @@ Short output is the default: every reply, note, and file is paid for again in la
 - **Naming.** Product text says "Apex Chess". apexchess.icu is the web address. Use the owner's terms: chord (side to side), ray (forward and back), front chord, Player's Choice, The Elbow Room.
 
 ## Stack
-TypeScript, pnpm workspaces (`packages/engine`, `apps/web`, `packages/sim`), Vite + React static SPA, Vitest, Node 22. Hosting: Cloudflare, provisional.
+TypeScript, pnpm workspaces (`packages/engine`, `packages/online`, `apps/web`, `apps/server`, `packages/sim`), Vite + React static SPA, Cloudflare Worker + Durable Objects for online play, Vitest, Node 22. Hosting: Cloudflare, provisional.
 
 ## Commands
-`pnpm install`, `pnpm dev` (web app), `pnpm build`, `pnpm test` (Vitest, all packages), `pnpm lint` (ESLint + Prettier check; `pnpm exec prettier --write .` to fix), `pnpm typecheck`, `pnpm validate:rules` (Ajv: `rules/<kind>/*.json` against `rules/schema/<kind>.schema.json`), `pnpm sim` (bot self-play report; `--pool --games --depth --nodes --seed --cap --jobs --report`).
+`pnpm install`, `pnpm dev` (web app; proxies `/api` to 8787), `pnpm dev:server` (online-play Worker via `wrangler dev` on 8787), `pnpm build`, `pnpm test` (Vitest, all packages), `pnpm lint` (ESLint + Prettier check; `pnpm exec prettier --write .` to fix), `pnpm typecheck`, `pnpm validate:rules` (Ajv: `rules/<kind>/*.json` against `rules/schema/<kind>.schema.json`), `pnpm sim` (bot self-play report; `--pool --games --depth --nodes --seed --cap --jobs --report`).
 
 ## Where things live
 - `docs/HANDOFF.md`: current state and the next session (rewritten every session). `docs/sessions/LOG.md`: one line per session.

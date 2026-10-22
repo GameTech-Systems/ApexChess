@@ -11,6 +11,14 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         Setups you save are kept in this browser's local storage so you can reuse them. They stay on
         this device and are never sent to us. Clearing your browser's site data removes them.
       </p>
+      <h2>Online games</h2>
+      <p>
+        When you play online, your locked setup and your moves go to our game server so your
+        opponent can see them. The server keeps each room (both setups, the moves, and how the game
+        ended) until 7 days after its last move, then deletes it. No names or accounts are involved.
+        This browser keeps a random room ticket so you can rejoin after a reload; leaving the room
+        removes it.
+      </p>
       <h2>What is not collected</h2>
       <p>
         Games you play against the computer or on one screen are not sent anywhere. The site is
