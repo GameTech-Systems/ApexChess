@@ -1,13 +1,10 @@
-/** Aggregate self-play games by first move, setup family, and setup feature, then write Markdown. */
-import {
-  canonicalSetupId,
-  type Pieces,
-  type ResolvedRuleset,
-  type Result,
-} from "@apexchess/engine";
+/** Self-play reports: the 0003 aggregate of bot games, plus the cap count, written as Markdown. */
+import type { Pieces, ResolvedRuleset, Result } from "@apexchess/engine";
+import { aggregate, type Aggregate, type Row } from "./aggregate";
 import type { Bot } from "./selfplay";
-import { setupFeatures } from "./setups";
-import { addScore, emptyTally, summarize, zCritical, type Summary, type Tally } from "./stats";
+import type { Summary } from "./stats";
+
+export type { Row } from "./aggregate";
 
 export interface PlayedGame {
   index: number;
@@ -27,50 +24,17 @@ export interface ReportOptions {
   capWarning: number;
 }
 
-export interface Row {
-  label: string;
-  feature?: string;
-  value?: string;
-  /** Pool families with this feature value: few means the row mostly measures those setups. */
-  families?: number;
-  /** Preset id, when the family is a preset's. */
-  preset?: string;
-  summary: Summary;
-  standsOut: boolean;
-}
-
-export interface Report {
+export interface Report extends Aggregate {
   ruleset: { id: string; version: string };
   meta: { bot: Bot; seed: number; maxPlies: number };
   options: ReportOptions;
   games: number;
   capped: number;
-  firstMove: { all: Summary; sameSetup: Summary | null };
-  families: Row[];
-  features: Row[];
-  zCritical: { families: number; features: number };
 }
 
 /** Light's score: 1, ½, or 0. A capped game scores as a draw. */
 function lightScore(r: Result): number {
   return r.status === "checkmate" ? (r.winner === "light" ? 1 : 0) : 0.5;
-}
-
-function rows(
-  tallies: Map<string, Tally & Omit<Row, "summary" | "standsOut">>,
-  options: ReportOptions,
-): { rows: Row[]; z: number } {
-  const shown = [...tallies.values()].filter(
-    (t) => t.wins + t.draws + t.losses >= options.minGames,
-  );
-  const z = zCritical(options.alpha, shown.length);
-  return {
-    rows: shown.map(({ wins, draws, losses, ...rest }) => {
-      const summary = summarize({ wins, draws, losses });
-      return { ...rest, summary, standsOut: Math.abs(summary.z) >= z };
-    }),
-    z,
-  };
 }
 
 export function buildReport(
@@ -80,73 +44,14 @@ export function buildReport(
   meta: Report["meta"],
   options: ReportOptions,
 ): Report {
-  const ids = pool.map((p) => canonicalSetupId(ruleset, p));
-  const presetId = canonicalSetupId(ruleset, ruleset.setup.default.pieces);
-  const features = pool.map((p) => setupFeatures(ruleset, p));
-  const all = emptyTally();
-  const same = emptyTally();
-  const families = new Map<string, Tally & { label: string; preset?: string }>();
-  for (const id of ids)
-    families.set(id, {
-      ...emptyTally(),
-      label: id,
-      ...(id === presetId ? { preset: ruleset.setup.default.id } : {}),
-    });
-  const byFeature = new Map<
-    string,
-    Tally & { label: string; feature: string; value: string; families: number }
-  >();
-  const featureTally = (feature: string, value: string) => {
-    const key = `${feature}=${value}`;
-    if (!byFeature.has(key)) {
-      const families = new Set(ids.filter((_, i) => features[i]![feature] === value)).size;
-      byFeature.set(key, { ...emptyTally(), label: key, feature, value, families });
-    }
-    return byFeature.get(key)!;
-  };
-
-  for (const g of games) {
-    const s = lightScore(g.result);
-    addScore(all, s);
-    const [lid, did] = [ids[g.light]!, ids[g.dark]!];
-    if (lid === did) {
-      addScore(same, s);
-      continue;
-    }
-    addScore(families.get(lid)!, s);
-    addScore(families.get(did)!, 1 - s);
-    const [lf, df] = [features[g.light]!, features[g.dark]!];
-    for (const feature of Object.keys(lf)) {
-      if (lf[feature] === df[feature]) continue;
-      addScore(featureTally(feature, lf[feature]!), s);
-      addScore(featureTally(feature, df[feature]!), 1 - s);
-    }
-  }
-
-  const sorted = new Map(
-    [...byFeature].sort(([, a], [, b]) =>
-      a.feature === b.feature
-        ? a.value.localeCompare(b.value, "en", { numeric: true })
-        : a.feature < b.feature
-          ? -1
-          : 1,
-    ),
-  );
-  const fam = rows(families, options);
-  const feat = rows(sorted, options);
+  const scored = games.map((g) => ({ light: g.light, dark: g.dark, score: lightScore(g.result) }));
   return {
     ruleset: { id: ruleset.id, version: ruleset.version },
     meta,
     options,
     games: games.length,
     capped: games.filter((g) => g.capped).length,
-    firstMove: {
-      all: summarize(all),
-      sameSetup: same.wins + same.draws + same.losses ? summarize(same) : null,
-    },
-    families: fam.rows,
-    features: feat.rows,
-    zCritical: { families: fam.z, features: feat.z },
+    ...aggregate(ruleset, pool, scored, options),
   };
 }
 
