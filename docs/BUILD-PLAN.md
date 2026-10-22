@@ -116,8 +116,8 @@ Finished online games go to D1 as anonymous records (ruleset id and version, set
 ### S19b — Phase 6: Public setup statistics · Opus 5.5 · high · `done`
 A daily aggregate of the archive using the 0003 measures (N ≥ 30, Bonferroni bar); a JSON snapshot per ruleset version and a Stats page. Decisions: D18 (default).
 
-### S19c — Phase 6: Accounts · Opus 5.5 · high · `blocked`
-Passkey plus handle, recovery codes, account deletion, handle policy, Terms. Blocked until the owner decides D16 and the minimum age.
+### S19c — Phase 6: Accounts · Opus 5.5 · high · `done`
+Passkey plus handle, recovery codes, account deletion, handle policy, Terms. D16 decided (passkey + handle, no email); minimum age 13. Built as recorded in 0006.
 
 ### S19d — Phase 6: Ratings · Opus 5.5 · high · `blocked`
 Glicko-2 per ruleset id for signed-in quick-match games. Blocked on D17, S19c, and a rule for abandoned games.
@@ -158,7 +158,7 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D13 | Hidden setups online | Decided: each player locks a saved setup before matchmaking; the server reveals both at the start, then flips the coin | S18 |
 | D14 | Hidden setups in hot-seat play | Decided: each player builds a setup while the other looks away; both are revealed at the start | S12 |
 | D15 | Sides when two players play again | Decided: they alternate sides | S5 |
-| D16 | Sign-in | Open; default: passkey + handle, no email (0006) | S19c |
+| D16 | Sign-in | Decided: passkey + handle, no email; minimum age 13 (0006) | S19c |
 | D17 | Ratings | Open; default: Glicko-2, one pool per ruleset id, signed-in quick match only (0006) | S19d |
 | D18 | Public setup statistics | Open; default (provisional): aggregates only, N ≥ 30, from anonymous archived games (0006) | S19a |
 | D19 | Time controls | Decided 2026-10-22: all options offered (untimed, Fischer, fixed time per move, abandonment only), default 10+0; presets in `rules/timeControls.json` (Claude's choice, provisional); running out of time loses unless the opponent has insufficient material (0007) | S20a |

@@ -3,8 +3,8 @@ export function Privacy({ onClose }: { onClose: () => void }) {
     <section aria-label="Privacy" className="rules">
       <h1>Privacy</h1>
       <p>
-        Apex Chess runs in your browser. No accounts, no sign-in, no ads, no analytics, and no
-        cookies.
+        Apex Chess runs in your browser. Accounts are optional, and there are no ads, no analytics,
+        and no cookies.
       </p>
       <h2>What is stored</h2>
       <p>
@@ -18,8 +18,9 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         opponent can see them. The server keeps each room (both setups, the moves, and how the game
         ended) until 7 days after its last move, then deletes it. In a timed game it also keeps each
         player's time left and when the current turn began, so it can run the clock; these go with
-        the room. No accounts are involved, and no names outside events (below). This browser keeps
-        a random room ticket so you can rejoin after a reload; leaving the room removes it.
+        the room. Games are not linked to accounts, and no names are shown outside events (below).
+        This browser keeps a random room ticket so you can rejoin after a reload; leaving the room
+        removes it.
       </p>
       <h2>Game archive</h2>
       <p>
@@ -39,6 +40,21 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         This browser keeps a random event ticket for each event you join, so you can come back to
         it. Event games go to the game archive like any other online game, without names or the
         event.
+      </p>
+      <h2>Accounts</h2>
+      <p>
+        No email, password, real name, or birth date is asked for. If you create an account, the
+        server keeps your handle, the day you made the account, the public key of each passkey (the
+        private key stays on your device), a hash of each unused recovery code, and a hash of each
+        session's token with its expiry. This browser keeps the session token and your handle until
+        you sign out. Signing out deletes that session; expired sessions are deleted daily. Delete
+        account deletes your handle, passkeys, recovery codes, and sessions at once. Your games were
+        never linked to your account, so they stay in the anonymous archive.
+      </p>
+      <h2>Handle reports</h2>
+      <p>
+        A report keeps the reported handle, the reason chosen from a list, and the day: not who sent
+        it.
       </p>
       <h2>Share links</h2>
       <p>

@@ -5,6 +5,7 @@ import {
   EVENT_CONTROLS,
   EVENT_MIN,
   NAME_MAX,
+  NAME_MIN,
   PROTOCOL,
   ROUND_ROBIN_MAX,
   crosstable,
@@ -23,8 +24,7 @@ import { copyText } from "./share";
 const POLL_MS = 10_000;
 
 const tcLabel = (id: string) => timeControl(id)?.label ?? id;
-const NAME_HINT =
-  "Your name is shown only in this event and deleted with it. Don't use your real name.";
+const NAME_HINT = `Your name is shown only in this event and deleted with it. Use ${NAME_MIN} to ${NAME_MAX} letters A to Z, digits, _ or -, starting with a letter. Don't use your real name.`;
 
 /** Create an event or open one by code. */
 export function EventHome({
