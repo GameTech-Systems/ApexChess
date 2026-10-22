@@ -34,6 +34,13 @@ export interface StatsSnapshot {
   zCritical: { families: number; features: number };
 }
 
+/** One published snapshot in the /api/stats list. */
+export interface StatsListing {
+  ruleset: RulesetRef;
+  asOf: string;
+  games: number;
+}
+
 /** An archive row as read back: `format`, `setup_light`, `setup_dark`, `plies`, `status`, `winner`. */
 export type StatsInput = Record<string, unknown>;
 

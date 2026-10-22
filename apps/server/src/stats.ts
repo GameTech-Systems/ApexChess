@@ -3,15 +3,9 @@
  * pure statsSnapshot in @apexchess/online and stored in table `stats` (migrations/0002_stats.sql).
  */
 import { catalog, resolveRuleset } from "@apexchess/engine";
-import { STATS_OPTIONS, statsSnapshot, type RulesetRef } from "@apexchess/online";
+import { STATS_OPTIONS, statsSnapshot, type StatsListing } from "@apexchess/online";
 
 type Db = Pick<D1Database, "prepare">;
-
-export interface StatsListing {
-  ruleset: RulesetRef;
-  asOf: string;
-  games: number;
-}
 
 const day = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
