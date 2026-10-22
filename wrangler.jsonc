@@ -1,8 +1,18 @@
 {
   "name": "apexchess",
   "compatibility_date": "2026-10-01",
+  // Online play (S18): /api goes to the Worker; everything else is the static app.
+  "main": "./apps/server/src/worker.ts",
   "assets": {
     "directory": "./apps/web/dist",
     "not_found_handling": "single-page-application",
+    "run_worker_first": ["/api/*"],
   },
+  "durable_objects": {
+    "bindings": [
+      { "name": "ROOMS", "class_name": "Room" },
+      { "name": "LOBBY", "class_name": "Lobby" },
+    ],
+  },
+  "migrations": [{ "tag": "v1", "new_sqlite_classes": ["Room", "Lobby"] }],
 }

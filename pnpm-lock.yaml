@@ -36,6 +36,19 @@ importers:
         specifier: ^2.1.0
         version: 2.1.9(@types/node@22.20.5)
 
+  apps/server:
+    dependencies:
+      '@apexchess/engine':
+        specifier: workspace:*
+        version: link:../../packages/engine
+      '@apexchess/online':
+        specifier: workspace:*
+        version: link:../../packages/online
+    devDependencies:
+      '@cloudflare/workers-types':
+        specifier: ^5.20261021.1
+        version: 5.20261021.1
+
   apps/web:
     dependencies:
       '@apexchess/engine':
@@ -166,6 +179,9 @@ packages:
   '@babel/types@7.29.8':
     resolution: {integrity: sha512-Vj1jF3cPfxg7OAfoI7QnVKLoILlm2JF9pnVHrX8qx7AHMiYWT+NDAA7jChlNgRS4WTLc/fD1lXLmPixluj+3Gg==}
     engines: {node: '>=6.9.0'}
+
+  '@cloudflare/workers-types@5.20261021.1':
+    resolution: {integrity: sha512-HLu/pEx2488dO13gQoLaLmMMTcah/NqEn/c/6c/sJV9nyBY/CVQAI9Zj+YugKacrxENDmIVPU0HKIK+mU7WKzA==}
 
   '@esbuild/aix-ppc64@0.21.5':
     resolution: {integrity: sha512-1SDgH6ZSPTlggy1yI6+Dbkiz8xzpHJEVAlF/AM1tHPLsf5STom9rwtjE4hKAF20FfXXNTFqEYXyJNWh1GiZedQ==}
@@ -1365,6 +1381,8 @@ snapshots:
     dependencies:
       '@babel/helper-string-parser': 7.29.7
       '@babel/helper-validator-identifier': 7.29.7
+
+  '@cloudflare/workers-types@5.20261021.1': {}
 
   '@esbuild/aix-ppc64@0.21.5':
     optional: true
