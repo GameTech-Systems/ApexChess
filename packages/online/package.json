@@ -9,6 +9,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
-    "@apexchess/engine": "workspace:*"
+    "@apexchess/engine": "workspace:*",
+    "@apexchess/sim": "workspace:*"
   }
 }
