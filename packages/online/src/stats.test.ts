@@ -14,14 +14,15 @@ const darkResigns: End = { status: "resigned", winner: "light" };
 const lightResigns: End = { status: "resigned", winner: "dark" };
 const draw: End = { status: "draw", reason: "stalemate" };
 
-const row = (light: Pieces, dark: Pieces, end: End, plies = 10) =>
+const row = (light: Pieces, dark: Pieces, end: End, plies = 10, format = 1) =>
   archiveRow({
-    format: 1,
+    format,
     ruleset: { id: ruleset.id, version: ruleset.version },
     setups: { light, dark },
     moves: Array.from({ length: plies }, () => "e2e3"),
     end,
     endDay: "2026-10-21",
+    timeControl: "10+0",
   } satisfies ArchiveRecord);
 const times = <T>(n: number, f: (i: number) => T) => Array.from({ length: n }, (_, i) => f(i));
 const snap = (rows: ReturnType<typeof row>[]) => statsSnapshot(ruleset, rows, "2026-10-21")!;
@@ -34,10 +35,20 @@ describe("public setup statistics", () => {
   it("counts only games of at least 10 plies in a format it reads", () => {
     const short = times(40, () => row(d, q, lightMates, 9));
     expect(statsSnapshot(ruleset, short, "2026-10-21")).toBeUndefined();
-    const future = times(40, () => Object.assign(row(d, q, lightMates), { format: 2 }));
+    const future = times(40, () => Object.assign(row(d, q, lightMates), { format: 3 }));
     expect(statsSnapshot(ruleset, future, "2026-10-21")).toBeUndefined();
     const s = snap([...short, ...times(30, () => row(d, q, draw))]);
     expect(s.games).toBe(30);
+  });
+
+  it("reads format 2 rows, counts a loss on time, and skips abandoned games", () => {
+    const s = snap([
+      ...times(20, () => row(d, q, { status: "time", winner: "dark" }, 10, 2)),
+      ...times(10, () => row(d, q, { status: "draw", reason: "time" }, 10, 2)),
+      ...times(9, () => row(d, q, { status: "abandoned", winner: "light" }, 10, 2)),
+      ...times(9, () => row(d, q, { status: "draw", reason: "abandoned" }, 10, 2)),
+    ]);
+    expect(s.firstMove.all).toMatchObject({ n: 30, wins: 0, draws: 10, losses: 20 });
   });
 
   it("scores checkmate, resignation, and draws from light's view", () => {

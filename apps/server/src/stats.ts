@@ -31,7 +31,7 @@ export async function refreshStats(db: Db, now: number): Promise<number> {
     }
     const { results } = await db
       .prepare(
-        "SELECT format, setup_light, setup_dark, plies, status, winner FROM games" +
+        "SELECT format, setup_light, setup_dark, plies, status, winner, reason FROM games" +
           " WHERE ruleset_id = ? AND ruleset_version = ? AND end_day < ? AND plies >= ?",
       )
       .bind(id, version, today, STATS_OPTIONS.minPlies)

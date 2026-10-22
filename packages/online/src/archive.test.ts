@@ -8,24 +8,28 @@ import {
   resolveRuleset,
 } from "@apexchess/engine";
 import { ARCHIVE_FORMAT, archiveRecord, archiveRow } from "./archive";
-import { PROTOCOL, type Lock } from "./protocol";
-import { act, createRoom, joinRoom, sideOf, type RoomData } from "./room";
+import { PROTOCOL, type ClientMessage, type Lock } from "./protocol";
+import { act as actAt, createRoom, joinRoom, sideOf, tick, type RoomData, type Seat } from "./room";
 
 const ruleset = resolveRuleset(catalog, "standard");
 const first = catalog.setups[0]!.pieces;
 const second = mirrorSetup(ruleset.board, "light", first);
-const lock = (setup: Lock["setup"]): Lock => ({
+const lock = (setup: Lock["setup"], timeControl?: string): Lock => ({
   protocol: PROTOCOL,
   ruleset: { id: ruleset.id, version: ruleset.version },
   setup,
+  ...(timeControl && { timeControl }),
 });
-const started = (): RoomData =>
+const act = (room: RoomData, rs: typeof ruleset, seat: Seat, msg: ClientMessage) =>
+  actAt(room, rs, seat, msg, 0);
+const started = (timeControl?: string): RoomData =>
   joinRoom(
-    createRoom("ABC234", ruleset, lock(first), "seat-zero-token"),
+    createRoom("ABC234", ruleset, lock(first, timeControl), "seat-zero-token"),
     ruleset,
     lock(second),
     "seat-one-token",
     () => 0.9,
+    0,
   );
 const toMove = (room: RoomData) =>
   sideOf(room, 0) === replay(ruleset, room.record!).position.turn ? 0 : 1;
@@ -51,6 +55,7 @@ describe("archive record", () => {
       moves: after.record!.moves,
       end: after.end,
       endDay: "2026-10-22",
+      timeControl: "10+0",
     });
     expect(rec.moves).toHaveLength(3);
     const text = JSON.stringify(rec);
@@ -69,6 +74,16 @@ describe("archive record", () => {
     // The rematch is its own game and is archived when it ends.
     const ended = act(rematch, ruleset, 1, { type: "resign" });
     expect(archiveRecord(rematch, ended, NOW)?.moves).toEqual([]);
+  });
+
+  it("keeps the time control and a loss on time, with no clock times", () => {
+    const before = started("3+2");
+    const flagged = tick(before, ruleset, 180_000);
+    const rec = archiveRecord(before, flagged, NOW)!;
+    expect(rec.timeControl).toBe("3+2");
+    expect(rec.end).toEqual({ status: "time", winner: "dark" });
+    expect(JSON.stringify(rec)).not.toContain("180000");
+    expect(archiveRow(rec)).toMatchObject({ status: "time", winner: "dark", time_control: "3+2" });
   });
 
   it("covers draws by agreement", () => {
@@ -99,6 +114,7 @@ describe("archive row", () => {
       winner: rec.end.status === "resigned" ? rec.end.winner : null,
       reason: null,
       end_day: "2026-10-22",
+      time_control: "10+0",
     });
   });
 

@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { leave, seek, type Seeker } from "./lobby";
 
-const seeker = (ticket: string, ruleset = "standard@0.1.0"): Seeker => ({ ticket, ruleset });
+const seeker = (ticket: string, ruleset = "standard@0.1.0", timeControl = "10+0"): Seeker => ({
+  ticket,
+  ruleset,
+  timeControl,
+});
 
 describe("quick match", () => {
   it("waits alone, then pairs the next player on the same ruleset", () => {
@@ -19,6 +23,15 @@ describe("quick match", () => {
     expect(next.queue).toHaveLength(2);
     expect(seek(next.queue, seeker("c", "standard@1.0.0")).pair!.map((s) => s.ticket)).toEqual([
       "b",
+      "c",
+    ]);
+  });
+
+  it("pairs only within the same time control (D19)", () => {
+    const { queue } = seek([], seeker("a", "standard@0.1.0", "3+2"));
+    expect(seek(queue, seeker("b", "standard@0.1.0", "5+3")).pair).toBeUndefined();
+    expect(seek(queue, seeker("c", "standard@0.1.0", "3+2")).pair!.map((s) => s.ticket)).toEqual([
+      "a",
       "c",
     ]);
   });

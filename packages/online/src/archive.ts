@@ -8,7 +8,7 @@ import type { End, RulesetRef } from "./protocol";
 import type { RoomData } from "./room";
 
 /** Bump when the record's shape changes; old rows keep their number. */
-export const ARCHIVE_FORMAT = 1;
+export const ARCHIVE_FORMAT = 2;
 
 export interface ArchiveRecord {
   format: number;
@@ -19,6 +19,8 @@ export interface ArchiveRecord {
   end: End;
   /** UTC day the game ended, `YYYY-MM-DD`. */
   endDay: string;
+  /** Time control id (D19; format 2). Clock times are not kept. */
+  timeControl: string;
 }
 
 export type ArchiveRow = Record<string, string | number | null>;
@@ -38,10 +40,11 @@ export function archiveRecord(
     moves: [...record.moves],
     end,
     endDay: new Date(now).toISOString().slice(0, 10),
+    timeControl: after.timeControl,
   };
 }
 
-/** The record as table columns, in the order of `apps/server/migrations/0001_archive.sql`. */
+/** The record as table columns, in the order of `apps/server/migrations/` 0001 then 0003. */
 export function archiveRow(rec: ArchiveRecord): ArchiveRow {
   return {
     format: rec.format,
@@ -55,5 +58,6 @@ export function archiveRow(rec: ArchiveRecord): ArchiveRow {
     winner: rec.end.status === "draw" ? null : rec.end.winner,
     reason: rec.end.status === "draw" ? rec.end.reason : null,
     end_day: rec.endDay,
+    time_control: rec.timeControl,
   };
 }

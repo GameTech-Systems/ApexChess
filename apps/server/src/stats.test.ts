@@ -4,6 +4,7 @@ import { catalog, resolveRuleset, type Pieces } from "@apexchess/engine";
 import { archiveRow, type End, type StatsSnapshot } from "@apexchess/online";
 import archive from "../migrations/0001_archive.sql?raw";
 import statsTable from "../migrations/0002_stats.sql?raw";
+import timeControl from "../migrations/0003_time_control.sql?raw";
 import { insertGame } from "./archive";
 import { getStats, listStats, refreshStats } from "./stats";
 
@@ -16,7 +17,7 @@ const { DatabaseSync } = createRequire(import.meta.url)("node:sqlite") as {
 };
 function d1() {
   const db = new DatabaseSync(":memory:");
-  db.exec(archive + statsTable);
+  db.exec(archive + statsTable + timeControl);
   const prepare = (sql: string) => {
     const bound = (values: unknown[]) => ({
       all: async () => ({ results: db.prepare(sql).all(...values) }),
@@ -41,12 +42,13 @@ function addGames(
 ) {
   for (let i = 0; i < count; i++) {
     const row = archiveRow({
-      format: 1,
+      format: 2,
       ruleset: { id: ruleset.id, version },
       setups: { light: d, dark: q },
       moves: Array(plies).fill("e2e3"),
       end: lightMates,
       endDay,
+      timeControl: "10+0",
     });
     const { sql, values } = insertGame(row, `g${n++}`);
     db.prepare(sql).run(...values);
