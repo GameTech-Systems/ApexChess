@@ -91,7 +91,9 @@ describe("creating and joining an event (D20)", () => {
         createEvent("E", ruleset, req("abc", { ruleset: { ...ref, version: "9.9.9" } }), "t"),
       ),
     ).toBe("ruleset");
-    expect(code(() => createEvent("E", ruleset, req("abc", { protocol: 0 }), "t"))).toBe("protocol");
+    expect(code(() => createEvent("E", ruleset, req("abc", { protocol: 0 }), "t"))).toBe(
+      "protocol",
+    );
     expect(code(() => createEvent("E", ruleset, req("admin"), "t"))).toBe("name");
   });
 

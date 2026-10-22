@@ -58,7 +58,10 @@ export type ErrorCode =
   | "players"
   | "turn"
   | "stale"
-  | "illegal";
+  | "illegal"
+  /** Accounts (S19c): sign in first or again; a handle already in use. */
+  | "signIn"
+  | "taken";
 
 /** Which event game a room plays (D20): rounds and boards count from 0. */
 export interface EventRef {

@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { ROOM_ALPHABET, clientKey, httpStatus, normalizeCode, roomCode, route } from "./routes";
+import {
+  ROOM_ALPHABET,
+  bearerToken,
+  clientKey,
+  httpStatus,
+  normalizeCode,
+  passkeyOrigin,
+  roomCode,
+  route,
+} from "./routes";
 
 describe("api routes", () => {
   it("maps each api path and nothing else", () => {
@@ -46,6 +55,61 @@ describe("event routes (D20)", () => {
   });
 });
 
+describe("account routes (S19c)", () => {
+  it("maps each account action to one method", () => {
+    const cases: [string, string, string][] = [
+      ["POST", "/api/account/register", "register"],
+      ["POST", "/api/account/register/finish", "registerFinish"],
+      ["POST", "/api/account/signin", "signIn"],
+      ["POST", "/api/account/signin/finish", "signInFinish"],
+      ["POST", "/api/account/recover", "recover"],
+      ["POST", "/api/account/passkey", "passkey"],
+      ["POST", "/api/account/passkey/finish", "passkeyFinish"],
+      ["POST", "/api/account/codes", "codes"],
+      ["POST", "/api/account/signout", "signOut"],
+      ["GET", "/api/account", "view"],
+      ["DELETE", "/api/account", "delete"],
+    ];
+    for (const [method, path, action] of cases)
+      expect(route(method, path)).toEqual({ kind: "account", action });
+    expect(route("GET", "/api/account/register")).toBeUndefined();
+    expect(route("POST", "/api/account")).toBeUndefined();
+    expect(route("POST", "/api/account/other")).toBeUndefined();
+  });
+
+  it("maps the handle report path", () => {
+    expect(route("POST", "/api/reports")).toEqual({ kind: "report" });
+    expect(route("GET", "/api/reports")).toBeUndefined();
+  });
+
+  it("reads a bearer token and nothing else", () => {
+    const h = (v?: string) => new Headers(v ? { authorization: v } : {});
+    expect(bearerToken(h("Bearer abc_DEF-123"))).toBe("abc_DEF-123");
+    expect(bearerToken(h("bearer abc"))).toBe("abc");
+    expect(bearerToken(h("Basic abc"))).toBeUndefined();
+    expect(bearerToken(h("Bearer "))).toBeUndefined();
+    expect(bearerToken(h())).toBeUndefined();
+  });
+
+  it("accepts passkeys only from this site's own origin, or a local dev page", () => {
+    const at = (url: string, origin?: string) =>
+      passkeyOrigin(new Request(url, { headers: origin ? { origin } : {} }));
+    expect(at("https://apexchess.icu/api/account", "https://apexchess.icu")).toEqual({
+      origin: "https://apexchess.icu",
+      rpID: "apexchess.icu",
+    });
+    expect(at("http://127.0.0.1:8787/api/account", "http://localhost:5173")).toEqual({
+      origin: "http://localhost:5173",
+      rpID: "localhost",
+    });
+    expect(at("https://apexchess.icu/api/account", "https://evil.example")).toBeUndefined();
+    expect(at("https://apexchess.icu/api/account", "http://apexchess.icu")).toBeUndefined();
+    expect(at("https://apexchess.icu/api/account", "http://localhost:5173")).toBeUndefined();
+    expect(at("https://apexchess.icu/api/account")).toBeUndefined();
+    expect(at("https://apexchess.icu/api/account", "null")).toBeUndefined();
+  });
+});
+
 describe("room codes", () => {
   it("are six characters from an alphabet without look-alikes", () => {
     const code = roomCode(Uint8Array.from([0, 1, 30, 31, 255, 128]));
@@ -69,6 +133,8 @@ describe("http status for room errors", () => {
     expect(httpStatus("busy")).toBe(429);
     expect(httpStatus("started")).toBe(409);
     expect(httpStatus("host")).toBe(403);
+    expect(httpStatus("signIn")).toBe(401);
+    expect(httpStatus("taken")).toBe(409);
   });
 });
 
