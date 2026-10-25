@@ -253,7 +253,7 @@ export function App({
       </div>
       {page && (
         <div className="view" key={`panel-${panel}`}>
-          {panel === "account" ? page : <main>{page}</main>}
+          {panel === "account" ? page : <main className="page">{page}</main>}
         </div>
       )}
       <footer className="site-footer">

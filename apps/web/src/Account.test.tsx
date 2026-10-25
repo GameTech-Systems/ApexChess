@@ -1,7 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { MIN_AGE, REPORT_REASONS } from "@apexchess/online";
-import { AccountScreen, CodesScreen, SignedOutScreen } from "./Account";
+import { HANDLE_MAX, HANDLE_MIN, MIN_AGE, REPORT_REASONS } from "@apexchess/online";
+import { Account, AccountScreen, CodesScreen, SignedOutScreen } from "./Account";
 
 const noop = () => undefined;
 
@@ -24,6 +24,28 @@ describe("Account screens", () => {
     expect(html).toContain("recovery code");
     expect(html).toContain("No email");
     expect(html).toContain("optional");
+  });
+
+  it("puts Back next to the title and groups the forms", () => {
+    const store = { getItem: () => null, setItem: noop };
+    const html = renderToStaticMarkup(<Account store={store} onClose={noop} onTerms={noop} />);
+    expect(html).toMatch(/<h1>Account<\/h1><button[^>]*>Back<\/button>/);
+    expect(html.match(/>Back</g)).toHaveLength(1);
+    expect(html.match(/class="form-group"/g)).toHaveLength(4);
+    expect(html).not.toContain('class="controls"');
+  });
+
+  it("says what a handle may contain", () => {
+    const html = renderToStaticMarkup(
+      <SignedOutScreen
+        busy={false}
+        onSignUp={noop}
+        onSignIn={noop}
+        onRecover={noop}
+        onTerms={noop}
+      />,
+    );
+    expect(html).toContain(`${HANDLE_MIN} to ${HANDLE_MAX}`);
   });
 
   it("shows new recovery codes once, with a warning", () => {

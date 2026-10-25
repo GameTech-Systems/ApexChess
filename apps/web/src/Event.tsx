@@ -17,6 +17,7 @@ import {
 } from "@apexchess/online";
 import { callApi, eventLink, loadEventToken, pointsText, saveEventToken } from "./event";
 import { apiUrl } from "./online";
+import { Field, PageHead } from "./Page";
 import type { KeyValueStore } from "./savedSetups";
 import { copyText } from "./share";
 
@@ -44,55 +45,71 @@ export function EventHome({
   const [tc, setTc] = useState(DEFAULT_TIME_CONTROL);
   const [code, setCode] = useState("");
   return (
-    <main>
-      <section aria-label="Tournaments" className="controls">
-        <h1>Tournaments</h1>
+    <main className="page">
+      <section aria-label="Tournaments" className="form-page">
+        <PageHead title="Tournaments" onBack={onExit} />
+        {error && (
+          <p role="alert" className="notice">
+            {error}
+          </p>
+        )}
         <p>
           A private event for {EVENT_MIN} or more players: share its link, and everyone who has it
           can join until you start. Up to {ROUND_ROBIN_MAX} players play a round robin; more play a
           Swiss event. Each game you lock a new setup; the pairing decides who plays light.
         </p>
-        <h2>Create an event</h2>
-        <label>
-          Your name{" "}
-          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={NAME_MAX} />
-        </label>
-        <label>
-          Time control{" "}
-          <select value={tc} onChange={(e) => setTc(e.target.value)}>
-            {EVENT_CONTROLS.map((c) => (
-              <option key={c.id} value={c.id}>
-                {c.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <p>{NAME_HINT}</p>
-        <button type="button" onClick={() => onCreate(name, tc)} disabled={busy || !name.trim()}>
-          Create the event
-        </button>
-        <h2>Open an event</h2>
-        <label>
-          Event code{" "}
-          <input
+        <form
+          className="form-group"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (!busy && name.trim()) onCreate(name, tc);
+          }}
+        >
+          <h2>Create an event</h2>
+          <Field
+            label="Your name"
+            hint={NAME_HINT}
+            value={name}
+            onChange={setName}
+            maxLength={NAME_MAX}
+            autoComplete="off"
+          />
+          <label className="field">
+            Time control
+            <select value={tc} onChange={(e) => setTc(e.target.value)}>
+              {EVENT_CONTROLS.map((c) => (
+                <option key={c.id} value={c.id}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </label>
+          <button type="submit" disabled={busy || !name.trim()}>
+            Create the event
+          </button>
+        </form>
+        <form
+          className="form-group"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (code.trim().length === 6) onOpen(code.trim().toUpperCase());
+          }}
+        >
+          <h2>Open an event</h2>
+          <Field
+            label="Event code"
+            hint="Six characters, from the link you were sent."
             value={code}
-            onChange={(e) => setCode(e.target.value)}
+            onChange={setCode}
             maxLength={6}
             autoCapitalize="characters"
+            autoComplete="off"
             spellCheck={false}
           />
-        </label>
-        <button
-          type="button"
-          onClick={() => onOpen(code.trim().toUpperCase())}
-          disabled={code.trim().length !== 6}
-        >
-          Open
-        </button>
-        <button type="button" onClick={onExit}>
-          Back
-        </button>
-        {error && <p role="alert">{error}</p>}
+          <button type="submit" disabled={code.trim().length !== 6}>
+            Open
+          </button>
+        </form>
       </section>
     </main>
   );
@@ -187,30 +204,37 @@ export function EventScreen({
       : "Round robin";
 
   return (
-    <main>
-      <section aria-label="Event" className="controls">
-        <h1>Event {view.id}</h1>
-        <p>
-          Time control: {tcLabel(view.timeControl)}.{" "}
-          {view.format
-            ? `${format(n)}, ${state === "over" ? `${view.rounds} rounds, finished` : `Round ${round + 1} of ${view.rounds}`}.`
-            : `${n} player${n === 1 ? "" : "s"} so far.`}
-        </p>
-        <p>
-          Only people with the link can open this page. The event and its names are deleted 7 days
-          after its last game.
-        </p>
-        <button
-          type="button"
-          onClick={async () =>
-            setCopied(await copyText(location.origin + location.pathname + eventLink(view.id)))
-          }
-        >
-          {copied ? "Link copied" : "Copy event link"}
-        </button>
+    <main className="page">
+      <section aria-label="Event" className="form-page">
+        <PageHead title={`Event ${view.id}`} onBack={onExit} />
+        {error && (
+          <p role="alert" className="notice">
+            {error}
+          </p>
+        )}
+        <div className="form-group">
+          <p>
+            Time control: {tcLabel(view.timeControl)}.{" "}
+            {view.format
+              ? `${format(n)}, ${state === "over" ? `${view.rounds} rounds, finished` : `Round ${round + 1} of ${view.rounds}`}.`
+              : `${n} player${n === 1 ? "" : "s"} so far.`}
+          </p>
+          <p>
+            Only people with the link can open this page. The event and its names are deleted 7 days
+            after its last game.
+          </p>
+          <button
+            type="button"
+            onClick={async () =>
+              setCopied(await copyText(location.origin + location.pathname + eventLink(view.id)))
+            }
+          >
+            {copied ? "Link copied" : "Copy event link"}
+          </button>
+        </div>
 
         {state === "open" && (
-          <>
+          <div className="form-group">
             <h2>Players</h2>
             <ol>
               {players.map((p, i) => (
@@ -223,15 +247,14 @@ export function EventScreen({
             </ol>
             {you === undefined ? (
               <>
-                <label>
-                  Your name{" "}
-                  <input
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    maxLength={NAME_MAX}
-                  />
-                </label>
-                <p>{NAME_HINT}</p>
+                <Field
+                  label="Your name"
+                  hint={NAME_HINT}
+                  value={name}
+                  onChange={setName}
+                  maxLength={NAME_MAX}
+                  autoComplete="off"
+                />
                 <button type="button" onClick={() => onJoin(name)} disabled={busy || !name.trim()}>
                   Join
                 </button>
@@ -250,11 +273,11 @@ export function EventScreen({
             ) : (
               <p>Waiting for {players[0]} to start the event.</p>
             )}
-          </>
+          </div>
         )}
 
         {state === "playing" && mine && (
-          <>
+          <div className="form-group">
             {mine.dark === undefined ? (
               <p>You have the bye this round: 1 point.</p>
             ) : mine.score ? (
@@ -274,13 +297,8 @@ export function EventScreen({
                 )}
               </>
             )}
-          </>
+          </div>
         )}
-
-        <button type="button" onClick={onExit}>
-          Back
-        </button>
-        {error && <p role="alert">{error}</p>}
       </section>
       {state !== "open" && (
         <section aria-label="Results" className="event">
@@ -463,11 +481,11 @@ function EventPage({
 
   if (!view)
     return (
-      <main>
-        <p role="status">{error ?? "Loading the event…"}</p>
-        <button type="button" onClick={onExit}>
-          Back
-        </button>
+      <main className="page">
+        <section aria-label="Event" className="form-page">
+          <PageHead title={`Event ${code}`} onBack={onExit} />
+          <p role="status">{error ?? "Loading the event…"}</p>
+        </section>
       </main>
     );
   return (

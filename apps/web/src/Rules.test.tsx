@@ -14,6 +14,10 @@ describe("Rules screen", () => {
     expect(html).toContain("no castling");
     expect(html).toContain("Close");
   });
+  it("does not promise which king sits at the bottom of the view", () => {
+    expect(html).toContain("light at h1, dark at a8");
+    expect(html).not.toContain("own king at the bottom");
+  });
   it("describes how every piece moves, each with a diagram", () => {
     for (const name of ["King", "Queen", "Rook", "Bishop", "Knight", "Pawns"])
       expect(html).toContain(`<h3>${name}</h3>`);

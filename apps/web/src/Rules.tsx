@@ -102,10 +102,10 @@ export function Rules({ ruleset, onClose }: { ruleset: ResolvedRuleset; onClose:
 
       <h2>The board</h2>
       <p>
-        Each king starts in its own light corner: light at {light}, dark at {dark}. You always see
-        your own king at the bottom. A <strong>chord</strong> is a side-to-side line across the
-        board; every chord is a single color. A <strong>ray</strong> is a line straight ahead and
-        back. Files (a to h) and ranks (1 to 8) run on the slant.
+        Each king starts in its own light corner: light at {light}, dark at {dark}. A{" "}
+        <strong>chord</strong> is a side-to-side line across the board; every chord is a single
+        color. A <strong>ray</strong> is a line straight ahead and back. Files (a to h) and ranks (1
+        to 8) run on the slant.
       </p>
 
       <h2>How the pieces move</h2>

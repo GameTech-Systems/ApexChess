@@ -40,8 +40,9 @@ export function Terms({ onClose }: { onClose: () => void }) {
       <p>
         Apex Chess™ and the turned-board logo are trademarks of the site&apos;s owner. The code and
         rules are source-available under the PolyForm Shield License 1.0.0, which gives no right to
-        use the name or logo. Chess itself belongs to everyone; Apex Chess is not affiliated with
-        any chess federation or other chess site.
+        use the name or logo. Chess itself belongs to everyone. Apex Chess is not affiliated with
+        any chess federation or other chess site, except Chess Nines (Chess9s.com), which comes from
+        the same organization and may be linked from this site.
       </p>
       <h2>No warranty</h2>
       <p>

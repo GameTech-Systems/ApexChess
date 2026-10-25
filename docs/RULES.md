@@ -4,7 +4,7 @@ Status: **draft**. Lines marked *(Dn)* follow an owner decision; lines marked *(
 
 ## 1. The board
 
-Apex Chess uses a standard 8×8 board and standard algebraic coordinates (files a to h, ranks 1 to 8), turned 45° so the long light diagonal a8 to h1 runs from one player to the other. Each king starts in its own light corner: **light at h1, dark at a8** *(D4)*. Each player sees the board with their own king at the bottom.
+Apex Chess uses a standard 8×8 board and standard algebraic coordinates (files a to h, ranks 1 to 8), turned 45° so the long light diagonal a8 to h1 runs from one player to the other. Each king starts in its own light corner: **light at h1, dark at a8** *(D4)*.
 
 Because the coordinates are the ordinary ones, any chess set, board, and notation work.
 
