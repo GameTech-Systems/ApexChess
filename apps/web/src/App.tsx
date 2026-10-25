@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import {
   addMove,
   catalog,
@@ -19,6 +19,9 @@ import { Account } from "./Account";
 import { Board } from "./Board";
 import { Events } from "./Event";
 import { parseEventHash } from "./event";
+import { Home, type Opponent, type Panel, type SetupChoice } from "./Home";
+import { Logo } from "./Logo";
+import { MoveList } from "./MoveList";
 import { Online } from "./Online";
 import { loadTicket, saveTicket } from "./online";
 import type { KeyValueStore } from "./savedSetups";
@@ -47,6 +50,7 @@ const current = { id: ruleset.id, version: ruleset.version };
 const presets = catalog.setups
   .filter((s) => s.status === "official")
   .map((s) => ({ name: s.name, pieces: s.pieces }));
+const defaultSetup = ruleset.setup.default.pieces;
 const store = (() => {
   try {
     return window.localStorage;
@@ -54,6 +58,10 @@ const store = (() => {
     return { getItem: () => null, setItem: () => undefined };
   }
 })();
+
+/** Public source repository and the build's third-party license file (see NOTICE). */
+const SOURCE_URL = "https://github.com/GameTech-Systems/ApexChess";
+const LICENSES_URL = "/third-party-licenses.txt";
 
 function describe(res: ReturnType<typeof result>): string {
   if (res.status === "checkmate") return `Checkmate. ${res.winner} wins.`;
@@ -64,27 +72,32 @@ function describe(res: ReturnType<typeof result>): string {
 /** Seeds differ per game; the engine stays deterministic for a given seed. */
 const newRandom = () => seededRandom(Math.floor(Math.random() * 2 ** 32));
 
-type Mode = "hotseat" | "computer" | "online";
+type Mode = Opponent;
 
 /** `storage` is this device's store; tests pass their own. */
 export function App({
   initialMode,
+  initialSetup = "custom",
   storage = store,
 }: {
   initialMode?: Mode;
+  initialSetup?: SetupChoice;
   storage?: KeyValueStore;
 }) {
   // A saved room ticket means a game in progress: go straight back to it.
   const [mode, setMode] = useState(
     () => initialMode ?? (loadTicket(storage) ? "online" : undefined),
   );
+  const [setupChoice, setSetupChoice] = useState<SetupChoice>(initialSetup);
   const [level, setLevel] = useState<Level>(DEFAULT_LEVEL);
-  const [showRules, setShowRules] = useState(false);
-  const [showPrivacy, setShowPrivacy] = useState(false);
-  const [showStats, setShowStats] = useState(false);
-  const [showLeaderboard, setShowLeaderboard] = useState(false);
-  const [showTerms, setShowTerms] = useState(false);
-  const [showAccount, setShowAccount] = useState(false);
+  // Pages opened over the current view; closing one goes back to what was under it.
+  const [panels, setPanels] = useState<Panel[]>([]);
+  // Bumped by Home so everything below starts over.
+  const [round, setRound] = useState(0);
+  const busy = useRef<string>();
+  const setBusy = useCallback((why: string | undefined) => {
+    busy.current = why;
+  }, []);
   // A share link opens straight to its setup or replay; the fragment never reaches the server.
   const [shared, setShared] = useState(() =>
     parseShare(ruleset, typeof window === "undefined" ? "" : window.location.hash),
@@ -94,18 +107,49 @@ export function App({
     const code = parseEventHash(typeof window === "undefined" ? "" : window.location.hash);
     return code ? { code } : undefined;
   });
+  const clearHash = () => {
+    if (window.location.hash)
+      history.replaceState(null, "", window.location.pathname + window.location.search);
+  };
   const closeShared = () => {
-    history.replaceState(null, "", window.location.pathname + window.location.search);
+    clearHash();
     setShared(undefined);
   };
+  const open = (panel: Panel) => setPanels((p) => [...p.filter((x) => x !== panel), panel]);
+  const close = () => setPanels((p) => p.slice(0, -1));
+  const panel = panels.at(-1);
+
+  const goHome = (e?: MouseEvent) => {
+    e?.preventDefault();
+    const online = mode === "online" && loadTicket(storage);
+    const warning = online
+      ? "Your online game keeps going while you are away. Go to the home page? You can rejoin from Play online."
+      : busy.current;
+    if (warning && !window.confirm(warning)) return;
+    clearHash();
+    busy.current = undefined;
+    setShared(undefined);
+    setEvents(undefined);
+    setPanels([]);
+    setMode(undefined);
+    setRound((n) => n + 1);
+  };
+
+  const view = shared ? `shared-${shared.kind}` : events ? "events" : (mode ?? "home");
+  // Each new page starts at the top.
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [view, panel, round]);
+
+  let content;
   if (shared?.kind === "game")
-    return (
+    content = (
       <main>
         <Replay ruleset={ruleset} record={shared.record} onClose={closeShared} />
       </main>
     );
-  if (shared?.kind === "setup")
-    return (
+  else if (shared?.kind === "setup")
+    content = (
       <main>
         <SetupBuilder
           ruleset={ruleset}
@@ -117,15 +161,15 @@ export function App({
         />
       </main>
     );
-  if (events)
-    return (
+  else if (events)
+    content = (
       <Events
         initial={events.code}
         ruleset={ruleset}
         store={storage}
         onPlay={(ticket) => {
           // The game takes over the page; a reload rejoins it from the saved ticket.
-          history.replaceState(null, "", window.location.pathname + window.location.search);
+          clearHash();
           saveTicket(storage, ticket);
           setEvents(undefined);
           setMode("online");
@@ -133,98 +177,29 @@ export function App({
         onExit={() => setEvents(undefined)}
       />
     );
-  if (showRules)
-    return (
-      <main>
-        <Rules onClose={() => setShowRules(false)} />
+  else if (!mode)
+    content = (
+      <main className="wide">
+        <Home
+          ruleset={ruleset}
+          initialLevel={level}
+          onStart={(opponent, setup, lvl) => {
+            setSetupChoice(setup);
+            setLevel(lvl);
+            setMode(opponent);
+          }}
+          onOpen={open}
+          onEvents={() => setEvents({})}
+        />
       </main>
     );
-  if (showPrivacy)
-    return (
-      <main>
-        <Privacy onClose={() => setShowPrivacy(false)} />
-      </main>
-    );
-  if (showStats)
-    return (
-      <main>
-        <Stats onClose={() => setShowStats(false)} current={current} />
-      </main>
-    );
-  if (showLeaderboard)
-    return (
-      <main>
-        <Leaderboard onClose={() => setShowLeaderboard(false)} />
-      </main>
-    );
-  if (showTerms)
-    return (
-      <main>
-        <Terms onClose={() => setShowTerms(false)} />
-      </main>
-    );
-  if (showAccount)
-    return (
-      <Account
-        store={storage}
-        onClose={() => setShowAccount(false)}
-        onTerms={() => setShowTerms(true)}
-      />
-    );
-  if (!mode) {
-    return (
-      <main>
-        <section aria-label="Choose an opponent" className="controls">
-          <button type="button" onClick={() => setMode("hotseat")}>
-            Two players
-          </button>
-          <button type="button" onClick={() => setMode("computer")}>
-            Play the computer
-          </button>
-          <button type="button" onClick={() => setMode("online")}>
-            Play online
-          </button>
-          <label>
-            Computer{" "}
-            <select value={level} onChange={(e) => setLevel(e.target.value as Level)}>
-              {Object.entries(levels).map(([id, l]) => (
-                <option key={id} value={id}>
-                  {l.label}
-                </option>
-              ))}
-            </select>
-          </label>
-          <button type="button" onClick={() => setEvents({})}>
-            Tournaments
-          </button>
-          <button type="button" onClick={() => setShowRules(true)}>
-            Rules
-          </button>
-          <button type="button" onClick={() => setShowStats(true)}>
-            Statistics
-          </button>
-          <button type="button" onClick={() => setShowLeaderboard(true)}>
-            Leaderboards
-          </button>
-          <button type="button" onClick={() => setShowAccount(true)}>
-            Account
-          </button>
-          <button type="button" onClick={() => setShowPrivacy(true)}>
-            Privacy
-          </button>
-          <button type="button" onClick={() => setShowTerms(true)}>
-            Terms
-          </button>
-        </section>
-      </main>
-    );
-  }
-  if (mode === "online")
-    return (
+  else if (mode === "online")
+    content = (
       <Online
         ruleset={ruleset}
         presets={presets}
         store={storage}
+        setup={setupChoice === "default" ? defaultSetup : undefined}
         onExit={() => setMode(undefined)}
         onEvent={(code) => {
           setMode(undefined);
@@ -232,16 +207,102 @@ export function App({
         }}
       />
     );
-  return mode === "computer" ? (
-    <VsComputer level={level} onChangeSetups={() => setMode(undefined)} />
-  ) : (
-    <HotSeat />
+  else
+    content =
+      mode === "computer" ? (
+        <VsComputer
+          level={level}
+          useDefault={setupChoice === "default"}
+          onChangeSetups={() => setMode(undefined)}
+          onBusy={setBusy}
+        />
+      ) : (
+        <HotSeat useDefault={setupChoice === "default"} onBusy={setBusy} />
+      );
+
+  let page;
+  if (panel === "rules") page = <Rules ruleset={ruleset} onClose={close} />;
+  else if (panel === "privacy") page = <Privacy onClose={close} />;
+  else if (panel === "terms") page = <Terms onClose={close} />;
+  else if (panel === "stats") page = <Stats onClose={close} current={current} />;
+  else if (panel === "leaderboard") page = <Leaderboard onClose={close} />;
+  else if (panel === "account")
+    page = <Account store={storage} onClose={close} onTerms={() => open("terms")} />;
+
+  return (
+    <>
+      <a className="skip" href="#content">
+        Skip to content
+      </a>
+      <header className="topbar">
+        <a className="brand" href="/" onClick={goHome} aria-label="Apex Chess home">
+          <Logo size={34} />
+          <span>Apex Chess</span>
+        </a>
+        <nav aria-label="Site">
+          <a href="/" onClick={goHome}>
+            Home
+          </a>
+          <button type="button" className="link" onClick={() => open("rules")}>
+            Rules
+          </button>
+        </nav>
+      </header>
+      <div id="content" className="view" key={`${view}-${round}`} hidden={Boolean(page)}>
+        {content}
+      </div>
+      {page && (
+        <div className="view" key={`panel-${panel}`}>
+          {panel === "account" ? page : <main>{page}</main>}
+        </div>
+      )}
+      <footer className="site-footer">
+        <nav aria-label="About">
+          <button type="button" className="link" onClick={() => open("rules")}>
+            Rules
+          </button>
+          <button type="button" className="link" onClick={() => open("privacy")}>
+            Privacy
+          </button>
+          <button type="button" className="link" onClick={() => open("terms")}>
+            Terms
+          </button>
+          <a href={LICENSES_URL}>Third-party licenses</a>
+          <a href={SOURCE_URL} rel="noopener noreferrer" target="_blank">
+            Source code
+          </a>
+        </nav>
+        <p>
+          © 2026 Duke Johnson. Apex Chess™ and the turned-board logo are trademarks of Duke Johnson.
+          The code and rules are source-available under the PolyForm Shield License 1.0.0; they are
+          not open source.
+        </p>
+      </footer>
+    </>
   );
 }
 
-/** The player builds a setup; the computer picks a legal preset, revealed when the game starts. */
-function VsComputer({ level, onChangeSetups }: { level: Level; onChangeSetups: () => void }) {
-  const [setups, setSetups] = useState<[Pieces, Pieces]>();
+/** The player builds a setup (or takes the default); the computer picks a legal preset, revealed when the game starts. */
+function VsComputer({
+  level,
+  useDefault,
+  onChangeSetups,
+  onBusy,
+}: {
+  level: Level;
+  useDefault?: boolean;
+  onChangeSetups: () => void;
+  onBusy?: (why: string | undefined) => void;
+}) {
+  const computerSetup = () =>
+    chooseSetup(
+      ruleset,
+      presets.map((p) => p.pieces),
+      newRandom(),
+    );
+  const [setups, setSetups] = useState<[Pieces, Pieces] | undefined>(() =>
+    useDefault ? [defaultSetup, computerSetup()] : undefined,
+  );
   if (!setups) {
     return (
       <main>
@@ -250,42 +311,56 @@ function VsComputer({ level, onChangeSetups }: { level: Level; onChangeSetups: (
           title="Build your setup"
           presets={presets}
           store={store}
-          onDone={(pieces) =>
-            setSetups([
-              pieces,
-              chooseSetup(
-                ruleset,
-                presets.map((p) => p.pieces),
-                newRandom(),
-              ),
-            ])
-          }
+          side={seatOf(0, 0)}
+          doneLabel="Start the game"
+          onDone={(pieces) => setSetups([pieces, computerSetup()])}
         />
       </main>
     );
   }
-  return <Game setups={setups} onChangeSetups={onChangeSetups} computer={level} />;
+  return (
+    <Game
+      setups={setups}
+      onChangeSetups={useDefault ? () => setSetups(undefined) : onChangeSetups}
+      computer={level}
+      onBusy={onBusy}
+    />
+  );
 }
 
-/** D14: each player builds a setup while the other looks away; both are revealed at the start. */
-function HotSeat() {
-  const [built, setBuilt] = useState<Pieces[]>([]);
+/** D14: each player builds a setup from their own seat while the other looks away; both are revealed at the start. */
+function HotSeat({
+  useDefault,
+  onBusy,
+}: {
+  useDefault?: boolean;
+  onBusy?: (why: string | undefined) => void;
+}) {
+  const [built, setBuilt] = useState<Pieces[]>(() =>
+    useDefault ? [defaultSetup, defaultSetup] : [],
+  );
   if (built.length < 2) {
-    const player = built.length + 1;
+    const player = built.length as 0 | 1;
+    const side = seatOf(player, 0);
     return (
       <main>
         <SetupBuilder
           key={player}
           ruleset={ruleset}
-          title={`Player ${player}: build your setup${player === 2 ? " (Player 1, look away)" : " (Player 2, look away)"}`}
+          title={`Player ${player + 1}: build your setup (Player ${player === 0 ? 2 : 1}, look away)`}
+          hint={`Player ${player + 1} plays ${side} in the first game. The board is shown from your seat, with your own coordinates.`}
           presets={presets}
           store={store}
+          side={side}
+          doneLabel={player === 0 ? "Done: hand over to Player 2" : "Start the game"}
           onDone={(pieces) => setBuilt([...built, pieces])}
         />
       </main>
     );
   }
-  return <Game setups={[built[0]!, built[1]!]} onChangeSetups={() => setBuilt([])} />;
+  return (
+    <Game setups={[built[0]!, built[1]!]} onChangeSetups={() => setBuilt([])} onBusy={onBusy} />
+  );
 }
 
 /** With `computer`, Player 2 is the computer at that level. */
@@ -293,10 +368,13 @@ export function Game({
   setups,
   onChangeSetups,
   computer,
+  onBusy,
 }: {
   setups: readonly [Pieces, Pieces];
   onChangeSetups: () => void;
   computer?: Level;
+  /** Told when leaving would lose a game in progress (a reason), and when it would not. */
+  onBusy?: (why: string | undefined) => void;
 }) {
   // D15: players alternate sides on rematch; `games` counts finished-or-abandoned games.
   const [games, setGames] = useState(0);
@@ -345,6 +423,12 @@ export function Game({
   };
 
   const moveCount = record.moves.length;
+  const inProgress = moveCount > 0 && !over;
+  useEffect(() => {
+    onBusy?.(inProgress ? "Leave this game? It is not saved." : undefined);
+  }, [inProgress, onBusy]);
+  useEffect(() => () => onBusy?.(undefined), [onBusy]);
+
   const lastCapture = useRef(false);
   lastCapture.current = Object.keys(pos.squares).length < 32;
   const prevCount = useRef(moveCount);
@@ -393,7 +477,7 @@ export function Game({
   if (showRules)
     return (
       <main>
-        <Rules onClose={() => setShowRules(false)} />
+        <Rules ruleset={ruleset} onClose={() => setShowRules(false)} />
       </main>
     );
 
@@ -405,7 +489,7 @@ export function Game({
     );
 
   return (
-    <main style={{ "--sq-dark": darkSquareColors[dark] } as React.CSSProperties}>
+    <main className="game" style={{ "--sq-dark": darkSquareColors[dark] } as React.CSSProperties}>
       <Board
         board={ruleset.board}
         position={pos}
@@ -418,103 +502,105 @@ export function Game({
         checked={checked}
         danger={danger}
       />
-      <p role="status" className="status">
-        {over
-          ? describe(res)
-          : `${pos.turn} to move${checked ? " (check)" : ""}${computerTurn ? ", computer thinking" : ""}`}
-      </p>
-      <p className="seats">
-        {computer
-          ? `You play ${seatOf(0, games)}, the computer (${levels[computer].label}) plays ${seatOf(1, games)}.`
-          : `Player 1 plays ${seatOf(0, games)}, Player 2 plays ${seatOf(1, games)}.`}
-      </p>
-      {pending && (
-        <div role="group" aria-label="Promote to" className="promo">
-          {pending.choices.map((piece) => (
-            <button
-              key={piece}
-              type="button"
-              onClick={() =>
-                commit(
-                  moves.find(
-                    (m) => m.from === pending.from && m.to === pending.to && m.promotion === piece,
-                  )!,
-                )
-              }
-            >
-              {piece}
-            </button>
-          ))}
-        </div>
-      )}
-      <div className="controls">
-        <button type="button" onClick={rematch}>
-          {over ? `Rematch (game ${games + 2})` : "Restart"}
-        </button>
-        <button type="button" onClick={undo} disabled={record.moves.length === 0 || computerTurn}>
-          Undo
-        </button>
-        <button type="button" onClick={onChangeSetups}>
-          New setups
-        </button>
-        <button type="button" onClick={() => setShowRules(true)}>
-          Rules
-        </button>
-        <button type="button" onClick={() => setShowReplay(true)} disabled={!record.moves.length}>
-          Replay
-        </button>
-        <button
-          type="button"
-          disabled={!record.moves.length}
-          onClick={async () => {
-            const url = location.origin + location.pathname + gameLink(ruleset, record);
-            setCopied(await copyText(url));
-          }}
-        >
-          {copied ? "Link copied" : "Copy game link"}
-        </button>
-        {!computer && (
-          <label>
-            <input type="checkbox" checked={flip} onChange={(e) => setFlip(e.target.checked)} />{" "}
-            Turn the board each move
-          </label>
-        )}
-        <label>
-          <input
-            type="checkbox"
-            checked={showMoves}
-            onChange={(e) => setShowMoves(e.target.checked)}
-          />{" "}
-          Show legal moves
-        </label>
-        <label>
-          <input
-            type="checkbox"
-            checked={showDanger}
-            onChange={(e) => setShowDanger(e.target.checked)}
-          />{" "}
-          Show pieces in danger
-        </label>
-        <label>
-          <input type="checkbox" checked={sound} onChange={(e) => setSound(e.target.checked)} />{" "}
-          Sound
-        </label>
-        <label>
-          Dark squares{" "}
-          <select value={dark} onChange={(e) => setDark(e.target.value as DarkSquareColor)}>
-            {Object.keys(darkSquareColors).map((name) => (
-              <option key={name} value={name}>
-                {name}
-              </option>
+      <div className="game-side">
+        <p role="status" className="status">
+          {over
+            ? describe(res)
+            : `${pos.turn} to move${checked ? " (check)" : ""}${computerTurn ? ", computer thinking" : ""}`}
+        </p>
+        <p className="seats">
+          {computer
+            ? `You play ${seatOf(0, games)}, the computer (${levels[computer].label}) plays ${seatOf(1, games)}.`
+            : `Player 1 plays ${seatOf(0, games)}, Player 2 plays ${seatOf(1, games)}.`}
+        </p>
+        {pending && (
+          <div role="group" aria-label="Promote to" className="promo">
+            {pending.choices.map((piece) => (
+              <button
+                key={piece}
+                type="button"
+                onClick={() =>
+                  commit(
+                    moves.find(
+                      (m) =>
+                        m.from === pending.from && m.to === pending.to && m.promotion === piece,
+                    )!,
+                  )
+                }
+              >
+                {piece}
+              </button>
             ))}
-          </select>
-        </label>
+          </div>
+        )}
+        <div className="controls">
+          <button type="button" onClick={rematch}>
+            {over ? `Rematch (game ${games + 2})` : "Restart"}
+          </button>
+          <button type="button" onClick={undo} disabled={record.moves.length === 0 || computerTurn}>
+            Undo
+          </button>
+          <button type="button" onClick={onChangeSetups}>
+            New setups
+          </button>
+          <button type="button" onClick={() => setShowRules(true)}>
+            Rules
+          </button>
+          <button type="button" onClick={() => setShowReplay(true)} disabled={!record.moves.length}>
+            Replay
+          </button>
+          <button
+            type="button"
+            disabled={!record.moves.length}
+            onClick={async () => {
+              const url = location.origin + location.pathname + gameLink(ruleset, record);
+              setCopied(await copyText(url));
+            }}
+          >
+            {copied ? "Link copied" : "Copy game link"}
+          </button>
+        </div>
+        <div className="controls toggles">
+          {!computer && (
+            <label>
+              <input type="checkbox" checked={flip} onChange={(e) => setFlip(e.target.checked)} />{" "}
+              Turn the board each move
+            </label>
+          )}
+          <label>
+            <input
+              type="checkbox"
+              checked={showMoves}
+              onChange={(e) => setShowMoves(e.target.checked)}
+            />{" "}
+            Show legal moves
+          </label>
+          <label>
+            <input
+              type="checkbox"
+              checked={showDanger}
+              onChange={(e) => setShowDanger(e.target.checked)}
+            />{" "}
+            Show pieces in danger
+          </label>
+          <label>
+            <input type="checkbox" checked={sound} onChange={(e) => setSound(e.target.checked)} />{" "}
+            Sound
+          </label>
+          <label>
+            Dark squares{" "}
+            <select value={dark} onChange={(e) => setDark(e.target.value as DarkSquareColor)}>
+              {Object.keys(darkSquareColors).map((name) => (
+                <option key={name} value={name}>
+                  {name}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <h2 className="moves-title">Moves</h2>
+        <MoveList moves={record.moves} first={ruleset.firstToMove} />
       </div>
-      <ol className="moves" aria-label="Moves">
-        {record.moves.map((text, i) => (
-          <li key={i}>{text}</li>
-        ))}
-      </ol>
     </main>
   );
 }

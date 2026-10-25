@@ -18,6 +18,7 @@ import {
   type Ticket,
 } from "@apexchess/online";
 import { Board } from "./Board";
+import { MoveList } from "./MoveList";
 import { copyText, gameLink } from "./share";
 import { SetupBuilder, type Preset } from "./SetupBuilder";
 import { promotionChoices, targetsFrom } from "./hotseat";
@@ -46,12 +47,14 @@ interface Props {
   onExit: () => void;
   /** Leaving an event game (D20) goes back to its event page. */
   onEvent?: (code: string) => void;
+  /** A setup chosen before arriving (the default setup from the home page): go straight to the lobby. */
+  setup?: Pieces;
 }
 
 /** Online play: lock a setup (D13), find an opponent, play. A saved ticket rejoins the room after a reload. */
-export function Online({ ruleset, presets, store, onExit, onEvent }: Props) {
+export function Online({ ruleset, presets, store, onExit, onEvent, setup: chosen }: Props) {
   const [ticket, setTicket] = useState(() => loadTicket(store));
-  const [setup, setSetup] = useState<Pieces>();
+  const [setup, setSetup] = useState<Pieces | undefined>(chosen);
   const [notice, setNotice] = useState<string>();
   const [tc, setTc] = useState(() => loadTimeControl(store));
   if (ticket)
@@ -75,9 +78,11 @@ export function Online({ ruleset, presets, store, onExit, onEvent }: Props) {
         <SetupBuilder
           ruleset={ruleset}
           title="Lock your setup for online play. Your opponent sees it only when the game starts."
+          hint={`A coin flip decides who plays light. If you draw dark, this same arrangement starts from ${ruleset.board.sides.dark.corner}.`}
           presets={presets}
           store={store}
           onDone={setSetup}
+          doneLabel="Lock setup"
         />
         <button type="button" onClick={onExit}>
           Back
@@ -439,6 +444,8 @@ export function EventLock({
           <SetupBuilder
             ruleset={ruleset}
             title={`Lock your setup for round ${round}. You play ${view.side}. Your opponent sees it only when the game starts.`}
+            side={view.side}
+            doneLabel="Lock setup"
             presets={presets}
             store={store}
             onDone={(pieces) => send({ type: "lock", lock: lockFor(ruleset, pieces) })}
@@ -648,11 +655,7 @@ export function OnlineGame({
           Show legal moves
         </label>
       </div>
-      <ol className="moves" aria-label="Moves">
-        {record.moves.map((text, i) => (
-          <li key={i}>{text}</li>
-        ))}
-      </ol>
+      <MoveList moves={record.moves} first={ruleset.firstToMove} />
     </main>
   );
 }

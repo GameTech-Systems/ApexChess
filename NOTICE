@@ -11,7 +11,9 @@ NOT LICENSED -- ALL RIGHTS RESERVED
 The following are not covered by the LICENSE file. No license to them is granted,
 expressly or by implication:
 
-  - The name "Apex Chess", logos, and trade dress. See TRADEMARKS.md.
+  - The name "Apex Chess", logos, and trade dress. See TRADEMARKS.md. This includes the
+    turned-board logo drawn by apps/web/src/Logo.tsx and apps/web/public/favicon.svg, even
+    though it is written as code.
   - Art, piece and board designs, illustrations, sound, animation, and any media,
     including anything in the assets/ directory.
   - Story, characters, books, video, and merchandise, and any derivative works of them.
@@ -22,12 +24,17 @@ documentation should be treated as reserved unless the Owner states otherwise in
 THIRD-PARTY COMPONENTS
 Third-party dependencies keep their own licenses.
 
-  - React and React DOM (MIT): web app runtime.
+  - React and React DOM (MIT): web app runtime, with scheduler, loose-envify, and js-tokens (MIT).
   - @cloudflare/workers-types (MIT OR Apache-2.0): server type definitions, build time only.
   - @simplewebauthn/server and @simplewebauthn/browser (MIT): passkey sign-in (S19c). The server
-    package brings @peculiar/asn1-* and @peculiar/x509, @hexagon/base64, @levischuck/tiny-cbor,
-    pvtsutils, pvutils, tsyringe (MIT), asn1js (BSD-3-Clause), reflect-metadata (Apache-2.0),
-    and tslib (0BSD).
+    package brings @peculiar/asn1-*, @peculiar/x509, @peculiar/utils, @hexagon/base64,
+    @levischuck/tiny-cbor, pvtsutils, pvutils, tsyringe (MIT), asn1js (BSD-3-Clause),
+    reflect-metadata (Apache-2.0), and tslib (0BSD).
+
+The web build writes dist/third-party-licenses.txt (scripts/third-party-licenses.mjs) with the
+full license text and copyright notice of every package shipped to the browser, and every page
+links to it. The web app loads no web fonts and nothing else from other sites: it uses the
+device's own fonts, so there are no font files or font licenses to carry.
 
 Build and test tools (TypeScript, Vite, Vitest, ESLint, Prettier, Ajv, Wrangler) are
 not shipped; each keeps its own permissive license.

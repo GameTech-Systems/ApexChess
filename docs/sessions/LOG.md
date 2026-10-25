@@ -29,3 +29,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-10-22 | S19c | Opus 5.5 · high | done | (see PR) | Passkey + handle accounts, recovery codes, delete, reports, Terms 13+, handle policy |
 | 2026-10-22 | S19d | Opus 5.5 · high | done | (see PR) | Glicko-2 ratings per ruleset id for signed-in quick match; Account list; Privacy text |
 | 2026-10-22 | S20d | Opus 5.5 · high | done | (see PR) | Opt-in leaderboards per ruleset id (settled ratings, top 50); Account switch; Privacy text; D1 id |
+| 2026-10-24 | UI1 | Opus 5.5 (chat) · high | done | (zip) | Home page, logo, nav, piece rules, fixed king, chord callout, dark-seat builder, move list, legal audit |

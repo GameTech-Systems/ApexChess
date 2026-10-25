@@ -1,7 +1,28 @@
-import { useMemo, useState } from "react";
-import { setupArea, type Pieces, type Position, type ResolvedRuleset } from "@apexchess/engine";
+import { useMemo, useState, type ReactNode } from "react";
+import {
+  setupArea,
+  type Pieces,
+  type Position,
+  type ResolvedRuleset,
+  type Side,
+} from "@apexchess/engine";
 import { Board } from "./Board";
-import { clearSquare, placePiece, remaining, setupErrors } from "./setupBuilder";
+import { squareCenter } from "./boardLayout";
+import {
+  beyondSquares,
+  chordSpan,
+  clearSquare,
+  emptySetup,
+  fromSeat,
+  isLocked,
+  placePiece,
+  remaining,
+  seatSetup,
+  setupErrors,
+  swapPieces,
+  withCornerPiece,
+  wouldOverfillBeyond,
+} from "./setupBuilder";
 import { copyText, setupLink } from "./share";
 import { deleteSetup, loadSetups, saveSetup, type KeyValueStore } from "./savedSetups";
 
@@ -18,37 +39,90 @@ interface Props {
   onDone: (pieces: Pieces) => void;
   /** Arrangement to start from, e.g. one opened from a setup link. */
   initial?: Pieces;
+  /** Seat the setup is built from, so the board and its coordinates match where it will start. */
+  side?: Side;
+  /** Extra line under the title, e.g. that the seat is decided later. */
+  hint?: ReactNode;
+  /** Label of the button that finishes. */
+  doneLabel?: string;
 }
 
-/** Held piece: picked from the tray (no `from`) or lifted off a square. */
+/** Held piece: picked from the tray (no `from`) or lifted off a square (setup frame). */
 interface Held {
   piece: string;
   from?: string;
 }
 
-export function SetupBuilder({ ruleset, title, presets, store, onDone, initial }: Props) {
-  const [pieces, setPieces] = useState<Pieces>(() => ({ ...initial }));
+export function SetupBuilder({
+  ruleset,
+  title,
+  presets,
+  store,
+  onDone,
+  initial,
+  side = "light",
+  hint,
+  doneLabel = "Done",
+}: Props) {
+  const [pieces, setPieces] = useState<Pieces>(() => withCornerPiece(ruleset, initial ?? {}));
   const [copied, setCopied] = useState(false);
   const [held, setHeld] = useState<Held>();
   const [saved, setSaved] = useState(() => loadSetups(store));
   const [name, setName] = useState("");
+  const [message, setMessage] = useState("");
 
-  const area = useMemo(() => setupArea(ruleset), [ruleset]);
+  const { constraints } = ruleset.setup;
+  const { maxPieces, chords } = constraints.beyondFrontChord;
+  const cornerSquare = ruleset.board.sides[side].corner;
+  const beyond = useMemo(() => beyondSquares(ruleset), [ruleset]);
+  const onSeat = (squares: string[]) =>
+    new Set(Object.keys(seatSetup(ruleset, side, Object.fromEntries(squares.map((s) => [s, ""])))));
+  const shownBeyond = onSeat(beyond);
+  const area = onSeat(setupArea(ruleset));
   const left = remaining(ruleset, pieces);
-  const errors = setupErrors(ruleset, pieces);
+  const toPlace = Object.values(left).reduce((a, b) => a + Math.max(0, b), 0);
+  const total = Object.values(ruleset.army).reduce((a, b) => a + b, 0);
+  const errors = setupErrors(ruleset, pieces, side);
+  const placementErrors = errors.filter((e) => e.code !== "army");
+  const frontSpan = chordSpan(ruleset, side, constraints.frontChord);
+  const beyondSpan = chordSpan(ruleset, side, chords[0]!);
+  const onePiece = maxPieces === 1 ? "one piece" : `${maxPieces} pieces`;
+
   const position: Position = {
     squares: Object.fromEntries(
-      Object.entries(pieces).map(([sq, piece]) => [sq, { side: "light" as const, piece }]),
+      Object.entries(seatSetup(ruleset, side, pieces)).map(([sq, piece]) => [sq, { side, piece }]),
     ),
-    turn: "light",
+    turn: side,
     ply: 0,
     unmoved: [],
   };
 
-  const onSquareClick = (square: string) => {
-    if (!area.includes(square)) return setHeld(undefined);
+  const update = (next: Pieces) => {
+    setPieces(next);
+    setCopied(false);
+  };
+
+  const onSquareClick = (shown: string) => {
+    setMessage("");
+    if (!area.has(shown)) return setHeld(undefined);
+    const square = fromSeat(ruleset, side, shown);
+    if (isLocked(ruleset, square)) {
+      setHeld(undefined);
+      return setMessage(`Your ${constraints.cornerPiece} is fixed on ${cornerSquare}.`);
+    }
     if (held) {
-      setPieces(placePiece(ruleset, pieces, square, held.piece, held.from));
+      if (held.from === square) return setHeld(undefined);
+      if (wouldOverfillBeyond(ruleset, pieces, square, held.from)) {
+        setHeld(undefined);
+        return setMessage(
+          `Only ${onePiece} may start on the highlighted chord (${beyondSpan}). Move the piece that is there first, or drop this one onto it to swap.`,
+        );
+      }
+      update(
+        held.from
+          ? swapPieces(ruleset, pieces, held.from, square)
+          : placePiece(ruleset, pieces, square, held.piece),
+      );
       return setHeld(undefined);
     }
     const piece = pieces[square];
@@ -56,50 +130,110 @@ export function SetupBuilder({ ruleset, title, presets, store, onDone, initial }
   };
 
   const load = (next: Pieces) => {
-    setPieces({ ...next });
+    update(withCornerPiece(ruleset, next));
     setHeld(undefined);
+    setMessage("");
   };
 
+  // The note sits over the empty part of the board, above the chord it points at.
+  const centers = [...shownBeyond].map((sq) => squareCenter(ruleset.board, side, sq));
+  const rowY = Math.min(...centers.map((c) => c.y));
+  const at = (n: number) => Math.round(n * 100) / 100;
+  const note = `Only ${maxPieces} piece${maxPieces === 1 ? "" : "s"} on this chord`;
+  // Width of the note's backing pill: about 0.56 em per character at 0.62 board units, plus padding.
+  const noteWidth = at(note.length * 0.62 * 0.56 + 0.9);
+  const row = centers.filter((c) => c.y === rowY);
+  const midX = row.reduce((a, c) => a + c.x, 0) / (row.length || 1);
+  const arrowX = row.reduce(
+    (best, c) => (Math.abs(c.x - midX) < Math.abs(best - midX) ? c.x : best),
+    Infinity,
+  );
+  const shownHeld = held?.from ? [...onSeat([held.from])][0] : undefined;
+
   return (
-    <section aria-label="Setup builder">
+    <section aria-label="Setup builder" className="builder">
       <h2>{title}</h2>
+      <p className="lede">
+        You set up as {side}. Your {constraints.cornerPiece} is fixed on {cornerSquare}. Fill every
+        square up to the front chord ({frontSpan}); {onePiece} goes on the highlighted chord beyond
+        it ({beyondSpan}). Pick a piece below, then tap a square. Tap a placed piece and then
+        another square to swap them.
+      </p>
+      {hint && <p className="hint">{hint}</p>}
       <Board
         board={ruleset.board}
         position={position}
-        view="light"
+        view={side}
         pieceSet={ruleset.pieces}
         onSquareClick={onSquareClick}
-        selected={held?.from}
-        targets={held ? new Set(area) : undefined}
-      />
+        selected={shownHeld}
+        targets={held ? new Set([...area].filter((sq) => sq !== cornerSquare)) : undefined}
+        highlight={shownBeyond}
+        fixed={new Set([cornerSquare])}
+        label={`Setup board, ${side} seat`}
+      >
+        {row.length > 0 && (
+          <g className="callout" aria-hidden="true">
+            <rect
+              x={at(midX - noteWidth / 2)}
+              y={at(rowY - 2.82)}
+              width={noteWidth}
+              height={1}
+              rx={0.5}
+            />
+            <text x={at(midX)} y={at(rowY - 2.3)} textAnchor="middle" dominantBaseline="central">
+              {note}
+            </text>
+            <line x1={arrowX} y1={at(rowY - 1.82)} x2={arrowX} y2={at(rowY - 1.05)} />
+            <polygon
+              points={`${at(arrowX - 0.24)},${at(rowY - 1.12)} ${at(arrowX + 0.24)},${at(rowY - 1.12)} ${arrowX},${at(rowY - 0.72)}`}
+            />
+          </g>
+        )}
+      </Board>
+      <p role="status" className="builder-status">
+        {message ||
+          (held
+            ? `Holding a ${held.piece}. Tap a square to ${held.from ? "put it there or swap" : "place it"}.`
+            : toPlace > 0
+              ? `${total - toPlace} of ${total} pieces placed. ${toPlace} to go.`
+              : placementErrors.length
+                ? ""
+                : "All pieces placed. Ready to play.")}
+      </p>
       <div role="group" aria-label="Pieces to place" className="tray">
-        {Object.keys(ruleset.army).map((piece) => (
-          <button
-            key={piece}
-            type="button"
-            aria-pressed={held?.piece === piece && !held.from}
-            disabled={left[piece] === 0}
-            onClick={() => setHeld({ piece })}
-          >
-            {piece} ×{left[piece]}
-          </button>
-        ))}
+        {Object.keys(ruleset.army)
+          .filter((piece) => piece !== constraints.cornerPiece)
+          .map((piece) => (
+            <button
+              key={piece}
+              type="button"
+              aria-pressed={held?.piece === piece && !held.from}
+              disabled={left[piece] === 0}
+              onClick={() => {
+                setMessage("");
+                setHeld(held?.piece === piece && !held.from ? undefined : { piece });
+              }}
+            >
+              {piece} ×{left[piece]}
+            </button>
+          ))}
         <button
           type="button"
           disabled={!held?.from}
           onClick={() => {
-            setPieces(clearSquare(pieces, held!.from!));
+            update(clearSquare(ruleset, pieces, held!.from!));
             setHeld(undefined);
           }}
         >
           Remove
         </button>
-        <button type="button" onClick={() => load({})}>
+        <button type="button" onClick={() => load(emptySetup(ruleset))}>
           Clear
         </button>
       </div>
-      <ul role="status" aria-label="Setup problems" className="errors">
-        {errors.map((e) => (
+      <ul aria-label="Setup problems" className="errors">
+        {placementErrors.map((e) => (
           <li key={e.message}>{e.message}</li>
         ))}
       </ul>
@@ -164,8 +298,13 @@ export function SetupBuilder({ ruleset, title, presets, store, onDone, initial }
           ))}
         </ul>
       )}
-      <button type="button" disabled={errors.length > 0} onClick={() => onDone(pieces)}>
-        Done
+      <button
+        type="button"
+        className="primary"
+        disabled={errors.length > 0}
+        onClick={() => onDone(pieces)}
+      >
+        {errors.length > 0 && toPlace > 0 ? `Place all ${total} pieces to continue` : doneLabel}
       </button>
     </section>
   );

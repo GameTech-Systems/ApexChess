@@ -36,10 +36,19 @@ export function Terms({ onClose }: { onClose: () => void }) {
         Don't use an engine or another person's help in an online game, and don't disrupt games,
         events, or the site.
       </p>
+      <h2>Names and logo</h2>
+      <p>
+        Apex Chess™ and the turned-board logo are trademarks of the site&apos;s owner. The code and
+        rules are source-available under the PolyForm Shield License 1.0.0, which gives no right to
+        use the name or logo. Chess itself belongs to everyone; Apex Chess is not affiliated with
+        any chess federation or other chess site.
+      </p>
       <h2>No warranty</h2>
       <p>
         The site is provided as is, without any warranty. It may change, pause, or stop at any time.
-        These terms may change; the version on this page applies.
+        As far as the law allows, the site&apos;s owner is not liable for any loss that comes from
+        using it, including lost games, ratings, or setups. These terms may change; the version on
+        this page applies.
       </p>
       <button type="button" onClick={onClose}>
         Close

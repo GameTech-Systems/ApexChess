@@ -36,7 +36,7 @@ describe("Board highlights", () => {
 describe("App", () => {
   it("opens on a choice of opponent and level", () => {
     const html = renderToStaticMarkup(<App />);
-    expect(html).toContain("Two players");
+    expect(html).toContain("Two players, one screen");
     expect(html).toContain("Play the computer");
     expect(html).toContain("Random moves");
     expect(html).not.toContain("to move");
@@ -54,6 +54,51 @@ describe("App", () => {
     expect(html).toContain("pawn ×8");
     expect(html).toContain("Choose");
     expect(html).not.toContain("to move");
+  });
+});
+
+describe("Home page", () => {
+  const html = renderToStaticMarkup(<App />);
+  it("welcomes with the headline, the turned board, and how it differs from chess", () => {
+    expect(html).toContain("Chess");
+    expect(html).toContain("Shifted");
+    expect(html).toContain("How it differs from regular chess");
+    expect(html).toContain("No castling and no en passant");
+    expect(html).toContain("The default setup: light&#x27;s king on h1, dark&#x27;s on a8");
+  });
+  it("offers the default setup or a custom one", () => {
+    expect(html).toContain("Play the default setup");
+    expect(html).toContain("Customize your setup");
+  });
+  it("has a home link with the logo, and legal links in the footer", () => {
+    expect(html).toContain('class="brand" href="/"');
+    expect(html).toContain('class="logo"');
+    expect(html).toContain("Third-party licenses");
+    expect(html).toContain("Privacy");
+    expect(html).toContain("Terms");
+    expect(html).toContain("Apex Chess™");
+  });
+  it("draws the logo without coordinates", () => {
+    const logo = html.slice(html.indexOf('class="logo"'), html.indexOf("</svg>"));
+    expect(logo).not.toContain("<text");
+    expect(logo.match(/<polygon class="logo-(light|dark)"/g)).toHaveLength(64);
+  });
+  it("starts straight into a game with the default setup", () => {
+    const vs = renderToStaticMarkup(<App initialMode="computer" initialSetup="default" />);
+    expect(vs).toContain("light to move");
+    expect(vs).not.toContain("Build your setup");
+    const hot = renderToStaticMarkup(<App initialMode="hotseat" initialSetup="default" />);
+    expect(hot).toContain("Player 1 plays light, Player 2 plays dark.");
+  });
+});
+
+describe("Setup builder", () => {
+  it("fixes the king on its corner and calls out the chord beyond the front chord", () => {
+    const html = renderToStaticMarkup(<App initialMode="hotseat" />);
+    expect(html).toContain("h1 light king, fixed");
+    expect(html).not.toContain("king ×");
+    expect(html.match(/class="mark-chord"/g)).toHaveLength(6);
+    expect(html).toContain("Only 1 piece on this chord");
   });
 });
 

@@ -7,6 +7,7 @@ import {
   type Side,
 } from "@apexchess/engine";
 import { Board } from "./Board";
+import { MoveList } from "./MoveList";
 
 /** Steps through a finished or shared game, move by move. */
 export function Replay({
@@ -62,15 +63,12 @@ export function Replay({
           Close
         </button>
       </div>
-      <ol className="moves" aria-label="Moves">
-        {record.moves.map((text, i) => (
-          <li key={i} aria-current={i + 1 === step ? "step" : undefined}>
-            <button type="button" onClick={() => setStep(i + 1)}>
-              {text}
-            </button>
-          </li>
-        ))}
-      </ol>
+      <MoveList
+        moves={record.moves}
+        first={ruleset.firstToMove}
+        current={step}
+        onSelect={setStep}
+      />
     </section>
   );
 }
