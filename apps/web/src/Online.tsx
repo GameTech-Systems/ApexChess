@@ -39,6 +39,7 @@ import {
 } from "./online";
 import type { KeyValueStore } from "./savedSetups";
 import { loadSession } from "./account";
+import { Field, PageHead } from "./Page";
 
 interface Props {
   ruleset: ResolvedRuleset;
@@ -166,74 +167,84 @@ function OnlineLobby({
   };
 
   return (
-    <main>
-      <section aria-label="Play online" className="controls">
-        <h1>Play online</h1>
-        <p>Your setup is locked. Pick how to find an opponent.</p>
+    <main className="page">
+      <section aria-label="Play online" className="form-page">
+        {/* Leaving while searching would unmount and drop the search; Cancel is the way out. */}
+        <PageHead title="Play online" onBack={seeking ? undefined : onExit} />
+        {error && (
+          <p role="alert" className="notice">
+            {error}
+          </p>
+        )}
         {seeking ? (
-          <>
+          <div className="form-group">
             <p role="status">Looking for an opponent…</p>
             <button type="button" onClick={() => seeking.close()}>
               Cancel
             </button>
-          </>
+          </div>
         ) : (
           <>
-            <label>
-              Time control{" "}
-              <select value={lock.timeControl} onChange={(e) => onTimeControl(e.target.value)}>
-                {KINDS.map(([kind, name]) => (
-                  <optgroup key={kind} label={name}>
-                    {TIME_CONTROLS.filter((c) => c.kind === kind).map((c) => (
-                      <option key={c.id} value={c.id}>
-                        {c.label}
-                      </option>
-                    ))}
-                  </optgroup>
-                ))}
-              </select>
-            </label>
-            <p>
-              Quick match pairs you with someone on the same time control. A room you join keeps the
-              time control its creator chose.
-            </p>
-            <p>
-              {session
-                ? "You are signed in: a quick match against another signed-in player is rated, unless it is untimed."
-                : "Sign in on the Account page to play rated quick matches."}
-            </p>
-            <button type="button" onClick={quickMatch} disabled={busy}>
-              Quick match
-            </button>
-            <button type="button" onClick={() => post("/api/rooms")} disabled={busy}>
-              Create a private room
-            </button>
-            <label>
-              Room code{" "}
-              <input
+            <div className="form-group">
+              <p>Your setup is locked. Pick how to find an opponent.</p>
+              <label className="field">
+                Time control
+                <select value={lock.timeControl} onChange={(e) => onTimeControl(e.target.value)}>
+                  {KINDS.map(([kind, name]) => (
+                    <optgroup key={kind} label={name}>
+                      {TIME_CONTROLS.filter((c) => c.kind === kind).map((c) => (
+                        <option key={c.id} value={c.id}>
+                          {c.label}
+                        </option>
+                      ))}
+                    </optgroup>
+                  ))}
+                </select>
+              </label>
+              <button type="button" onClick={onChangeSetup}>
+                Change setup
+              </button>
+            </div>
+            <div className="form-group">
+              <h2>Quick match</h2>
+              <p>Quick match pairs you with someone on the same time control.</p>
+              <p>
+                {session
+                  ? "You are signed in: a quick match against another signed-in player is rated, unless it is untimed."
+                  : "Sign in on the Account page to play rated quick matches."}
+              </p>
+              <button type="button" onClick={quickMatch} disabled={busy}>
+                Quick match
+              </button>
+            </div>
+            <form
+              className="form-group"
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (!busy && code.trim().length === 6)
+                  post(`/api/rooms/${encodeURIComponent(code.trim())}/join`);
+              }}
+            >
+              <h2>Private room</h2>
+              <p>A room you join keeps the time control its creator chose.</p>
+              <button type="button" onClick={() => post("/api/rooms")} disabled={busy}>
+                Create a private room
+              </button>
+              <Field
+                label="Room code"
                 value={code}
-                onChange={(e) => setCode(e.target.value)}
+                onChange={setCode}
                 maxLength={6}
                 autoCapitalize="characters"
+                autoComplete="off"
                 spellCheck={false}
               />
-            </label>
-            <button
-              type="button"
-              onClick={() => post(`/api/rooms/${encodeURIComponent(code.trim())}/join`)}
-              disabled={busy || code.trim().length !== 6}
-            >
-              Join
-            </button>
-            <button type="button" onClick={onChangeSetup}>
-              Change setup
-            </button>
-            <button type="button" onClick={onExit}>
-              Back
-            </button>
+              <button type="submit" disabled={busy || code.trim().length !== 6}>
+                Join
+              </button>
+            </form>
           </>
         )}
-        {error && <p role="alert">{error}</p>}
       </section>
     </main>
   );

@@ -20,4 +20,9 @@ describe("Terms screen", () => {
     expect(html).toContain("not affiliated");
     expect(html).toContain("not liable");
   });
+  it("names Chess Nines as the one related site that may be linked", () => {
+    const html = renderToStaticMarkup(<Terms onClose={() => undefined} />);
+    expect(html).toContain("Chess Nines (Chess9s.com)");
+    expect(html).toContain("not affiliated with any chess federation");
+  });
 });

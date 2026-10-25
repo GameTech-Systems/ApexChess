@@ -63,9 +63,25 @@ describe("event start screen", () => {
     expect(html).toContain("real name");
     expect(html).toContain("Event code");
   });
+
+  it("puts Back next to the title, and lays the forms out in groups", () => {
+    const html = renderToStaticMarkup(
+      <EventHome onCreate={() => undefined} onOpen={() => undefined} onExit={() => undefined} />,
+    );
+    expect(html).toMatch(/<h1>Tournaments<\/h1><button[^>]*>Back<\/button>/);
+    expect(html.match(/>Back</g)).toHaveLength(1);
+    expect(html.match(/class="form-group"/g)).toHaveLength(2);
+    expect(html).not.toContain('class="controls"');
+  });
 });
 
 describe("event page", () => {
+  it("puts Back next to the title", () => {
+    const html = screen({});
+    expect(html).toMatch(/<h1>Event EVT234<\/h1><button[^>]*>Back<\/button>/);
+    expect(html.match(/>Back</g)).toHaveLength(1);
+  });
+
   it("before the start: lists players and lets a visitor join", () => {
     const html = screen({});
     expect(html).toContain("Event EVT234");
