@@ -1,12 +1,14 @@
 # Handoff
 
-Updated 2026-10-22 by S20d (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-10-24 by UI1 (Opus 5.5 chat · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Phase 7 done. Leaderboards (provisional): one opt-in switch per account (`accounts.listed`, migration 0006), off by default.
-- A listed account shows handle, rounded rating, and rated games per ruleset id, only once RD ≤ 110; top 50. `/api/leaderboard` is `no-store` + `noindex`, so opting out is immediate.
-- D1 `apexchess-archive` id is in `wrangler.jsonc`; the deploy workflow applies migrations 0001 to 0006.
-- No Code step is left in `docs/BUILD-PLAN.md`. Owner steps S2, S3, S17 remain; the site is not live yet.
+- UI1 (owner brief): home page "Chess Shifted" (`Home.tsx`), turned-board logo (`Logo.tsx`, favicon), Home link on every page, footer with legal links.
+- Home offers the default setup or a custom one for every opponent; `Online` takes a chosen `setup`.
+- Setup builder: king fixed on its corner, chord-beyond callout, a second piece there refused, swaps, seat-correct view (hot-seat Player 2 and event games build from dark).
+- Rules screen: every piece's moves with engine-drawn diagrams (`pieceDiagrams.ts`). Move list pairs turns (`MoveList.tsx`).
+- Legal: `third-party-licenses.txt` built into dist, NOTICE updated, `_headers` (CSP and others), Terms: names/logo and liability lines (provisional).
+- Phase 7 and every Code step in `docs/BUILD-PLAN.md` are done. Owner steps S2, S3, S17 remain; the site is not live yet.
 
 ## Next session
 **None planned** · Owner steps next (S3 hosting, then deploy)
@@ -20,9 +22,10 @@ Start with: `/start-session <new step>`
 - Leaderboards: opt-in per account, settled ratings only, top 50 (default, 0006).
 
 ## Open questions for the owner
-- D17 confirmation, including the abandoned-game rule (default: as built).
-- Leaderboard defaults above (default: as built).
+- D17 confirmation, including the abandoned-game rule (default: as built). Leaderboard defaults (as built).
+- Privacy and Terms need a contact address before launch (TRADEMARKS.md says the same).
+- Name check: a Steam game "Chess: Apex" (Netherlate Games) is announced; a trademark search is advised.
+- After the first deploy, check the browser console for CSP reports (`apps/web/public/_headers`).
 
 ## Notes for Claude
-- Leaderboards: `leaderboards` in `apps/server/src/ratings.ts`, `listing` action in `accounts.ts`, `apps/web/src/Leaderboard.tsx`.
 - Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.

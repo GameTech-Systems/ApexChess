@@ -14,4 +14,10 @@ describe("Terms screen", () => {
     expect(html).toContain("optional");
     expect(html).toContain("Close");
   });
+  it("names the trademarks and limits liability", () => {
+    const html = renderToStaticMarkup(<Terms onClose={() => undefined} />);
+    expect(html).toContain("Apex Chess™");
+    expect(html).toContain("not affiliated");
+    expect(html).toContain("not liable");
+  });
 });

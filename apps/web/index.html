@@ -3,22 +3,25 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Apex Chess</title>
+    <title>Apex Chess: chess shifted 45°</title>
+    <meta
+      name="description"
+      content="Apex Chess is chess on a board turned 45°, so each king starts in its own corner. Play the default setup or arrange your own, against a friend, the computer, or online."
+    />
+    <meta name="theme-color" content="#f3f6fa" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <meta property="og:title" content="Apex Chess: chess shifted 45°" />
+    <meta
+      property="og:description"
+      content="The chess pieces you know, on a board turned 45°. Each king starts in its own corner."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://apexchess.icu/" />
+    <script src="/boot-error.js"></script>
   </head>
   <body>
     <div id="root"></div>
     <noscript>Apex Chess needs JavaScript. Please turn it on and reload.</noscript>
-    <script>
-      addEventListener(
-        "error",
-        function (e) {
-          var root = document.getElementById("root");
-          if (root && !root.hasChildNodes() && e.target !== window)
-            root.textContent = "Apex Chess failed to load. Please reload the page.";
-        },
-        true,
-      );
-    </script>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
