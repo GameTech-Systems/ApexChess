@@ -121,12 +121,9 @@ export function Home({
             {dark}, facing each other down the middle.
           </li>
           <li>
-            Rooks travel on the slant. Bishops travel straight across (a chord) and straight ahead
-            (a ray).
-          </li>
-          <li>
             Pawns step straight ahead toward the opposing corner, capture one square forward and to
-            the side, and promote only on the far corner.
+            the side, may advance forward along the outer-edge squares, and promote only on the far
+            corner.
           </li>
           <li>No castling and no en passant.</li>
           <li>
@@ -136,8 +133,9 @@ export function Home({
           </li>
         </ul>
         <p>
-          Everything else is chess: check, checkmate, stalemate, and promotion work the way you
-          expect.{" "}
+          Bishops travel diagonally ahead (a ray) and across (a chord). Everything else is chess:
+          rooks travel on the slants (ranks and files); kings, queens, and knights move the same as
+          regular chess. Check, checkmate, stalemate, and promotion work the way you expect.{" "}
           <button type="button" className="link" onClick={() => onOpen("rules")}>
             Read the rules, with every piece&apos;s moves
           </button>
