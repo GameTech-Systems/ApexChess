@@ -1,6 +1,6 @@
 # Apex Chess
 
-A chess variant played with the standard pieces on a standard board turned 45°, so each player's king starts in its own light corner. Players can bring their own starting arrangement, and rules ship as data so new setups and rule sets are easy to add.
+A chess variant played with the standard pieces on a standard board turned 45°, so each player's king starts in its own light corner. Players can bring their own starting arrangement, and rules ship as data so new setups and rule sets are easy to add. 
 
 The game will be played at **apexchess.icu**. This repository holds the game's code, rules text, and rule data.
 
