@@ -8,7 +8,7 @@ Updated 2026-10-24 by UI1 (Opus 5.5 chat · high). `/end-session` rewrites this 
 - Setup builder: fixed king, chord-beyond callout, swaps, seat-correct view.
 - Rules screen has engine-drawn piece diagrams; move list pairs turns.
 - Legal: `third-party-licenses.txt` in dist, NOTICE, `_headers` (CSP), Terms names/logo and liability lines (provisional).
-- Launch prep: sitemap, robots, canonical/OG/Twitter tags, share card, icons, manifest, security.txt, README. Images: `scripts/brand-images.mjs` (logo + text only).
+- Launch prep: sitemap, robots, canonical/OG/Twitter tags, share card, icons, manifest, security.txt, README. Images: `scripts/brand-images.mjs`; share card approved by owner.
 - Phase 7 and every Code step in `docs/BUILD-PLAN.md` are done. Owner steps S2, S3, S17 remain; the site is not live yet.
 
 ## Next session
@@ -22,7 +22,7 @@ Start with: `/start-session <new step>`
 - Leaderboards: opt-in per account, settled ratings only, top 50 (default, 0006).
 
 ## Open questions for the owner
-- Approve the share card (`apps/web/public/og-image.png`). After deploy: `www` to apex redirect, domain route in `wrangler.jsonc` (S3), submit sitemap in Search Console, check share previews.
+- After deploy: `www` to apex redirect, domain route in `wrangler.jsonc` (S3), submit sitemap in Search Console, check share previews.
 - D17 confirmation, including the abandoned-game rule (default: as built). Leaderboard defaults (as built).
 - Privacy and Terms need a contact address before launch (TRADEMARKS.md says the same).
 - Name check: a Steam game "Chess: Apex" (Netherlate Games) is announced; a trademark search is advised.
