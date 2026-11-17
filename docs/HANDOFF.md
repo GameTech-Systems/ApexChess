@@ -6,15 +6,14 @@ Updated 2026-10-24 by UI1 (Opus 5.5 chat · high). `/end-session` rewrites this 
 - UI1 (owner brief): home page "Chess Shifted" (`Home.tsx`), turned-board logo (`Logo.tsx`, favicon), Home link on every page, footer with legal links.
 - Home offers the default setup or a custom one for every opponent; `Online` takes a chosen `setup`.
 - Setup builder: fixed king, chord-beyond callout, swaps, seat-correct view.
-- Rules screen: every piece's moves with engine-drawn diagrams (`pieceDiagrams.ts`). Move list pairs turns (`MoveList.tsx`).
+- Rules screen has engine-drawn piece diagrams; move list pairs turns.
 - Legal: `third-party-licenses.txt` in dist, NOTICE, `_headers` (CSP), Terms names/logo and liability lines (provisional).
 - Launch prep: sitemap, robots, canonical/OG/Twitter tags, share card, icons, manifest, security.txt, README. Images: `scripts/brand-images.mjs` (logo + text only).
 - Phase 7 and every Code step in `docs/BUILD-PLAN.md` are done. Owner steps S2, S3, S17 remain; the site is not live yet.
 
 ## Next session
 **None planned** · Owner steps next (S3 hosting, then deploy)
-Set: owner's choice when new steps are added to `docs/BUILD-PLAN.md`
-Why: every Code step is done.
+Why: every Code step is done; set model and effort when a step is added.
 Start with: `/start-session <new step>`
 
 ## Decisions in effect
