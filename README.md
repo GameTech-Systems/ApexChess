@@ -2,7 +2,15 @@
 
 A chess variant played with the standard pieces on a standard board turned 45°, so each player's king starts in its own light corner. Players can bring their own starting arrangement, and rules ship as data so new setups and rule sets are easy to add.
 
-The game will be played at **apexchess.icu**. This repository holds the game's code, rules text, and rule data.
+Play at **[apexchess.icu](https://apexchess.icu)**. This repository holds the game's code, rules text, and rule data.
+
+## Ways to play
+
+- **Against the computer**, at a strength you pick.
+- **Two players, one screen**, passing the device between moves.
+- **Online**, by quick match or a private room with a friend. Rated play is for signed-in accounts; accounts are optional and use a passkey and a handle (no email).
+- **Events**: private tournaments by link (round robin or Swiss), with clocks.
+- Every game can start from the default setup or from your own arrangement, and finished games can be shared as a replay link.
 
 ## The game in brief
 
@@ -18,9 +26,41 @@ The full rules, including the default setup, are in [docs/RULES.md](docs/RULES.m
 
 Any existing chess set can be used for live play in this octant style: turn the board 45° so each king sits on its light corner, then play with personalized setups and rules. For live games played with special or altered rules, keep a printout or a written copy of the rule set at the table.
 
+## Development
+
+Requires Node 22 and pnpm 10.
+
+```bash
+pnpm install
+pnpm dev          # web app (proxies /api to port 8787)
+pnpm dev:server   # online-play Worker via wrangler dev on 8787
+pnpm test         # Vitest, all packages
+pnpm lint         # ESLint + Prettier check
+pnpm typecheck
+pnpm validate:rules   # rules/<kind>/*.json against rules/schema
+pnpm build
+pnpm sim          # bot self-play report
+```
+
+| Path | What it is |
+| --- | --- |
+| `packages/engine` | Rules engine: moves, check, setups, records. Reads everything from `rules/`. |
+| `packages/online` | Room, matchmaking, event, and clock logic shared by client and server. |
+| `packages/sim` | Bot self-play for balance reports. |
+| `apps/web` | Vite + React static app, including `public/` (robots, sitemap, share image, icons). |
+| `apps/server` | Cloudflare Worker and Durable Objects for online play, D1 for the archive and accounts. |
+| `rules/` | Pieces, boards, setups, rulesets, parameters, time controls, and their JSON schemas. |
+| `docs/` | Rules in words, build plan, decisions, and the current handoff. |
+
+Rules and setups are data: a new setup or rule set is a JSON file validated against its schema, not a code change. Official rulesets are immutable; changes ship as a new version.
+
+## Deployment
+
+The static app and the Worker deploy together to Cloudflare with `wrangler deploy` (`wrangler.jsonc`); `.github/workflows/deploy.yml` does it on every push to `main` once the Cloudflare secrets are set. Security headers and cache rules for the static files are in `apps/web/public/_headers`. See [docs/DEV-WORKFLOW.md](docs/DEV-WORKFLOW.md) for repository settings and [docs/decisions/0004-hosting.md](docs/decisions/0004-hosting.md) for the hosting choice.
+
 ## Status
 
-Foundation stage. The build plan is [docs/BUILD-PLAN.md](docs/BUILD-PLAN.md) and the current state is [docs/HANDOFF.md](docs/HANDOFF.md).
+Feature-complete for launch: the game, computer opponent, online play, accounts and ratings, public setup statistics, events, and leaderboards are built. The remaining steps are the owner's (hosting, domain, outside testers). The rules are still a draft: items marked provisional follow a default that has not been confirmed. Current state: [docs/HANDOFF.md](docs/HANDOFF.md); plan: [docs/BUILD-PLAN.md](docs/BUILD-PLAN.md).
 
 ## License
 
