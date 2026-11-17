@@ -27,7 +27,7 @@ Proposals and reports posted in Discussions and Issues are treated as Contributi
 
 ## Rule changes need a proposal
 
-Any change to a parameter default, option list, or ruleset needs a linked proposal and follows the process in [Governance](docs/GOVERNANCE.md). Do not change an Official ruleset in a pull request. Official rulesets are immutable, and changes ship as new versions.
+Any change to a parameter default, option list, or ruleset needs a linked proposal and goes through the rule proposal issue template. Do not change an Official ruleset in a pull request. Official rulesets are immutable, and changes ship as new versions.
 
 ## Pull request basics (once open)
 
