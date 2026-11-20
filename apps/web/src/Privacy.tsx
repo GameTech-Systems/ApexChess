@@ -29,9 +29,11 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         When an online game ends, the server also keeps an anonymous copy for setup statistics: the
         rules version, the time control, both setups, the moves, how the game ended (including on
         time), and the day it ended. It holds no clock times, room code, ticket, IP address, or time
-        of day, so it cannot be linked back to you, and it is kept after the room is deleted.
-        Statistics are published only as totals, never as single games. Games that ended before this
-        notice was published were not archived.
+        of day, and it names no account. Archived games are kept with no end date, and stay after
+        the room is deleted. A game's setups and moves can be close to unique, so someone who knows
+        what you played could be recognised by someone who knows that game; treat an archived game
+        as pseudonymous, not untraceable. Statistics are published only as totals, never as single
+        games. Games that ended before this notice was published were not archived.
       </p>
       <h2>Tournaments</h2>
       <p>

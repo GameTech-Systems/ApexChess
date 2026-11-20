@@ -210,8 +210,8 @@ function OnlineLobby({
               <p>Quick match pairs you with someone on the same time control.</p>
               <p>
                 {session
-                  ? "You are signed in: a quick match against another signed-in player is rated, unless it is untimed."
-                  : "Sign in on the Account page to play rated quick matches."}
+                  ? "Beta: you are signed in, so a quick match against another signed-in player is rated, unless it is untimed."
+                  : "Beta: sign in on the Account page to play rated quick matches."}
               </p>
               <button type="button" onClick={quickMatch} disabled={busy}>
                 Quick match

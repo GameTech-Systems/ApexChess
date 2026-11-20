@@ -2,10 +2,14 @@
 import { useEffect, useState } from "react";
 import type { Leaderboard as Board } from "@apexchess/online";
 import { accountApi } from "./account";
+import { BETA_NOTE } from "./beta";
 
 export function LeaderboardView({ boards }: { boards: Board[] }) {
   return (
     <>
+      <p role="note">
+        <strong>{BETA_NOTE}</strong>
+      </p>
       <p>
         Players who chose to be listed, with a settled rating from rated quick-match games. To be
         listed, or to leave, use the Account page.
