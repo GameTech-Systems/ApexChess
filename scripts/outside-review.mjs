@@ -8,7 +8,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-export const DEFAULT_MODELS = ["moonshotai/kimi-k3.1-pro", "mistralai/mistral-large-4-1t-a52b"];
+export const DEFAULT_MODELS = ["moonshotai/kimi-k3.1-pro", "nvidia/nemotron-3-ultra-550b-a55b"];
 const ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
 const LAST = "docs/reviews/LAST";
 const CAP = 40_000; // characters of material per request
@@ -104,12 +104,16 @@ export function readStream(raw) {
 /** Asks one model; resolves with its reply, marked when the time limit cut it short. */
 function ask(model, messages, seconds = 1500) {
   const key = process.env.NVIDIA_API_KEY || "proxy-injected";
+  // Thinking off: with it on, these models spend the whole budget reasoning and time out.
+  const thinkingOff = { thinking: false, enable_thinking: false };
   const body = JSON.stringify({
     model,
     messages,
     max_tokens: 6000,
     temperature: 0.2,
     stream: true,
+    reasoning_effort: "low",
+    chat_template_kwargs: thinkingOff,
   });
   const args = [
     "-sSN",
