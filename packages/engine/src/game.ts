@@ -49,13 +49,22 @@ export function legalMoves(ruleset: ResolvedRuleset, pos: Position): Move[] {
   return generateMoves(ruleset, pos).filter((m) => !inCheck(ruleset, makeMove(pos, m), pos.turn));
 }
 
-/** Same pieces on the same squares, same side to move, same legal moves (as in FIDE 9.2.2). */
-function positionKey(ruleset: ResolvedRuleset, pos: Position): string {
+/** Side to move and piece placement: the cheap first part of `positionKey`. */
+export function placementKey(pos: Position): string {
   const pieces = Object.keys(pos.squares)
     .sort()
     .map((sq) => `${sq}:${pos.squares[sq]!.side}:${pos.squares[sq]!.piece}`);
+  return [pos.turn, pieces.join(",")].join("|");
+}
+
+/**
+ * Repetition key: same pieces on the same squares, same side to move, same legal moves (as in
+ * FIDE 9.2.2), so unmoved pieces and first-move rules count only where they change the moves.
+ * It is `placementKey(pos)`, then "|", then the sorted legal moves.
+ */
+export function positionKey(ruleset: ResolvedRuleset, pos: Position): string {
   const moves = legalMoves(ruleset, pos).map(moveText).sort();
-  return [pos.turn, pieces.join(","), moves.join(",")].join("|");
+  return placementKey(pos) + "|" + moves.join(",");
 }
 
 export function newGame(ruleset: ResolvedRuleset, position: Position): GameState {
