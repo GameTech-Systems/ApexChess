@@ -1,7 +1,7 @@
 import { CONTACT_EMAIL } from "./contact";
 
 export function Privacy({ onClose }: { onClose: () => void }) {
-    return (
+  return (
     <section aria-label="Privacy" className="rules">
       <h1>Privacy</h1>
       <p>
