@@ -19,6 +19,13 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
+      - name: Require the Cloudflare secrets
+        run: |
+          missing=0
+          for name in CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID; do
+            if [ -z "${!name}" ]; then echo "::error::Repository secret $name is not set."; missing=1; fi
+          done
+          [ "$missing" = 0 ] || exit 1
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
       - uses: actions/setup-node@v4
@@ -28,8 +35,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm build
       - name: Apply game archive migrations (D1)
-        if: env.CLOUDFLARE_API_TOKEN != ''
         run: pnpm dlx wrangler@4 d1 migrations apply apexchess-archive --remote
       - name: Deploy to Cloudflare Workers
-        if: env.CLOUDFLARE_API_TOKEN != ''
         run: pnpm dlx wrangler@4 deploy
+      - name: Smoke test the live site
+        run: node scripts/smoke.mjs https://apexchess.icu ${{ github.sha }}

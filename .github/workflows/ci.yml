@@ -53,3 +53,5 @@ jobs:
         run: pnpm test
       - if: steps.ws.outputs.node == 'true'
         run: pnpm validate:rules
+      - if: steps.ws.outputs.node == 'true'
+        run: pnpm build
