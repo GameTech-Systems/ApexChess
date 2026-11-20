@@ -1,23 +1,22 @@
 # Handoff
 
-Updated 2026-11-20 by S28 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-11-20 by S24 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Product complete through UI1; launch prep and S22 (CI build, deploy secrets check, live smoke) done. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
-- S28 review done (`docs/reviews/2026-11-20-s28-triage.md`); `LAST` now 004264c. Two real findings, both in the worker path (see Notes).
-- S23 done: quiescence searches every evasion in check, scores mate/stalemate first, checks draws, carries mate distance; search repetition uses the game's `positionKey` (now exported). Computer moves in a Web Worker (`apps/web/src/computer.worker.ts`), with an on-page fallback.
-- Hard level now ~1.4 s a move (was ~0.75 s) at the same node cap; the page stays responsive (17 ms max frame gap measured).
+- Product complete through UI1; launch prep, S22, S23, S24 done. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
+- S24: header Beta badge with ruleset id/version (`apps/web/src/beta.tsx`); Beta notes on leaderboards, events, rated quick match; Privacy states no end date for archived games and no longer says "cannot be linked back".
+- Privacy changed, so the S28 outside review runs next (covers S24 and the two open worker findings).
 - Contact address GameTypeBrand@gmail.com (keep the capitals) on Privacy, Terms, footer, security.txt, TRADEMARKS.
 
 ## Next session
-**S24 — Beta labels, ruleset version, privacy retention** · Sonnet 5.5 · effort medium
+**S28 — Outside review (recurring)** · Sonnet 5.5 · effort medium
 Set: `/model sonnet` · `/effort medium`
-Why: Next todo Code step; S28 review found nothing blocking.
-Start with: `/start-session S24`
+Why: S24 changed privacy text; review before S26.
+Start with: `/start-session S28`
 
 ## Decisions in effect for the next step
 - D16: passkey + handle, no email, age 13+ (decided). D17: Glicko-2 per ruleset id (default).
-- D21 to D24: open, defaults in the plan.
+- D21 to D23: defaults applied in S24 (provisional). D24: open, default in the plan.
 
 ## Open questions for the owner
 - After deploy: `www` redirect, domain route (S3), Search Console sitemap, share previews, CSP reports.
