@@ -15,6 +15,7 @@ import {
   type Played,
   type Ticket,
 } from "@apexchess/online";
+import { BETA_NOTE } from "./beta";
 import { callApi, eventLink, loadEventToken, pointsText, saveEventToken } from "./event";
 import { apiUrl } from "./online";
 import { Field, PageHead } from "./Page";
@@ -53,6 +54,9 @@ export function EventHome({
             {error}
           </p>
         )}
+        <p role="note">
+          <strong>{BETA_NOTE}</strong>
+        </p>
         <p>
           A private event for {EVENT_MIN} or more players: share its link, and everyone who has it
           can join until you start. Up to {ROUND_ROBIN_MAX} players play a round robin; more play a

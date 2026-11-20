@@ -825,3 +825,10 @@ main.page > .event {
     animation: none;
   }
 }
+
+.beta-badge {
+  font-size: 0.8rem;
+  opacity: 0.85;
+  margin-inline-start: auto;
+  margin-inline-end: 1rem;
+}

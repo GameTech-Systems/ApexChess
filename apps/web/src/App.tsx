@@ -17,6 +17,7 @@ import {
   type Side,
 } from "@apexchess/engine";
 import { Account } from "./Account";
+import { BetaBadge } from "./beta";
 import { Board } from "./Board";
 import { Events } from "./Event";
 import { parseEventHash } from "./event";
@@ -240,6 +241,7 @@ export function App({
           <Logo size={34} />
           <span>Apex Chess</span>
         </a>
+        <BetaBadge current={current} />
         <nav aria-label="Site">
           <a href="/" onClick={goHome}>
             Home
