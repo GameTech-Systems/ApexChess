@@ -1,5 +1,4 @@
 import { describe, expect, it } from "vitest";
-// @ts-expect-error untyped .mjs module
 import {
   buildMessages,
   parseArgs,
@@ -9,6 +8,7 @@ import {
   shouldFallBack,
   DEFAULT_MODELS,
   FALLBACK_MODELS,
+  // @ts-expect-error untyped .mjs module
 } from "../outside-review.mjs";
 
 describe("outside review", () => {
