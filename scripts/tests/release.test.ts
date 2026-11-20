@@ -30,7 +30,15 @@ function fakes(bad: string[] = [], commit = SHA) {
     const path = new URL(url).pathname;
     const ok = (body: unknown, status = 200) =>
       new Response(typeof body === "string" ? body : JSON.stringify(body), { status });
-    if (path === "/") return bad.includes("home") ? ok("", 500) : ok("<title>Apex Chess</title>");
+    if (path === "/")
+      return bad.includes("home")
+        ? ok("", 500)
+        : ok('<title>Apex Chess</title><script src="/assets/index-a1.js"></script>');
+    if (path === "/assets/index-a1.js") return ok('new Worker("assets/computer.worker-b2.js")');
+    if (path === "/assets/computer.worker-b2.js")
+      return bad.includes("worker")
+        ? ok("<html>", 200)
+        : new Response("self.onmessage=1", { headers: { "content-type": "text/javascript" } });
     if (path === "/how-to-play/")
       return bad.includes("info")
         ? ok("<title>Apex Chess</title>")
@@ -65,7 +73,7 @@ describe("smoke test", () => {
     const r = await smoke("https://x.test", { expectCommit: SHA, ...fakes() });
     expect(r.failures).toEqual([]);
   });
-  it.each(["home", "info", "sw", "api", "create", "socket"])(
+  it.each(["home", "info", "worker", "sw", "api", "create", "socket"])(
     "fails when %s is broken",
     async (what) => {
       const r = await smoke("https://x.test", { expectCommit: SHA, ...fakes([what]) });
