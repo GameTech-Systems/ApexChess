@@ -56,7 +56,7 @@ Rules and setups are data: a new setup or rule set is a JSON file validated agai
 
 ## Deployment
 
-The static app and the Worker deploy together to Cloudflare with `wrangler deploy` (`wrangler.jsonc`); `.github/workflows/deploy.yml` does it on every push to `main` once the Cloudflare secrets are set. Security headers and cache rules for the static files are in `apps/web/public/_headers`. See [docs/DEV-WORKFLOW.md](docs/DEV-WORKFLOW.md) for repository settings and [docs/decisions/0004-hosting.md](docs/decisions/0004-hosting.md) for the hosting choice.
+The static app and the Worker deploy together to Cloudflare with `wrangler deploy` (`wrangler.jsonc`); `.github/workflows/deploy.yml` does it on every push to `main`. It fails (it does not skip) when `CLOUDFLARE_API_TOKEN` or `CLOUDFLARE_ACCOUNT_ID` is missing, and afterwards runs `scripts/smoke.mjs` against the live site (home page, API, room create and join, WebSocket, and the deployed commit from `/version.json`). CI runs `pnpm build` on every pull request. Security headers and cache rules for the static files are in `apps/web/public/_headers`. See [docs/DEV-WORKFLOW.md](docs/DEV-WORKFLOW.md) for repository settings and [docs/decisions/0004-hosting.md](docs/decisions/0004-hosting.md) for the hosting choice.
 
 ## Status
 

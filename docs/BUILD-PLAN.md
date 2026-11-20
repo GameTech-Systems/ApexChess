@@ -143,7 +143,7 @@ Opt-in leaderboards per ruleset id. Needs S19c and S19d (both done). Built as re
 
 From the 2026-11-20 outside audit; the checklist is `docs/LAUNCH-PLAN.md`. Order: S22, S23, S24, S28, then S25 and S17, S26, S27, S28 again, S29.
 
-### S22 — Release hardening · Sonnet 5.5 · medium · `todo`
+### S22 — Release hardening · Sonnet 5.5 · medium · `done`
 CI runs `pnpm build`. `deploy.yml` fails when `CLOUDFLARE_API_TOKEN` or another required secret is missing, instead of skipping. The deployed commit is visible (a version file or tag). After deploy, a smoke test checks the home page, the API, room create and join, and the WebSocket. Docs agree on what is live.
 Done when: a PR without a build error passes CI, a missing secret fails deploy, and the smoke test runs against the live site.
 
