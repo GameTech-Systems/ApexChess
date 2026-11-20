@@ -1,5 +1,6 @@
 /** Terms of use (S19c). Provisional text; the minimum age is the owner's decision (13). */
 import { HANDLE_MAX, HANDLE_MIN, MIN_AGE } from "@apexchess/online";
+import { CONTACT_EMAIL } from "./contact";
 
 export function Terms({ onClose }: { onClose: () => void }) {
   return (
@@ -50,6 +51,10 @@ export function Terms({ onClose }: { onClose: () => void }) {
         As far as the law allows, the site&apos;s owner is not liable for any loss that comes from
         using it, including lost games, ratings, or setups. These terms may change; the version on
         this page applies.
+      </p>
+      <h2>Contact</h2>
+      <p>
+        Questions about these terms go to <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
       </p>
       <button type="button" onClick={onClose}>
         Close

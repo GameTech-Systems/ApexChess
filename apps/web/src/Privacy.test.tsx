@@ -59,4 +59,10 @@ describe("Privacy screen", () => {
     expect(html).toContain("at once");
     expect(html).toContain("not indexed");
   });
+  it("gives the contact address with its capitals", () => {
+    const html = renderToStaticMarkup(<Privacy onClose={() => undefined} />);
+    expect(html).toContain("Contact");
+    expect(html).toContain('href="mailto:GameTypeBrand@gmail.com"');
+    expect(html).toContain(">GameTypeBrand@gmail.com<");
+  });
 });

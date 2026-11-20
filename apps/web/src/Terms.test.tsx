@@ -25,4 +25,10 @@ describe("Terms screen", () => {
     expect(html).toContain("Chess Nines (Chess9s.com)");
     expect(html).toContain("not affiliated with any chess federation");
   });
+  it("gives the contact address with its capitals", () => {
+    const html = renderToStaticMarkup(<Terms onClose={() => undefined} />);
+    expect(html).toContain("Contact");
+    expect(html).toContain('href="mailto:GameTypeBrand@gmail.com"');
+    expect(html).toContain(">GameTypeBrand@gmail.com<");
+  });
 });

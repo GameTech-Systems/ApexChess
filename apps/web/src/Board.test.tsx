@@ -77,6 +77,7 @@ describe("Home page", () => {
     expect(html).toContain("Privacy");
     expect(html).toContain("Terms");
     expect(html).toContain("Apex Chess™");
+    expect(html).toContain('href="mailto:GameTypeBrand@gmail.com"');
   });
   it("draws the logo without coordinates", () => {
     const logo = html.slice(html.indexOf('class="logo"'), html.indexOf("</svg>"));

@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { CONTACT_EMAIL } from "./contact";
 import {
   addMove,
   catalog,
@@ -271,6 +272,7 @@ export function App({
           <a href={SOURCE_URL} rel="noopener noreferrer" target="_blank">
             Source code
           </a>
+          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
         </nav>
         <p>
           © 2026 Duke Johnson. Apex Chess™ and the turned-board logo are trademarks of Duke Johnson.
