@@ -150,7 +150,7 @@ Done when: a PR without a build error passes CI, a missing secret fails deploy, 
 ### S23 — AI search horizon · Opus 5.5 · high · `done`
 In `packages/engine/src/ai.ts`: when the side to move is in check, quiescence searches every legal evasion; mate and stalemate are scored before the static evaluation; the search's repetition key carries all rule-relevant state (unmoved pieces, first-move rules), matching the game's key. Also: draw checks in quiescence, mate distance carried into quiescence, a guard for an empty move list and a tiny node budget, and the computer's search in a Web Worker so the page never freezes (I14). Tests: mate at the horizon, a quiet-only check evasion, promotion, repetition with unmoved pieces. Difficulty levels stay as they are. Findings: `docs/reviews/2026-11-20-*.md`.
 
-### S24 — Beta labels, ruleset version, privacy retention · Sonnet 5.5 · medium · `todo`
+### S24 — Beta labels, ruleset version, privacy retention · Sonnet 5.5 · medium · `done`
 Show the live ruleset id and version and a Beta label (D21). Mark or turn off rated play, leaderboards, and tournaments (D22). State the archive retention period in Privacy (D23) and soften "cannot be linked back to you" if a unique game record could identify players.
 
 ### S25 — Live checks before the beta · Owner · `todo`
@@ -194,9 +194,9 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D18 | Public setup statistics | Open; default (provisional): aggregates only, N ≥ 30, from anonymous archived games (0006) | S19a |
 | D19 | Time controls | Decided 2026-10-22: all options offered (untimed, Fischer, fixed time per move, abandonment only), default 10+0; presets in `rules/timeControls.json` (Claude's choice, provisional); running out of time loses unless the opponent has insufficient material (0007) | S20a |
 | D20 | Tournaments | Open; default (provisional): private events by link; round robin up to 8 players, Swiss above; sides set by pairing (0007) | S20c |
-| D21 | Launch ruleset label | Open; default: launch as a beta on rules draft 0.1, labelled in the app | S24 |
-| D22 | Rated play, leaderboards, tournaments in the beta | Open; default: keep them on, marked Beta | S24 |
-| D23 | Game archive retention | Open; default: say archived games are kept with no end date (as built) | S24 |
+| D21 | Launch ruleset label | Open; default: launch as a beta on rules draft 0.1, labelled in the app (applied in S24, provisional) | S24 |
+| D22 | Rated play, leaderboards, tournaments in the beta | Open; default: keep them on, marked Beta (applied in S24, provisional) | S24 |
+| D23 | Game archive retention | Open; default: say archived games are kept with no end date (as built) (applied in S24, provisional) | S24 |
 | D24 | Offline play | Open; default: installable web app (service worker), hot-seat and computer only | S27 |
 
 ## Ledger sync format
