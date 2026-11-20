@@ -197,7 +197,7 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D21 | Launch ruleset label | Open; default: launch as a beta on rules draft 0.1, labelled in the app (applied in S24, provisional) | S24 |
 | D22 | Rated play, leaderboards, tournaments in the beta | Open; default: keep them on, marked Beta (applied in S24, provisional) | S24 |
 | D23 | Game archive retention | Open; default: say archived games are kept with no end date (as built) (applied in S24, provisional) | S24 |
-| D24 | Offline play | Open; default: installable web app (service worker), hot-seat and computer only (applied in S27, provisional) | S27 |
+| D24 | Offline play | Decided: both; installable web app first (built in S27), desktop download later (no step yet) | S27 |
 
 ## Ledger sync format
 

@@ -14,10 +14,10 @@ Why: Next todo Code step; review S27 (service worker, offline UI).
 Start with: `/start-session S28`
 
 ## Decisions in effect for the next step
-- D24: offline play via service worker, hot-seat and computer only (default, provisional). D16: passkey + handle (decided). D17: Glicko-2 per ruleset id (default).
+- D24: decided, both: web app first (done in S27), desktop download later (no step yet). D16: passkey + handle (decided). D17: Glicko-2 per ruleset id (default).
 
 ## Open questions for the owner
-- D24 confirmation. After deploy: `www` redirect, domain route (S3), Search Console sitemap, share previews, CSP reports; check `/sw.js` is live and installable.
+- After deploy: `www` redirect, domain route (S3), Search Console sitemap, share previews, CSP reports; check `/sw.js` is live and installable.
 - D17 confirmation. Name check: a Steam game "Chess: Apex" is announced; a trademark search is advised. S25 live checks are yours.
 
 ## Notes for Claude
