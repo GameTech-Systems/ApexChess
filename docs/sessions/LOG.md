@@ -33,3 +33,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-11-17 | launch | Sonnet 5.5 · medium | done | (branch) | Sitemap, robots, share card, icons, manifest, security.txt, README |
 | 2026-11-20 | launch plan | Opus 5.5 · high | done | (see PR) | Launch plan from outside audit, Phase 8 steps, NVIDIA outside-review script, contact address |
 | 2026-11-20 | S22 | Sonnet 5.5 · medium | done | (see PR) | CI build, deploy fails on missing secrets, version.json, live smoke test |
+| 2026-11-20 | S23 | Opus 5.5 · high | done | (see PR) | Quiescence evasions, mate/stalemate, game-matching repetition key; search in a Web Worker |
