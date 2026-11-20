@@ -273,6 +273,14 @@ input[type="radio"] {
 .option input {
   margin-top: 0.2rem;
 }
+.option.off {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.offline-note {
+  margin: 0 0 0.75rem;
+  color: var(--muted);
+}
 .option.chosen {
   border-color: var(--ink);
   box-shadow: inset 0 0 0 1px var(--ink);

@@ -14,6 +14,8 @@ const OPPONENTS: { id: Opponent; label: string; note: string }[] = [
   { id: "online", label: "Play online", note: "Quick match, or a private room with a friend." },
 ];
 
+const NEEDS_CONNECTION = "Needs a connection.";
+
 /** The landing page: what Apex Chess is, how it differs from chess, and the way into a game. */
 export function Home({
   ruleset,
@@ -21,14 +23,18 @@ export function Home({
   onOpen,
   onEvents,
   initialLevel = DEFAULT_LEVEL,
+  online = true,
 }: {
   ruleset: ResolvedRuleset;
   onStart: (opponent: Opponent, setup: SetupChoice, level: Level) => void;
   onOpen: (panel: Panel) => void;
   onEvents: () => void;
   initialLevel?: Level;
+  /** False while the device has no connection: online-only choices are disabled (D24). */
+  online?: boolean;
 }) {
-  const [opponent, setOpponent] = useState<Opponent>("computer");
+  const [chosen, setOpponent] = useState<Opponent>("computer");
+  const opponent = !online && chosen === "online" ? "computer" : chosen;
   const [level, setLevel] = useState<Level>(initialLevel);
   const def = ruleset.setup.default.pieces;
   const { board } = ruleset;
@@ -63,23 +69,35 @@ export function Home({
 
       <section className="start" aria-labelledby="start-title">
         <h2 id="start-title">Start a game</h2>
+        {!online && (
+          <p className="offline-note" role="status">
+            You are offline. The computer and two-player games work without a connection.
+          </p>
+        )}
         <fieldset className="opponents">
           <legend>Who are you playing?</legend>
-          {OPPONENTS.map((o) => (
-            <label key={o.id} className={opponent === o.id ? "option chosen" : "option"}>
-              <input
-                type="radio"
-                name="opponent"
-                value={o.id}
-                checked={opponent === o.id}
-                onChange={() => setOpponent(o.id)}
-              />
-              <span>
-                <strong>{o.label}</strong>
-                <small>{o.note}</small>
-              </span>
-            </label>
-          ))}
+          {OPPONENTS.map((o) => {
+            const off = !online && o.id === "online";
+            return (
+              <label
+                key={o.id}
+                className={opponent === o.id ? "option chosen" : off ? "option off" : "option"}
+              >
+                <input
+                  type="radio"
+                  name="opponent"
+                  value={o.id}
+                  checked={opponent === o.id}
+                  disabled={off}
+                  onChange={() => setOpponent(o.id)}
+                />
+                <span>
+                  <strong>{o.label}</strong>
+                  <small>{off ? NEEDS_CONNECTION : o.note}</small>
+                </span>
+              </label>
+            );
+          })}
         </fieldset>
         {opponent === "computer" && (
           <label className="level">
@@ -146,28 +164,45 @@ export function Home({
         <h2 id="more-title">More</h2>
         <ul>
           <li>
-            <button type="button" className="link" onClick={onEvents}>
+            <button type="button" className="link" disabled={!online} onClick={onEvents}>
               Tournaments
             </button>
-            <span>Run a private event for 4 to 32 players.</span>
+            <span>{online ? "Run a private event for 4 to 32 players." : NEEDS_CONNECTION}</span>
           </li>
           <li>
-            <button type="button" className="link" onClick={() => onOpen("stats")}>
+            <button
+              type="button"
+              className="link"
+              disabled={!online}
+              onClick={() => onOpen("stats")}
+            >
               Statistics
             </button>
-            <span>How each setup scores in online games.</span>
+            <span>{online ? "How each setup scores in online games." : NEEDS_CONNECTION}</span>
           </li>
           <li>
-            <button type="button" className="link" onClick={() => onOpen("leaderboard")}>
+            <button
+              type="button"
+              className="link"
+              disabled={!online}
+              onClick={() => onOpen("leaderboard")}
+            >
               Leaderboards
             </button>
-            <span>Ratings of players who chose to be listed.</span>
+            <span>{online ? "Ratings of players who chose to be listed." : NEEDS_CONNECTION}</span>
           </li>
           <li>
-            <button type="button" className="link" onClick={() => onOpen("account")}>
+            <button
+              type="button"
+              className="link"
+              disabled={!online}
+              onClick={() => onOpen("account")}
+            >
               Account
             </button>
-            <span>Optional. Sign in with a passkey for rated games.</span>
+            <span>
+              {online ? "Optional. Sign in with a passkey for rated games." : NEEDS_CONNECTION}
+            </span>
           </li>
         </ul>
       </section>

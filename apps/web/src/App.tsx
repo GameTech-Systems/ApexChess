@@ -24,6 +24,7 @@ import { parseEventHash } from "./event";
 import { Home, type Opponent, type Panel, type SetupChoice } from "./Home";
 import { Logo } from "./Logo";
 import { MoveList } from "./MoveList";
+import { useOnline } from "./offline";
 import { Online } from "./Online";
 import { loadTicket, saveTicket } from "./online";
 import type { KeyValueStore } from "./savedSetups";
@@ -120,6 +121,7 @@ export function App({
   const open = (panel: Panel) => setPanels((p) => [...p.filter((x) => x !== panel), panel]);
   const close = () => setPanels((p) => p.slice(0, -1));
   const panel = panels.at(-1);
+  const online = useOnline();
 
   const goHome = (e?: MouseEvent) => {
     e?.preventDefault();
@@ -192,6 +194,7 @@ export function App({
           }}
           onOpen={open}
           onEvents={() => setEvents({})}
+          online={online}
         />
       </main>
     );
