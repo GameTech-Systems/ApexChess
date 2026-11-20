@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 export const DEFAULT_MODELS = ["moonshotai/kimi-k3.1-pro", "mistralai/mistral-large-4-1t-a52b"];
 const ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
 const LAST = "docs/reviews/LAST";
-const CAP = 120_000; // characters of material per request
+const CAP = 60_000; // characters of material per request
 const CORE = ["docs/RULES.md", "docs/HANDOFF.md"];
 const NEVER = /(^|\/)\.env|\.dev\.vars|secret|credential|\.pem$|\.key$/i;
 
@@ -84,15 +84,35 @@ function gather(since) {
   return { diff, files };
 }
 
+/** Joins the streamed (SSE) reply; streaming keeps the gateway from timing out on long reviews. */
+export function readStream(raw) {
+  let text = "";
+  for (const line of raw.split("\n")) {
+    if (!line.startsWith("data:")) continue;
+    const data = line.slice(5).trim();
+    if (!data || data === "[DONE]") continue;
+    const j = JSON.parse(data);
+    text += j.choices?.[0]?.delta?.content ?? "";
+  }
+  if (!text) throw new Error(raw.slice(0, 300));
+  return text;
+}
+
 function ask(model, messages) {
   const key = process.env.NVIDIA_API_KEY || "proxy-injected";
-  const body = JSON.stringify({ model, messages, max_tokens: 8000, temperature: 0.2 });
+  const body = JSON.stringify({
+    model,
+    messages,
+    max_tokens: 8000,
+    temperature: 0.2,
+    stream: true,
+  });
   const out = execFileSync(
     "curl",
     [
-      "-sS",
+      "-sSN",
       "--max-time",
-      "900",
+      "1200",
       ENDPOINT,
       "-H",
       `Authorization: Bearer ${key}`,
@@ -101,11 +121,9 @@ function ask(model, messages) {
       "--data-binary",
       "@-",
     ],
-    { input: body, encoding: "utf8", maxBuffer: 16 << 20 },
+    { input: body, encoding: "utf8", maxBuffer: 64 << 20 },
   );
-  const j = JSON.parse(out);
-  if (!j.choices) throw new Error(`${model}: ${out.slice(0, 300)}`);
-  return j.choices[0].message.content ?? "";
+  return readStream(out);
 }
 
 function main() {
