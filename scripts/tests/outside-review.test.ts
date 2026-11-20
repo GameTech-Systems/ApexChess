@@ -51,6 +51,7 @@ describe("outside review", () => {
       "data: [DONE]",
     ].join("\n");
     expect(readStream(raw)).toBe("High: bug");
+    expect(readStream(raw + '\ndata: {"choices":[{"del')).toBe("High: bug");
     expect(() => readStream("upstream request timeout")).toThrow("upstream request timeout");
   });
 });

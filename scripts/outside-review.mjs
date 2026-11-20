@@ -3,7 +3,7 @@
 // API (integrate.api.nvidia.com) and save each model's findings in docs/reviews/.
 // In Claude Code cloud sessions the network proxy adds the key; elsewhere set NVIDIA_API_KEY.
 // Usage: node scripts/outside-review.mjs [--model a/b,c/d] [--since <git ref>] [--focus "..."] [--dry-run]
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -11,7 +11,7 @@ import { fileURLToPath } from "node:url";
 export const DEFAULT_MODELS = ["moonshotai/kimi-k3.1-pro", "mistralai/mistral-large-4-1t-a52b"];
 const ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
 const LAST = "docs/reviews/LAST";
-const CAP = 60_000; // characters of material per request
+const CAP = 40_000; // characters of material per request
 const CORE = ["docs/RULES.md", "docs/HANDOFF.md"];
 const NEVER = /(^|\/)\.env|\.dev\.vars|secret|credential|\.pem$|\.key$/i;
 
@@ -91,42 +91,54 @@ export function readStream(raw) {
     if (!line.startsWith("data:")) continue;
     const data = line.slice(5).trim();
     if (!data || data === "[DONE]") continue;
-    const j = JSON.parse(data);
-    text += j.choices?.[0]?.delta?.content ?? "";
+    try {
+      text += JSON.parse(data).choices?.[0]?.delta?.content ?? "";
+    } catch {
+      // a line cut off by the time limit
+    }
   }
-  if (!text) throw new Error(raw.slice(0, 300));
+  if (!text) throw new Error(raw.slice(0, 300) || "empty reply");
   return text;
 }
 
-function ask(model, messages) {
+/** Asks one model; resolves with its reply, marked when the time limit cut it short. */
+function ask(model, messages, seconds = 1500) {
   const key = process.env.NVIDIA_API_KEY || "proxy-injected";
   const body = JSON.stringify({
     model,
     messages,
-    max_tokens: 8000,
+    max_tokens: 6000,
     temperature: 0.2,
     stream: true,
   });
-  const out = execFileSync(
-    "curl",
-    [
-      "-sSN",
-      "--max-time",
-      "1200",
-      ENDPOINT,
-      "-H",
-      `Authorization: Bearer ${key}`,
-      "-H",
-      "Content-Type: application/json",
-      "--data-binary",
-      "@-",
-    ],
-    { input: body, encoding: "utf8", maxBuffer: 64 << 20 },
-  );
-  return readStream(out);
+  const args = [
+    "-sSN",
+    "--max-time",
+    String(seconds),
+    ENDPOINT,
+    "-H",
+    `Authorization: Bearer ${key}`,
+  ];
+  args.push("-H", "Content-Type: application/json", "--data-binary", "@-");
+  return new Promise((done, fail) => {
+    const child = spawn("curl", args);
+    let out = "";
+    let err = "";
+    child.stdout.on("data", (d) => (out += d));
+    child.stderr.on("data", (d) => (err += d));
+    child.on("close", (code) => {
+      try {
+        const text = readStream(out);
+        done(code === 0 ? text : `${text}\n\n[Reply cut off: ${err.trim()}]`);
+      } catch (e) {
+        fail(new Error(`${err.trim()} ${e.message}`.trim()));
+      }
+    });
+    child.stdin.end(body);
+  });
 }
 
-function main() {
+async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const since = opts.since ?? (existsSync(LAST) ? readFileSync(LAST, "utf8").trim() : null);
   const head = git("rev-parse", "--short", "HEAD").trim();
@@ -139,24 +151,21 @@ function main() {
   if (opts.dryRun) return;
   mkdirSync("docs/reviews", { recursive: true });
   const date = new Date().toISOString().slice(0, 10);
+  const scope = since ? `changes ${since}..${head}` : `core files at ${head}`;
+  const results = await Promise.allSettled(opts.models.map((m) => ask(m, messages)));
   let saved = 0;
-  for (const model of opts.models) {
-    try {
-      const text = ask(model, messages);
-      const path = reportPath(date, model);
-      const scope = since ? `changes ${since}..${head}` : `core files at ${head}`;
-      writeFileSync(
-        path,
-        `# Outside review: ${model}\n\n${date} · ${scope}${opts.focus ? ` · focus: ${opts.focus}` : ""}\n\nUnverified model output. Check each finding against the code before acting.\n\n${text.trim()}\n`,
-      );
-      console.log(`Saved ${path}`);
-      saved++;
-    } catch (e) {
-      console.error(`Skipped ${model}: ${e.message}`);
-    }
-  }
+  results.forEach((r, i) => {
+    const model = opts.models[i];
+    if (r.status === "rejected") return console.error(`Skipped ${model}: ${r.reason.message}`);
+    const path = reportPath(date, model);
+    const head1 = `# Outside review: ${model}\n\n${date} · ${scope}${opts.focus ? ` · focus: ${opts.focus}` : ""}`;
+    const note = "Unverified model output. Check each finding against the code before acting.";
+    writeFileSync(path, `${head1}\n\n${note}\n\n${r.value.trim()}\n`);
+    console.log(`Saved ${path}`);
+    saved++;
+  });
   if (saved) writeFileSync(LAST, git("rev-parse", "HEAD"));
   else process.exitCode = 1;
 }
 
-if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
+if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) await main();
