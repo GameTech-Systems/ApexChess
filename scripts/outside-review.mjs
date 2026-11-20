@@ -1,7 +1,9 @@
 #!/usr/bin/env node
 // Outside review: send the changes since the last review to open models on NVIDIA's build
 // API (integrate.api.nvidia.com) and save each model's findings in docs/reviews/.
-// In Claude Code cloud sessions the network proxy adds the key; elsewhere set NVIDIA_API_KEY.
+// If every model hits a limit, it falls back to free OpenRouter models ("openrouter:<id>:free").
+// In Claude Code cloud sessions the network proxy adds both keys; elsewhere set NVIDIA_API_KEY
+// and OPENROUTER_API_KEY.
 // Usage: node scripts/outside-review.mjs [--model a/b,c/d] [--since <git ref>] [--focus "..."] [--dry-run]
 import { execFileSync, spawn } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
@@ -9,7 +11,32 @@ import { resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const DEFAULT_MODELS = ["moonshotai/kimi-k3.1-pro", "nvidia/nemotron-3-ultra-550b-a55b"];
-const ENDPOINT = "https://integrate.api.nvidia.com/v1/chat/completions";
+/** Used when every default model hits a rate or daily limit. OpenRouter's free models only. */
+export const FALLBACK_MODELS = [
+  "openrouter:nvidia/nemotron-3-ultra-550b-a55b:free",
+  "openrouter:google/gemma-4-31b-it:free",
+];
+
+/** Where a model name goes: plain names to NVIDIA, "openrouter:<id>:free" to OpenRouter. */
+export function provider(name) {
+  if (!name.startsWith("openrouter:"))
+    return {
+      url: "https://integrate.api.nvidia.com/v1/chat/completions",
+      model: name,
+      envKey: "NVIDIA_API_KEY",
+    };
+  const model = name.slice("openrouter:".length);
+  if (!model.endsWith(":free")) throw new Error(`${model}: only OpenRouter models ending in :free`);
+  return {
+    url: "https://openrouter.ai/api/v1/chat/completions",
+    model,
+    envKey: "OPENROUTER_API_KEY",
+  };
+}
+
+const LIMIT = /\b429\b|rate.?limit|quota|too many requests|limit exceeded/i;
+export const shouldFallBack = (errors) =>
+  errors.length > 0 && errors.every((e) => LIMIT.test(e.message));
 const LAST = "docs/reviews/LAST";
 const CAP = 40_000; // characters of material per request
 const CORE = ["docs/RULES.md", "docs/HANDOFF.md"];
@@ -41,6 +68,7 @@ export function buildMessages({ focus, files, diff, cap = CAP }) {
     "launch blockers, and missing tests. Rank findings most severe first. For each: severity (high/med/low),",
     "file and line, what goes wrong, and a concrete fix. Say whether you confirmed it from the text or only suspect it.",
     "Never invent rules: if a rule seems unclear, list it as a question for the owner. Skip style nits. Be brief.",
+    "You cannot run tools or ask for more files: answer now, in full, from the material given.",
   ].join(" ");
   let budget = cap;
   const parts = [];
@@ -65,10 +93,13 @@ export function buildMessages({ focus, files, diff, cap = CAP }) {
 const git = (...args) => execFileSync("git", args, { encoding: "utf8", maxBuffer: 64 << 20 });
 
 function gather(since) {
+  // Keep the order of `paths`, so the most important files come first under the cap.
   const tracked = (paths) =>
-    git("ls-files", "--", ...paths)
-      .split("\n")
-      .filter((p) => p && !NEVER.test(p));
+    paths.flatMap((p) =>
+      git("ls-files", "--", p)
+        .split("\n")
+        .filter((q) => q && !NEVER.test(q)),
+    );
   let diff = "";
   let paths = CORE;
   if (since) {
@@ -76,9 +107,16 @@ function gather(since) {
     const safe = changed.filter((p) => !NEVER.test(p) && !/lock\.yaml$|\.png$|\.ico$/.test(p));
     if (safe.length) diff = git("diff", `${since}..HEAD`, "--", ...safe);
   } else {
-    paths = [...CORE, "packages/engine/src", "packages/online/src", "apps/server/src"];
+    paths = [
+      ...CORE,
+      "packages/engine/src/ai.ts",
+      "packages/engine/src/game.ts",
+      "packages/engine/src",
+      "packages/online/src",
+      "apps/server/src",
+    ];
   }
-  const files = tracked(paths)
+  const files = [...new Set(tracked(paths))]
     .filter((p) => !p.includes(".test.") && existsSync(p))
     .map((p) => ({ path: p, text: readFileSync(p, "utf8") }));
   return { diff, files };
@@ -102,8 +140,15 @@ export function readStream(raw) {
 }
 
 /** Asks one model; resolves with its reply, marked when the time limit cut it short. */
-function ask(model, messages, seconds = 1500) {
-  const key = process.env.NVIDIA_API_KEY || "proxy-injected";
+export function ask(name, messages, seconds = 1500) {
+  let target;
+  try {
+    target = provider(name);
+  } catch (e) {
+    return Promise.reject(e);
+  }
+  const { url, model, envKey } = target;
+  const key = process.env[envKey] || "proxy-injected";
   // Thinking off: with it on, these models spend the whole budget reasoning and time out.
   const thinkingOff = { thinking: false, enable_thinking: false };
   const body = JSON.stringify({
@@ -113,16 +158,11 @@ function ask(model, messages, seconds = 1500) {
     temperature: 0.2,
     stream: true,
     reasoning_effort: "low",
-    chat_template_kwargs: thinkingOff,
+    ...(envKey === "NVIDIA_API_KEY"
+      ? { chat_template_kwargs: thinkingOff }
+      : { reasoning: { enabled: false } }),
   });
-  const args = [
-    "-sSN",
-    "--max-time",
-    String(seconds),
-    ENDPOINT,
-    "-H",
-    `Authorization: Bearer ${key}`,
-  ];
+  const args = ["-sSN", "--max-time", String(seconds), url, "-H", `Authorization: Bearer ${key}`];
   args.push("-H", "Content-Type: application/json", "--data-binary", "@-");
   return new Promise((done, fail) => {
     const child = spawn("curl", args);
@@ -156,18 +196,30 @@ async function main() {
   mkdirSync("docs/reviews", { recursive: true });
   const date = new Date().toISOString().slice(0, 10);
   const scope = since ? `changes ${since}..${head}` : `core files at ${head}`;
-  const results = await Promise.allSettled(opts.models.map((m) => ask(m, messages)));
-  let saved = 0;
-  results.forEach((r, i) => {
-    const model = opts.models[i];
-    if (r.status === "rejected") return console.error(`Skipped ${model}: ${r.reason.message}`);
-    const path = reportPath(date, model);
-    const head1 = `# Outside review: ${model}\n\n${date} · ${scope}${opts.focus ? ` · focus: ${opts.focus}` : ""}`;
-    const note = "Unverified model output. Check each finding against the code before acting.";
-    writeFileSync(path, `${head1}\n\n${note}\n\n${r.value.trim()}\n`);
-    console.log(`Saved ${path}`);
-    saved++;
-  });
+  const run = async (models) => {
+    const results = await Promise.allSettled(models.map((m) => ask(m, messages)));
+    const errors = [];
+    let saved = 0;
+    results.forEach((r, i) => {
+      const model = models[i];
+      if (r.status === "rejected") {
+        errors.push(r.reason);
+        return console.error(`Skipped ${model}: ${r.reason.message}`);
+      }
+      const path = reportPath(date, model);
+      const head1 = `# Outside review: ${model}\n\n${date} · ${scope}${opts.focus ? ` · focus: ${opts.focus}` : ""}`;
+      const note = "Unverified model output. Check each finding against the code before acting.";
+      writeFileSync(path, `${head1}\n\n${note}\n\n${r.value.trim()}\n`);
+      console.log(`Saved ${path}`);
+      saved++;
+    });
+    return { saved, errors };
+  };
+  let { saved, errors } = await run(opts.models);
+  if (!saved && shouldFallBack(errors)) {
+    console.log("Every model hit a limit: trying OpenRouter's free models.");
+    ({ saved } = await run(FALLBACK_MODELS));
+  }
   if (saved) writeFileSync(LAST, git("rev-parse", "HEAD"));
   else process.exitCode = 1;
 }

@@ -3,9 +3,12 @@ import { describe, expect, it } from "vitest";
 import {
   buildMessages,
   parseArgs,
+  provider,
   readStream,
   reportPath,
+  shouldFallBack,
   DEFAULT_MODELS,
+  FALLBACK_MODELS,
 } from "../outside-review.mjs";
 
 describe("outside review", () => {
@@ -53,5 +56,29 @@ describe("outside review", () => {
     expect(readStream(raw)).toBe("High: bug");
     expect(readStream(raw + '\ndata: {"choices":[{"del')).toBe("High: bug");
     expect(() => readStream("upstream request timeout")).toThrow("upstream request timeout");
+  });
+
+  it("sends openrouter: models to OpenRouter, free models only", () => {
+    expect(provider("moonshotai/kimi-k3.1-pro")).toEqual({
+      url: "https://integrate.api.nvidia.com/v1/chat/completions",
+      model: "moonshotai/kimi-k3.1-pro",
+      envKey: "NVIDIA_API_KEY",
+    });
+    expect(provider("openrouter:google/gemma-4-31b-it:free")).toEqual({
+      url: "https://openrouter.ai/api/v1/chat/completions",
+      model: "google/gemma-4-31b-it:free",
+      envKey: "OPENROUTER_API_KEY",
+    });
+    expect(() => provider("openrouter:openai/gpt-6-luna")).toThrow(":free");
+    expect(
+      FALLBACK_MODELS.every((m: string) => m.startsWith("openrouter:") && m.endsWith(":free")),
+    ).toBe(true);
+  });
+
+  it("falls back to OpenRouter only when every model hit a limit", () => {
+    expect(shouldFallBack([new Error("429 Too Many Requests")])).toBe(true);
+    expect(shouldFallBack([new Error("daily quota exceeded"), new Error("rate limit")])).toBe(true);
+    expect(shouldFallBack([new Error("429"), new Error("upstream request timeout")])).toBe(false);
+    expect(shouldFallBack([])).toBe(false);
   });
 });
