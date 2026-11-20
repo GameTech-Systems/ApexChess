@@ -36,3 +36,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-11-20 | S23 | Opus 5.5 · high | done | (see PR) | Quiescence evasions, mate/stalemate, game-matching repetition key; search in a Web Worker |
 | 2026-11-20 | S28 | Sonnet 5.5 · medium | done | (see PR) | Outside review of S22-S23: 2 real worker findings, rest not real |
 | 2026-11-20 | S24 | Sonnet 5.5 · medium | done | (see PR) | Beta badge, ruleset id/version, Beta notes, archive retention and softer privacy wording |
+| 2026-11-20 | S26 | Sonnet 5.5 · medium | done | (see PR) | Five static info pages from RULES.md, sitemap, smoke check; S28 review of S24+S26 clean |

@@ -156,7 +156,7 @@ Show the live ruleset id and version and a Beta label (D21). Mark or turn off ra
 ### S25 — Live checks before the beta · Owner · `todo`
 Run the live checklist in `docs/LAUNCH-PLAN.md` on two devices and two networks, and on current mobile and desktop browsers. Problems go to the ledger as issues.
 
-### S26 — Crawlable info pages · Sonnet 5.5 · medium · `todo`
+### S26 — Crawlable info pages · Sonnet 5.5 · medium · `done`
 Static, indexable pages outside the app: How to Play, Rules, 45-Degree Chess, Custom Setups, About. Add them to the sitemap. Text comes from `docs/RULES.md`; no new rules.
 
 ### S27 — Offline play · Sonnet 5.5 · high · `todo`
