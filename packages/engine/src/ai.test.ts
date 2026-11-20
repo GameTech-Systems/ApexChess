@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import fixtureData from "../test/fixtures/ai.json";
 import { bestMove, chooseSetup, evaluate, pieceValues, randomMove, seededRandom } from "./ai";
 import { catalog } from "./catalog";
-import { legalMoves, makeMove, newGame, play, result } from "./game";
+import { legalMoves, makeMove, newGame, play, result, type GameState } from "./game";
 import { moveText, startPosition, type Position } from "./moves";
 import { resolveRuleset, type Side } from "./rules";
 
@@ -153,5 +153,86 @@ describe("bestMove", () => {
         const move = bestMove(ruleset, game, { depth: 2 })!;
         expect(legalMoves(ruleset, game.position).map(moveText)).toContain(moveText(move));
       }
+  });
+});
+
+describe("search horizon", () => {
+  const pick = (ruleset: ReturnType<typeof rulesetWith>, game: GameState, depth = 1) =>
+    moveText(bestMove(ruleset, game, { depth })!);
+  const at = (f: Omit<Fixture, "name">) => position({ name: "", ...f });
+
+  it("scores a mate found at the horizon above winning a queen", () => {
+    const pos = at({
+      turn: "light",
+      pieces: { light: { b6: "king", d1: "rook" }, dark: { a8: "king", h1: "queen" } },
+    });
+    expect(pick(standard, newGame(standard, pos))).toBe("d1-d8");
+  });
+
+  it("searches quiet check evasions in quiescence (a skewer beats taking a knight)", () => {
+    const pos = at({
+      turn: "light",
+      pieces: {
+        light: { h1: "king", h4: "rook" },
+        dark: { e6: "king", e8: "queen", e4: "pawn", h7: "knight" },
+      },
+    });
+    expect(pick(standard, newGame(standard, pos))).toBe("h4xe4");
+  });
+
+  it("does not promote into stalemate", () => {
+    const pos = at({
+      turn: "light",
+      pieces: { light: { d6: "king", a3: "knight", b7: "pawn" }, dark: { b6: "king" } },
+    });
+    const text = pick(standard, newGame(standard, pos));
+    expect(text).not.toBe("b7-a8=queen");
+    expect(text).toBe("b7-a8=rook");
+  });
+
+  it("counts a trade into dead material as a draw in quiescence", () => {
+    const pos = at({
+      turn: "light",
+      pieces: {
+        light: { h1: "king", d4: "rook" },
+        dark: { a8: "king", d7: "rook", b6: "knight" },
+      },
+    });
+    expect(pick(standard, newGame(standard, pos))).toBe("d4xd7");
+  });
+
+  describe("repetition key matches the game's (unmoved pieces, first-move rules)", () => {
+    // Light is lost; g1-g5 hangs the rook unless it repeats an earlier position (a draw).
+    const pieces = {
+      light: { h1: "king", g1: "rook" },
+      dark: { a8: "king", c5: "queen", d6: "pawn" },
+    };
+    const current = at({ turn: "light", pieces });
+    const repeat = (ruleset: ReturnType<typeof rulesetWith>, unmoved: string[]) => {
+      const before = { ...makeMove(current, { from: "g1", to: "g5", piece: "rook" }), unmoved };
+      const game: GameState = {
+        position: current,
+        quietPlies: 1,
+        history: [newGame(ruleset, before).history[0]!, newGame(ruleset, current).history[0]!],
+      };
+      return pick(ruleset, game);
+    };
+
+    it("takes a true repetition", () => {
+      expect(repeat(standard, [])).toBe("g1-g5");
+      // Under the default one-square first move, an unmoved pawn has the same moves.
+      expect(repeat(standard, ["d6"])).toBe("g1-g5");
+    });
+
+    it("does not count a position where a pawn still had its two-square first move", () => {
+      expect(repeat(rulesetWith({ pawnFirstMove: "two" }), ["d6"])).not.toBe("g1-g5");
+    });
+  });
+
+  it("plays a legal move with a node budget of 0 or 1", () => {
+    const game = opening();
+    const legal = legalMoves(standard, game.position).map(moveText);
+    for (const maxNodes of [0, 1])
+      expect(legal).toContain(moveText(bestMove(standard, game, { depth: 3, maxNodes })!));
   });
 });
