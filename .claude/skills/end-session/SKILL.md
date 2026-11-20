@@ -16,7 +16,7 @@ Finish the current step.
    - Outcome `partial` or `blocked`: run `scripts/claude/ship.sh --no-merge ...` so the PR stays open, and name the branch to resume in the handoff.
    - Never merge red CI, never push to `main`, never force-push `main`.
 8. **Choose the next session.** Name the next step, model, and effort, in this order:
-   1. **Next step.** Outcome `done`: the next `todo` Code step in `docs/BUILD-PLAN.md` order (Owner steps are not Code sessions). Outcome `partial` or `blocked`: the same step, resuming the branch named in the handoff.
+   1. **Next step.** Outcome `done`: the next `todo` Code step in `docs/BUILD-PLAN.md` order (Owner steps are not Code sessions). If this step was a major update (it closed a phase, or changed the engine, the server, or privacy), the next step is S28, the outside review, first. Outcome `partial` or `blocked`: the same step, resuming the branch named in the handoff.
    2. **Start from the plan.** Use that step's model and effort in `docs/BUILD-PLAN.md` as the default.
    3. **Raise one level** (low → medium → high), or switch Sonnet → Opus, if this session needed repeated attempts on design or correctness, ended `partial` or `blocked`, or left a test failing or skipped. Never above Opus 5.5 · high: `xhigh` and `max` are the owner's call. Never Fable.
    4. **Lower** when the next step is mechanical: Haiku 5.5 · low for docs-only or config follow-ups, or Opus → Sonnet when the design is settled and the next step only implements it.
