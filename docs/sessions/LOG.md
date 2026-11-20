@@ -38,3 +38,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-11-20 | S24 | Sonnet 5.5 · medium | done | (see PR) | Beta badge, ruleset id/version, Beta notes, archive retention and softer privacy wording |
 | 2026-11-20 | S26 | Sonnet 5.5 · medium | done | (see PR) | Five static info pages from RULES.md, sitemap, smoke check; S28 review of S24+S26 clean |
 | 2026-11-20 | S27 | Sonnet 5.5 · high | done | (see PR) | Offline play: generated service worker, offline-aware Home, smoke check; D24 default |
+| 2026-11-20 | S27b | Sonnet 5.5 · high | done | (see PR) | Worker fallback logs, yields, caps nodes; built worker tested; smoke checks worker file |

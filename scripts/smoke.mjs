@@ -1,4 +1,4 @@
-// Smoke test for a live deploy: home page, version, API, room create and join, WebSocket.
+// Smoke test for a live deploy: home page, computer worker, version, API, room create and join, WebSocket.
 // Usage: node scripts/smoke.mjs <baseUrl> [expectedCommit]   (exit 1 on any failure)
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
@@ -52,6 +52,20 @@ export async function smoke(base, opts = {}) {
 
   await check("home", async () => {
     if (!(await (await get("/")).text()).includes("Apex Chess")) throw new Error("no title");
+  });
+  await check("computer worker", async () => {
+    // The page's script names the worker file; the computer's search needs it served as script.
+    const home = await (await get("/")).text();
+    const src = /src="(\/assets\/index-[^"]+\.js)"/.exec(home)?.[1];
+    if (!src) throw new Error("home page names no app script");
+    const name = /computer\.worker-[\w-]+\.js/.exec(await (await get(src)).text())?.[0];
+    if (!name) throw new Error("app script names no computer worker");
+    const res = await get(`/assets/${name}`);
+    if (
+      !/javascript/.test(res.headers.get("content-type") ?? "") ||
+      !(await res.text()).includes("onmessage")
+    )
+      throw new Error(`/assets/${name} is not the computer worker`);
   });
   await check("info pages", async () => {
     const html = await (await get("/how-to-play/")).text();

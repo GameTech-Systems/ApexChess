@@ -141,7 +141,7 @@ Opt-in leaderboards per ruleset id. Needs S19c and S19d (both done). Built as re
 
 ## Phase 8: Launch
 
-From the 2026-11-20 outside audit; the checklist is `docs/LAUNCH-PLAN.md`. Order: S22, S23, S24, S28, then S25 and S17, S26, S27, S28 again, S29.
+From the 2026-11-20 outside audit; the checklist is `docs/LAUNCH-PLAN.md`. Order: S22, S23, S24, S28, then S25 and S17, S26, S27, S27b, S28 again, S29.
 
 ### S22 — Release hardening · Sonnet 5.5 · medium · `done`
 CI runs `pnpm build`. `deploy.yml` fails when `CLOUDFLARE_API_TOKEN` or another required secret is missing, instead of skipping. The deployed commit is visible (a version file or tag). After deploy, a smoke test checks the home page, the API, room create and join, and the WebSocket. Docs agree on what is live.
@@ -161,6 +161,10 @@ Static, indexable pages outside the app: How to Play, Rules, 45-Degree Chess, Cu
 
 ### S27 — Offline play · Sonnet 5.5 · high · `done`
 Hot-seat and computer games without a connection, per D24 (default: installable web app with a service worker; online features say they need a connection). Any new dependency must be permissive and listed in NOTICE.
+
+### S27b — Computer worker hardening · Sonnet 5.5 · high · `done`
+Closes the two S28 findings on the S23 worker. `thinkMove` logs a worker failure (cannot start, error, unreadable reply) and falls back on the page after a tick, at a lower node cap (`FALLBACK_MAX_NODES`); a page search that also fails logs and gives no move; a cancelled request skips the fallback. `scripts/tests/worker-bundle.test.ts` builds the web app and runs the real built worker (every level returns a legal move); `scripts/smoke.mjs` checks the live app script names a worker file served as JavaScript.
+Done when: the new tests pass, and the smoke check passes against a built site.
 
 ### S28 — Outside review (recurring) · Sonnet 5.5 · medium · `todo`
 Run after each major update: a phase closes, or a step changes the engine, the server, or privacy. `pnpm review:outside` sends the changes since `docs/reviews/LAST` to open models on NVIDIA's build API and saves reports in `docs/reviews/`. Check each finding against the code; real ones become ledger issues (`newIssues`), the rest get one line in the report saying why not. The step stays `todo` so it can run again.
