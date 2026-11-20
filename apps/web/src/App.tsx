@@ -35,7 +35,7 @@ import { Stats } from "./Stats";
 import { Terms } from "./Terms";
 import { piecesInDanger, playSound, undoMoves } from "./playAids";
 import { SetupBuilder } from "./SetupBuilder";
-import { DEFAULT_LEVEL, computerMove, levels, type Level } from "./computer";
+import { DEFAULT_LEVEL, levels, thinkMove, type Level } from "./computer";
 import { seatOf, setupsForGame } from "./seats";
 import {
   DEFAULT_DARK_SQUARE,
@@ -440,14 +440,24 @@ export function Game({
     prevCount.current = moveCount;
   }, [moveCount, sound, over]);
 
-  // The short delay lets the player's move render before the search runs.
+  // The search runs in a Web Worker; the short delay lets the player's move show first.
   useEffect(() => {
     if (!computerTurn) return;
+    let cancel = () => {};
+    let live = true;
     const timer = setTimeout(() => {
-      const move = computerMove(ruleset, game, computer!, random);
-      if (move) setRecord((r) => addMove(ruleset, r, move));
+      const seed = Math.floor(random() * 2 ** 32);
+      const thinking = thinkMove({ ruleset, game, level: computer!, seed });
+      cancel = thinking.cancel;
+      void thinking.move.then((move) => {
+        if (live && move) setRecord((r) => addMove(ruleset, r, move));
+      });
     }, 250);
-    return () => clearTimeout(timer);
+    return () => {
+      live = false;
+      clearTimeout(timer);
+      cancel();
+    };
   }, [computerTurn, game, computer, random]);
 
   const onSquareClick = (square: string) => {
