@@ -1,32 +1,29 @@
 # Handoff
 
-Updated 2026-10-24 by UI1 (Opus 5.5 chat · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-11-20 by the launch-plan session (Opus 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- UI1 (owner brief): home page "Chess Shifted" (`Home.tsx`), turned-board logo (`Logo.tsx`, favicon), Home link on every page, footer with legal links.
-- Home offers the default setup or a custom one for every opponent; `Online` takes a chosen `setup`.
-- Setup builder: fixed king, chord-beyond callout, swaps, seat-correct view.
-- Rules screen has engine-drawn piece diagrams; move list pairs turns.
-- Legal: `third-party-licenses.txt` in dist, NOTICE, `_headers` (CSP), Terms names/logo and liability lines (provisional).
+- Product complete through UI1: home, logo, setup builder, rules diagrams, legal pages and CSP (`_headers`).
 - Launch prep: sitemap, robots, canonical/OG/Twitter tags, share card, icons, manifest, security.txt, README. Images: `scripts/brand-images.mjs`; share card approved by owner.
-- Phase 7 and every Code step in `docs/BUILD-PLAN.md` are done. Owner steps S2, S3, S17 remain; the site is not live yet.
+- Phases 0 to 7 done; S17 testers in progress. Phase 8 (launch, S22 to S29) planned from the 2026-11-20 outside audit: `docs/LAUNCH-PLAN.md`.
+- Contact address GameTypeBrand@gmail.com (keep the capitals) on Privacy, Terms, footer, security.txt, TRADEMARKS.
+- Outside review: `pnpm review:outside` (NVIDIA build API, key from the cloud proxy); S28 runs after each major update.
 
 ## Next session
-**None planned** · Owner steps next (S3 hosting, then deploy)
-Why: every Code step is done; set model and effort when a step is added.
-Start with: `/start-session <new step>`
+**S22 — Release hardening** · Sonnet 5.5 · medium
+Why: builds and deploys must be verifiable before the beta.
+Start with: `/start-session S22`
 
 ## Decisions in effect
-- D16: passkey + handle, no email; minimum age 13 (decided).
-- D17: Glicko-2, one pool per ruleset id, "?" while RD > 110 (default).
+- D16: passkey + handle, no email, age 13+ (decided). D17: Glicko-2 per ruleset id, "?" while RD > 110 (default).
 - Leaderboards: opt-in per account, settled ratings only, top 50 (default, 0006).
+- D21 to D24 (beta label, Beta-marked rated features, archive retention, offline as a web app): open, defaults in the plan.
 
 ## Open questions for the owner
-- After deploy: `www` to apex redirect, domain route in `wrangler.jsonc` (S3), submit sitemap in Search Console, check share previews.
+- After deploy: `www` redirect, domain route (S3), Search Console sitemap, share previews, CSP reports.
 - D17 confirmation, including the abandoned-game rule (default: as built). Leaderboard defaults (as built).
-- Privacy and Terms need a contact address before launch (TRADEMARKS.md says the same).
 - Name check: a Steam game "Chess: Apex" (Netherlate Games) is announced; a trademark search is advised.
-- After the first deploy, check the browser console for CSP reports (`apps/web/public/_headers`).
 
 ## Notes for Claude
+- Ledger decision ids D16 and D17 differ from the plan's; new ledger ids start at D21.
 - Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.

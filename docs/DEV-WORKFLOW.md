@@ -49,6 +49,14 @@ Claude opens and merges its own pull requests after CI passes. The owner does no
 7. Keep output short: replies, notes, PR text, and the handoff. The rules are under "Token efficiency" in `CLAUDE.md`.
 8. Every session ends with the next step, model, and effort, plus the two commands to set them. Type them before the first message of the next session.
 
+## Outside review (NVIDIA build API)
+
+Available: Claude Code cloud sessions reach NVIDIA's build API (`integrate.api.nvidia.com`, free open models) with the key added by the network proxy, so no key is stored here. Elsewhere, set `NVIDIA_API_KEY`.
+
+- `pnpm review:outside` sends the changes since `docs/reviews/LAST` (or the core docs and source on the first run) to the default models and saves one report per model in `docs/reviews/`. Flags: `--model a/b,c/d`, `--since <ref>`, `--focus "..."`, `--dry-run`.
+- Only tracked files are sent, never `.env`, secrets, or lockfiles. Everything sent is code bound for this public repo.
+- Reports are unverified model output. Step S28 checks each finding against the code and files the real ones as ledger issues. It runs after each major update.
+
 ## Repo hygiene
 
 Never put secrets, personal information, or unreleased art in this repository. `.claude/settings.json` blocks reading `.env` and private paths, and blocks force-pushes and direct pushes to `main`.

@@ -9,7 +9,8 @@ Status values: `todo`, `doing`, `done`, `blocked`. `/end-session` updates the st
 1. The owner opens a new Claude Code session on this repo (claude.ai/code), sets the model and effort the step recommends, and sends `/start-session S<n>`, optionally followed by a brief pasted from the ledger.
 2. Claude reads `docs/HANDOFF.md` (loaded automatically) and only this file's section for the step.
 3. Claude plans, writes failing tests, implements, and commits after each green task.
-4. `/end-session` runs the checks, rewrites the handoff, logs the session, ships the PR (opens, waits for CI, merges), and ends with the next session's step, model, and effort (with the `/model` and `/effort` commands to set) and a `ledger-sync` block for the owner's ledger.
+4. After a major update (a phase closes, or a step changes the engine, the server, or privacy), the next session is S28, the outside review.
+5. `/end-session` runs the checks, rewrites the handoff, logs the session, ships the PR (opens, waits for CI, merges), and ends with the next session's step, model, and effort (with the `/model` and `/effort` commands to set) and a `ledger-sync` block for the owner's ledger.
 
 ## Model and effort guide (Pro plan)
 
@@ -30,14 +31,14 @@ Sonnet 5.5 is pinned as the project default in `.claude/settings.json`. Opus ste
 ### S1 — Foundation files and session system · Owner with Claude in chat · Opus 5.5 · high · `done`
 Foundation package: license, notices, CLAUDE.md, session skills, ship script, CI and unpack workflows, branch ruleset, rules draft, this plan, and the setup steps. Done when the package and steps are delivered; S2 puts them on `main`.
 
-### S2 — GitHub settings and apps · Owner · `todo`
+### S2 — GitHub settings and apps · Owner · `done`
 Follow "GitHub setup checklist" in [DEV-WORKFLOW.md](DEV-WORKFLOW.md): repository settings, Actions permissions, Claude and DCO apps, the two workflow files, the foundation zip, then the `main` ruleset import.
 Done when: the foundation files are on `main`, the ruleset is active, and a test zip unpacks and merges by itself.
 
-### S3 — Domain and hosting account · Owner · `todo`
+### S3 — Domain and hosting account · Owner · `done`
 Point apexchess.icu at Cloudflare DNS and open the hosting account (D11).
 
-### S4 — Settle the rules reading · Owner with Claude in chat · `todo`
+### S4 — Settle the rules reading · Owner with Claude in chat · `done`
 Confirm or change D1 to D9 in the ledger. Claude then updates `docs/RULES.md` and the defaults table.
 
 ## Phase 1: Engine and board
@@ -100,7 +101,8 @@ Bot self-play across setups; reports of wins, losses, draws, and win percentage 
 Deploy the static app to apexchess.icu, privacy policy page, no blank screens on errors.
 Decisions: D11.
 
-### S17 — Outside testers · Owner · `todo`
+### S17 — Outside testers · Owner · `doing`
+20 to 30 outside testers with set tasks (`docs/LAUNCH-PLAN.md`, part A); serious problems become ledger issues.
 
 ## Later phases
 
@@ -137,6 +139,35 @@ Private events by link: event display names, round robin or Swiss pairing, byes,
 ### S20d — Phase 7: Leaderboards · Opus 5.5 · high · `done`
 Opt-in leaderboards per ruleset id. Needs S19c and S19d (both done). Built as recorded in 0006 (provisional: one switch per account, settled ratings only, top 50).
 
+## Phase 8: Launch
+
+From the 2026-11-20 outside audit; the checklist is `docs/LAUNCH-PLAN.md`. Order: S22, S23, S24, S28, then S25 and S17, S26, S27, S28 again, S29.
+
+### S22 — Release hardening · Sonnet 5.5 · medium · `todo`
+CI runs `pnpm build`. `deploy.yml` fails when `CLOUDFLARE_API_TOKEN` or another required secret is missing, instead of skipping. The deployed commit is visible (a version file or tag). After deploy, a smoke test checks the home page, the API, room create and join, and the WebSocket. Docs agree on what is live.
+Done when: a PR without a build error passes CI, a missing secret fails deploy, and the smoke test runs against the live site.
+
+### S23 — AI search horizon · Opus 5.5 · high · `todo`
+In `packages/engine/src/ai.ts`: when the side to move is in check, quiescence searches every legal evasion; mate and stalemate are scored before the static evaluation; the search's repetition key carries all rule-relevant state (unmoved pieces, first-move rules), matching the game's key. Tests: mate at the horizon, a quiet-only check evasion, promotion, repetition with unmoved pieces. Difficulty levels stay as they are.
+
+### S24 — Beta labels, ruleset version, privacy retention · Sonnet 5.5 · medium · `todo`
+Show the live ruleset id and version and a Beta label (D21). Mark or turn off rated play, leaderboards, and tournaments (D22). State the archive retention period in Privacy (D23) and soften "cannot be linked back to you" if a unique game record could identify players.
+
+### S25 — Live checks before the beta · Owner · `todo`
+Run the live checklist in `docs/LAUNCH-PLAN.md` on two devices and two networks, and on current mobile and desktop browsers. Problems go to the ledger as issues.
+
+### S26 — Crawlable info pages · Sonnet 5.5 · medium · `todo`
+Static, indexable pages outside the app: How to Play, Rules, 45-Degree Chess, Custom Setups, About. Add them to the sitemap. Text comes from `docs/RULES.md`; no new rules.
+
+### S27 — Offline play · Sonnet 5.5 · high · `todo`
+Hot-seat and computer games without a connection, per D24 (default: installable web app with a service worker; online features say they need a connection). Any new dependency must be permissive and listed in NOTICE.
+
+### S28 — Outside review (recurring) · Sonnet 5.5 · medium · `todo`
+Run after each major update: a phase closes, or a step changes the engine, the server, or privacy. `pnpm review:outside` sends the changes since `docs/reviews/LAST` to open models on NVIDIA's build API and saves reports in `docs/reviews/`. Check each finding against the code; real ones become ledger issues (`newIssues`), the rest get one line in the report saying why not. The step stays `todo` so it can run again.
+
+### S29 — Community launch · Owner · `todo`
+Parts A to D and the 30-day targets in `docs/LAUNCH-PLAN.md`. No paid advertising yet.
+
 ## Decision defaults
 
 The owner decides in the ledger. Until a decision is made, its default applies when the step that needs it starts, marked provisional. Private decisions are not listed here.
@@ -163,6 +194,10 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D18 | Public setup statistics | Open; default (provisional): aggregates only, N ≥ 30, from anonymous archived games (0006) | S19a |
 | D19 | Time controls | Decided 2026-10-22: all options offered (untimed, Fischer, fixed time per move, abandonment only), default 10+0; presets in `rules/timeControls.json` (Claude's choice, provisional); running out of time loses unless the opponent has insufficient material (0007) | S20a |
 | D20 | Tournaments | Open; default (provisional): private events by link; round robin up to 8 players, Swiss above; sides set by pairing (0007) | S20c |
+| D21 | Launch ruleset label | Open; default: launch as a beta on rules draft 0.1, labelled in the app | S24 |
+| D22 | Rated play, leaderboards, tournaments in the beta | Open; default: keep them on, marked Beta | S24 |
+| D23 | Game archive retention | Open; default: say archived games are kept with no end date (as built) | S24 |
+| D24 | Offline play | Open; default: installable web app (service worker), hot-seat and computer only | S27 |
 
 ## Ledger sync format
 
