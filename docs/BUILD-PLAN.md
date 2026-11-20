@@ -147,7 +147,7 @@ From the 2026-11-20 outside audit; the checklist is `docs/LAUNCH-PLAN.md`. Order
 CI runs `pnpm build`. `deploy.yml` fails when `CLOUDFLARE_API_TOKEN` or another required secret is missing, instead of skipping. The deployed commit is visible (a version file or tag). After deploy, a smoke test checks the home page, the API, room create and join, and the WebSocket. Docs agree on what is live.
 Done when: a PR without a build error passes CI, a missing secret fails deploy, and the smoke test runs against the live site.
 
-### S23 — AI search horizon · Opus 5.5 · high · `todo`
+### S23 — AI search horizon · Opus 5.5 · high · `done`
 In `packages/engine/src/ai.ts`: when the side to move is in check, quiescence searches every legal evasion; mate and stalemate are scored before the static evaluation; the search's repetition key carries all rule-relevant state (unmoved pieces, first-move rules), matching the game's key. Also: draw checks in quiescence, mate distance carried into quiescence, a guard for an empty move list and a tiny node budget, and the computer's search in a Web Worker so the page never freezes (I14). Tests: mate at the horizon, a quiet-only check evasion, promotion, repetition with unmoved pieces. Difficulty levels stay as they are. Findings: `docs/reviews/2026-11-20-*.md`.
 
 ### S24 — Beta labels, ruleset version, privacy retention · Sonnet 5.5 · medium · `todo`
