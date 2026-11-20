@@ -49,11 +49,11 @@ Claude opens and merges its own pull requests after CI passes. The owner does no
 7. Keep output short: replies, notes, PR text, and the handoff. The rules are under "Token efficiency" in `CLAUDE.md`.
 8. Every session ends with the next step, model, and effort, plus the two commands to set them. Type them before the first message of the next session.
 
-## Outside review (NVIDIA build API)
+## Outside review (NVIDIA build API, OpenRouter fallback)
 
-Available: Claude Code cloud sessions reach NVIDIA's build API (`integrate.api.nvidia.com`, free open models) with the key added by the network proxy, so no key is stored here. Elsewhere, set `NVIDIA_API_KEY`.
+Available: Claude Code cloud sessions reach NVIDIA's build API (`integrate.api.nvidia.com`, free open models) with the key added by the network proxy, so no key is stored here. Elsewhere, set `NVIDIA_API_KEY`. If every model hits a rate or daily limit, the script retries on OpenRouter's free models (`openrouter:<id>:free`, key `OPENROUTER_API_KEY`, also proxy-injected in the cloud). It refuses OpenRouter models without `:free`, so it never spends credit.
 
-- `pnpm review:outside` sends the changes since `docs/reviews/LAST` (or the core docs and source on the first run) to the default models and saves one report per model in `docs/reviews/`. Flags: `--model a/b,c/d`, `--since <ref>`, `--focus "..."`, `--dry-run`.
+- `pnpm review:outside` sends the changes since `docs/reviews/LAST` (or the core docs and source on the first run) to the default models (Kimi K3.1 Pro and Nemotron 3 Ultra, thinking off) and saves one report per model in `docs/reviews/`. Flags: `--model a/b,c/d`, `--since <ref>`, `--focus "..."`, `--dry-run`.
 - Only tracked files are sent, never `.env`, secrets, or lockfiles. Everything sent is code bound for this public repo.
 - Reports are unverified model output. Step S28 checks each finding against the code and files the real ones as ledger issues. It runs after each major update.
 
