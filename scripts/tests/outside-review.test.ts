@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 // @ts-expect-error untyped .mjs module
-import { buildMessages, parseArgs, reportPath, DEFAULT_MODELS } from "../outside-review.mjs";
+import {
+  buildMessages,
+  parseArgs,
+  readStream,
+  reportPath,
+  DEFAULT_MODELS,
+} from "../outside-review.mjs";
 
 describe("outside review", () => {
   it("reads flags and falls back to the default models", () => {
@@ -35,5 +41,16 @@ describe("outside review", () => {
     expect(user).toContain("Focus: rules");
     expect(user.length).toBeLessThan(800);
     expect(user).toContain("[truncated]");
+  });
+
+  it("joins a streamed reply and reports a failed one", () => {
+    const raw = [
+      'data: {"choices":[{"delta":{"reasoning_content":"thinking"}}]}',
+      'data: {"choices":[{"delta":{"content":"High: "}}]}',
+      'data: {"choices":[{"delta":{"content":"bug"}}]}',
+      "data: [DONE]",
+    ].join("\n");
+    expect(readStream(raw)).toBe("High: bug");
+    expect(() => readStream("upstream request timeout")).toThrow("upstream request timeout");
   });
 });
