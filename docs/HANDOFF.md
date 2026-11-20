@@ -1,24 +1,23 @@
 # Handoff
 
-Updated 2026-11-20 by S26 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-11-20 by S27 (Sonnet 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Product complete through UI1; launch prep, S22 to S24, S26 done, and the S28 review of S24 and S26 ran. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
-- S26: five static pages (`/how-to-play/`, `/rules/`, `/45-degree-chess/`, `/custom-setups/`, `/about/`) built from `docs/RULES.md` by `scripts/info-pages.mjs` during `pnpm build`; in the sitemap and live smoke test; footer links How to play and About.
-- S28b triage: `docs/reviews/2026-11-20-s28b-triage.md`; nothing new to fix. `docs/reviews/LAST` advanced.
-- Contact address GameTypeBrand@gmail.com (keep the capitals) on Privacy, Terms, footer, security.txt, TRADEMARKS.
+- Product complete through UI1; launch prep, S22 to S24, S26, S27 done. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
+- S27: `scripts/write-sw.mjs` + `scripts/sw.template.js` write `dist/sw.js` (precache of the build; pages network-first, files cache-first; `/api` and `/version.json` never cached). `apps/web/src/offline.ts` registers it (prod only) and `useOnline`; Home disables online play, tournaments, stats, leaderboards, account when offline. Smoke checks `/sw.js`. Checked in real Chromium offline.
+- No new dependency. Manifest already existed (S25).
 
 ## Next session
-**S27 — Offline play** · Sonnet 5.5 · effort high
-Set: `/model sonnet` · `/effort high`
-Why: Next Code step; D24 default applies.
-Start with: `/start-session S27`
+**S28 — Outside review (recurring)** · Sonnet 5.5 · effort medium
+Set: `/model sonnet` · `/effort medium`
+Why: Next todo Code step; review S27 (service worker, offline UI).
+Start with: `/start-session S28`
 
 ## Decisions in effect for the next step
-- D24: open; default installable web app with a service worker (provisional). D16: passkey + handle (decided). D17: Glicko-2 per ruleset id (default).
+- D24: offline play via service worker, hot-seat and computer only (default, provisional). D16: passkey + handle (decided). D17: Glicko-2 per ruleset id (default).
 
 ## Open questions for the owner
-- After deploy: `www` redirect, domain route (S3), Search Console sitemap (now five more URLs), share previews, CSP reports.
+- D24 confirmation. After deploy: `www` redirect, domain route (S3), Search Console sitemap, share previews, CSP reports; check `/sw.js` is live and installable.
 - D17 confirmation. Name check: a Steam game "Chess: Apex" is announced; a trademark search is advised. S25 live checks are yours.
 
 ## Notes for Claude

@@ -159,7 +159,7 @@ Run the live checklist in `docs/LAUNCH-PLAN.md` on two devices and two networks,
 ### S26 — Crawlable info pages · Sonnet 5.5 · medium · `done`
 Static, indexable pages outside the app: How to Play, Rules, 45-Degree Chess, Custom Setups, About. Add them to the sitemap. Text comes from `docs/RULES.md`; no new rules.
 
-### S27 — Offline play · Sonnet 5.5 · high · `todo`
+### S27 — Offline play · Sonnet 5.5 · high · `done`
 Hot-seat and computer games without a connection, per D24 (default: installable web app with a service worker; online features say they need a connection). Any new dependency must be permissive and listed in NOTICE.
 
 ### S28 — Outside review (recurring) · Sonnet 5.5 · medium · `todo`
@@ -197,7 +197,7 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D21 | Launch ruleset label | Open; default: launch as a beta on rules draft 0.1, labelled in the app (applied in S24, provisional) | S24 |
 | D22 | Rated play, leaderboards, tournaments in the beta | Open; default: keep them on, marked Beta (applied in S24, provisional) | S24 |
 | D23 | Game archive retention | Open; default: say archived games are kept with no end date (as built) (applied in S24, provisional) | S24 |
-| D24 | Offline play | Open; default: installable web app (service worker), hot-seat and computer only | S27 |
+| D24 | Offline play | Open; default: installable web app (service worker), hot-seat and computer only (applied in S27, provisional) | S27 |
 
 ## Ledger sync format
 

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -p tsconfig.json --noEmit && vite build && node ../../scripts/third-party-licenses.mjs . dist/third-party-licenses.txt && node ../../scripts/info-pages.mjs dist && node ../../scripts/write-version.mjs dist",
+    "build": "tsc -p tsconfig.json --noEmit && vite build && node ../../scripts/third-party-licenses.mjs . dist/third-party-licenses.txt && node ../../scripts/info-pages.mjs dist && node ../../scripts/write-version.mjs dist && node ../../scripts/write-sw.mjs dist",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

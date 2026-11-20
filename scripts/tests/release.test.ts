@@ -35,6 +35,10 @@ function fakes(bad: string[] = [], commit = SHA) {
       return bad.includes("info")
         ? ok("<title>Apex Chess</title>")
         : ok('<link rel="canonical" href="https://apexchess.icu/how-to-play/" />');
+    if (path === "/sw.js")
+      return bad.includes("sw")
+        ? ok("<html>", 200)
+        : new Response("const PRECACHE = [];", { headers: { "content-type": "text/javascript" } });
     if (path === "/version.json") return ok({ commit });
     if (path === "/api/stats") return bad.includes("api") ? ok("", 500) : ok([]);
     if (path === "/api/rooms" && init?.method === "POST")
@@ -61,10 +65,13 @@ describe("smoke test", () => {
     const r = await smoke("https://x.test", { expectCommit: SHA, ...fakes() });
     expect(r.failures).toEqual([]);
   });
-  it.each(["home", "info", "api", "create", "socket"])("fails when %s is broken", async (what) => {
-    const r = await smoke("https://x.test", { expectCommit: SHA, ...fakes([what]) });
-    expect(r.failures.length).toBeGreaterThan(0);
-  });
+  it.each(["home", "info", "sw", "api", "create", "socket"])(
+    "fails when %s is broken",
+    async (what) => {
+      const r = await smoke("https://x.test", { expectCommit: SHA, ...fakes([what]) });
+      expect(r.failures.length).toBeGreaterThan(0);
+    },
+  );
   it("fails when the live commit is not the deployed one", async () => {
     const r = await smoke("https://x.test", { expectCommit: SHA, ...fakes([], "deadbeef") });
     expect(r.failures.join()).toMatch(/commit/);
