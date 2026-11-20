@@ -21,4 +21,4 @@ Only rulesets and setup presets published in this repository with status **Offic
 
 ## Questions
 
-Contact details will be published here before launch.
+Write to [GameTypeBrand@gmail.com](mailto:GameTypeBrand@gmail.com).

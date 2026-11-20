@@ -1,5 +1,7 @@
+import { CONTACT_EMAIL } from "./contact";
+
 export function Privacy({ onClose }: { onClose: () => void }) {
-  return (
+    return (
     <section aria-label="Privacy" className="rules">
       <h1>Privacy</h1>
       <p>
@@ -89,6 +91,11 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         Games you play against the computer or on one screen are not sent anywhere. The site is
         served by Cloudflare, which may keep standard server logs (such as IP address) for security
         and operation.
+      </p>
+      <h2>Contact</h2>
+      <p>
+        Questions about your data, or a request to delete it, go to{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
       </p>
       <button type="button" onClick={onClose}>
         Close
