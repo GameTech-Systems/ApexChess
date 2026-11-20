@@ -148,7 +148,7 @@ CI runs `pnpm build`. `deploy.yml` fails when `CLOUDFLARE_API_TOKEN` or another 
 Done when: a PR without a build error passes CI, a missing secret fails deploy, and the smoke test runs against the live site.
 
 ### S23 — AI search horizon · Opus 5.5 · high · `todo`
-In `packages/engine/src/ai.ts`: when the side to move is in check, quiescence searches every legal evasion; mate and stalemate are scored before the static evaluation; the search's repetition key carries all rule-relevant state (unmoved pieces, first-move rules), matching the game's key. Tests: mate at the horizon, a quiet-only check evasion, promotion, repetition with unmoved pieces. Difficulty levels stay as they are.
+In `packages/engine/src/ai.ts`: when the side to move is in check, quiescence searches every legal evasion; mate and stalemate are scored before the static evaluation; the search's repetition key carries all rule-relevant state (unmoved pieces, first-move rules), matching the game's key. Also: draw checks in quiescence, mate distance carried into quiescence, a guard for an empty move list and a tiny node budget, and the computer's search in a Web Worker so the page never freezes (I14). Tests: mate at the horizon, a quiet-only check evasion, promotion, repetition with unmoved pieces. Difficulty levels stay as they are. Findings: `docs/reviews/2026-11-20-*.md`.
 
 ### S24 — Beta labels, ruleset version, privacy retention · Sonnet 5.5 · medium · `todo`
 Show the live ruleset id and version and a Beta label (D21). Mark or turn off rated play, leaderboards, and tournaments (D22). State the archive retention period in Privacy (D23) and soften "cannot be linked back to you" if a unique game record could identify players.
