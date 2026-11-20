@@ -270,6 +270,8 @@ export function App({
           <button type="button" className="link" onClick={() => open("terms")}>
             Terms
           </button>
+          <a href="/how-to-play/">How to play</a>
+          <a href="/about/">About</a>
           <a href={LICENSES_URL}>Third-party licenses</a>
           <a href={SOURCE_URL} rel="noopener noreferrer" target="_blank">
             Source code

@@ -53,6 +53,11 @@ export async function smoke(base, opts = {}) {
   await check("home", async () => {
     if (!(await (await get("/")).text()).includes("Apex Chess")) throw new Error("no title");
   });
+  await check("info pages", async () => {
+    const html = await (await get("/how-to-play/")).text();
+    if (!html.includes('rel="canonical" href="https://apexchess.icu/how-to-play/"'))
+      throw new Error("/how-to-play/ is not its own page");
+  });
   await check("commit", async () => {
     const { commit } = await (await get("/version.json")).json();
     if (expectCommit && commit !== expectCommit)

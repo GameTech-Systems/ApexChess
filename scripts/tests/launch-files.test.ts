@@ -39,10 +39,12 @@ describe("launch files (apps/web)", () => {
     expect(robots).toContain(`Sitemap: ${SITE}/sitemap.xml`);
   });
 
-  it("sitemap.xml lists the home page on the canonical host only", () => {
+  it("sitemap.xml lists only canonical-host URLs, home page first", () => {
     const xml = read("public/sitemap.xml");
     expect(xml).toContain("http://www.sitemaps.org/schemas/sitemap/0.9");
-    expect([...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1])).toEqual([`${SITE}/`]);
+    const locs = [...xml.matchAll(/<loc>([^<]+)<\/loc>/g)].map((m) => m[1]);
+    expect(locs[0]).toBe(`${SITE}/`);
+    for (const l of locs) expect(l?.startsWith(`${SITE}/`)).toBe(true);
   });
 
   it("the manifest names the app and its icons exist at the stated sizes", () => {

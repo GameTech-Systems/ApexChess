@@ -1,9 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- The app routes inside one page (links use #fragments), so the home page is the only indexable URL. -->
+<!-- The app routes inside one page; the info pages are static (scripts/info-pages.mjs). -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://apexchess.icu/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
+  <url><loc>https://apexchess.icu/how-to-play/</loc></url>
+  <url><loc>https://apexchess.icu/rules/</loc></url>
+  <url><loc>https://apexchess.icu/45-degree-chess/</loc></url>
+  <url><loc>https://apexchess.icu/custom-setups/</loc></url>
+  <url><loc>https://apexchess.icu/about/</loc></url>
 </urlset>
