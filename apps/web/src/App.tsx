@@ -64,14 +64,10 @@ const store = (() => {
   }
 })();
 
-/** The site menu: page, label, and whether it needs a connection. */
-const NAV: [Route, string, boolean][] = [
-  ["rules", "Rules", false],
-  ["tournaments", "Tournaments", true],
-  ["stats", "Stats", true],
-  ["leaderboard", "Leaderboard", true],
-  ["account", "Account", true],
-  ["about", "About", false],
+/** The header menu (Home comes first); Tournaments, Stats, Leaderboards and Account live in the home page's More section. */
+const NAV: [Route, string][] = [
+  ["rules", "Rules"],
+  ["about", "About"],
 ];
 
 /** Public source repository and the build's third-party license file (see NOTICE). */
@@ -300,31 +296,25 @@ export function App({
           <Logo size={34} />
           <span>Apex Chess</span>
         </a>
-        <BetaBadge />
         <nav aria-label="Site">
           <a href="/" onClick={goHome} aria-current={route || mode || shared ? undefined : "page"}>
             Home
           </a>
-          {NAV.map(([r, label, needsConnection]) =>
-            needsConnection && !online ? (
-              <span key={r} className="nav-off" title="Needs a connection.">
-                {label}
-              </span>
-            ) : (
-              <a
-                key={r}
-                href={ROUTE_PATHS[r]}
-                aria-current={route === r ? "page" : undefined}
-                onClick={(e) => {
-                  e.preventDefault();
-                  go(r);
-                }}
-              >
-                {label}
-              </a>
-            ),
-          )}
+          {NAV.map(([r, label]) => (
+            <a
+              key={r}
+              href={ROUTE_PATHS[r]}
+              aria-current={route === r ? "page" : undefined}
+              onClick={(e) => {
+                e.preventDefault();
+                go(r);
+              }}
+            >
+              {label}
+            </a>
+          ))}
         </nav>
+        <BetaBadge />
       </header>
       <div id="content" className="view" key={`${view}-${round}`} hidden={Boolean(page)}>
         {content}
@@ -336,6 +326,9 @@ export function App({
       )}
       <footer className="site-footer">
         <nav aria-label="About">
+          <a href="/" onClick={goHome}>
+            Home
+          </a>
           <button type="button" className="link" onClick={() => open("rules")}>
             Rules
           </button>
@@ -352,7 +345,9 @@ export function App({
           <a href={SOURCE_URL} rel="noopener noreferrer" target="_blank">
             Source code
           </a>
-          <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>
+          <a href={`mailto:${CONTACT_EMAIL}`} target="_blank" rel="noopener noreferrer">
+            {CONTACT_EMAIL}
+          </a>
         </nav>
         <p>
           © 2026 Duke Johnson. Apex Chess™ and the turned-board logo are trademarks of Duke Johnson.
