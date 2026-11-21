@@ -6,10 +6,11 @@ Play at **[apexchess.icu](https://apexchess.icu)**. This repository holds the ga
 
 ## Ways to play
 
-- **Against the computer**, at a strength you pick.
-- **Two players, one screen**, passing the device between moves.
+- **Against the computer**, at a strength you pick. Works offline.
+- **Two players, one screen**, passing the device between moves. Works offline.
 - **Online**, by quick match or a private room with a friend. Rated play is for signed-in accounts; accounts are optional and use a passkey and a handle (no email).
 - **Events**: private tournaments by link (round robin or Swiss), with clocks.
+- **Offline.** After the first visit a service worker keeps the app on the device, so the computer, two-player games, and the rules work without a connection. Online play, events, statistics, leaderboards, and accounts need one.
 - Every game can start from the default setup or from your own arrangement, and finished games can be shared as a replay link.
 
 ## The game in brief
@@ -20,7 +21,7 @@ Play at **[apexchess.icu](https://apexchess.icu)**. This repository holds the ga
 - **Player's Choice.** Arrange your own pieces under two rules: your king starts in your light corner, and only one piece may start beyond your front chord (d1 to h5 for light, e8 to a4 for dark). Online, you see your opponent's arrangement only when the game begins, and a coin flip decides who plays light and moves first.
 - No castling and no en passant.
 
-The full rules, including the default setup, are in [docs/RULES.md](docs/RULES.md). They are a draft: items marked provisional follow a default that has not been confirmed yet.
+The full rules, including the default setup, are in [docs/RULES.md](docs/RULES.md). The rules are settled; the site carries a Beta Testing badge until enough players have confirmed that everything works.
 
 ## The Elbow Room
 
@@ -47,7 +48,7 @@ pnpm sim          # bot self-play report
 | `packages/engine` | Rules engine: moves, check, setups, records. Reads everything from `rules/`. |
 | `packages/online` | Room, matchmaking, event, and clock logic shared by client and server. |
 | `packages/sim` | Bot self-play for balance reports. |
-| `apps/web` | Vite + React static app, including `public/` (robots, sitemap, share image, icons). |
+| `apps/web` | Vite + React static app. Each page (`/rules/`, `/about/`, `/tournaments/`, `/stats/`, `/leaderboard/`, `/account/`, `/privacy/`, `/terms/`) has its own address and is served by the same app (`src/routes.ts`); `public/` holds robots, sitemap, redirects, share image, icons. |
 | `apps/server` | Cloudflare Worker and Durable Objects for online play, D1 for the archive and accounts. |
 | `rules/` | Pieces, boards, setups, rulesets, parameters, time controls, and their JSON schemas. |
 | `docs/` | Rules in words, build plan, decisions, and the current handoff. |
@@ -60,7 +61,7 @@ The static app and the Worker deploy together to Cloudflare with `wrangler deplo
 
 ## Status
 
-Feature-complete for launch: the game, computer opponent, online play, accounts and ratings, public setup statistics, events, and leaderboards are built. The remaining steps are the owner's (hosting, domain, outside testers). The rules are still a draft: items marked provisional follow a default that has not been confirmed. Current state: [docs/HANDOFF.md](docs/HANDOFF.md); plan: [docs/BUILD-PLAN.md](docs/BUILD-PLAN.md).
+Feature-complete for launch: the game, computer opponent, online play, accounts and ratings, public setup statistics, events, and leaderboards are built. The remaining steps are the owner's (hosting, domain, outside testers). The site is in beta testing. Current state: [docs/HANDOFF.md](docs/HANDOFF.md); plan: [docs/BUILD-PLAN.md](docs/BUILD-PLAN.md).
 
 ## License
 

@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- The app routes inside one page; the info pages are static (scripts/info-pages.mjs). -->
+<!-- The app serves each page from its own address (apps/web/src/routes.ts). -->
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://apexchess.icu/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
-  <url><loc>https://apexchess.icu/how-to-play/</loc></url>
   <url><loc>https://apexchess.icu/rules/</loc></url>
-  <url><loc>https://apexchess.icu/45-degree-chess/</loc></url>
-  <url><loc>https://apexchess.icu/custom-setups/</loc></url>
+  <url><loc>https://apexchess.icu/tournaments/</loc></url>
+  <url><loc>https://apexchess.icu/stats/</loc></url>
+  <url><loc>https://apexchess.icu/leaderboard/</loc></url>
   <url><loc>https://apexchess.icu/about/</loc></url>
 </urlset>

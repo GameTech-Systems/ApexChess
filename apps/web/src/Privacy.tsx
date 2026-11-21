@@ -8,6 +8,13 @@ export function Privacy({ onClose }: { onClose: () => void }) {
         Apex Chess runs in your browser. Accounts are optional, and there are no ads, no analytics,
         and no cookies.
       </p>
+      <h2>Offline play</h2>
+      <p>
+        So the game works without a connection, your browser keeps a copy of the site's files
+        (pages, scripts, and images) in its cache through a service worker. It holds no personal
+        data, and games against the computer or on one screen stay on your device. Clearing your
+        browser's site data removes the copy.
+      </p>
       <h2>What is stored</h2>
       <p>
         Setups you save, and the time control you last picked for online play, are kept in this

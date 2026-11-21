@@ -6,7 +6,7 @@ import { chordSpan } from "./setupBuilder";
 
 export type Opponent = "hotseat" | "computer" | "online";
 export type SetupChoice = "default" | "custom";
-export type Panel = "rules" | "privacy" | "terms" | "stats" | "leaderboard" | "account";
+export type Panel = "rules" | "about" | "privacy" | "terms" | "stats" | "leaderboard" | "account";
 
 const OPPONENTS: { id: Opponent; label: string; note: string }[] = [
   { id: "computer", label: "Play the computer", note: "Pick how strong it plays." },
@@ -71,7 +71,8 @@ export function Home({
         <h2 id="start-title">Start a game</h2>
         {!online && (
           <p className="offline-note" role="status">
-            You are offline. The computer and two-player games work without a connection.
+            You are offline. The computer and two-player games work without a connection (offline
+            play is ready on this device).
           </p>
         )}
         <fieldset className="opponents">

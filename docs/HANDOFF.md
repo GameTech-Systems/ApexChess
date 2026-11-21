@@ -5,6 +5,7 @@ Updated 2026-11-20 by S28 (Sonnet 5.5 · medium). `/end-session` rewrites this f
 ## State
 - Product complete through UI1; launch prep S22 to S24, S26, S27, S27b done. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
 - S28 (third run) reviewed S27 and S27b: nothing real. Triage: `docs/reviews/2026-11-20-s28c-triage.md`. `docs/reviews/LAST` is now `35272d2`.
+- Site pages (post-S28): each page has its own address in the app (`apps/web/src/routes.ts`); static info pages removed, old ones redirect to `/rules/`; header badge is "Beta Testing".
 - No Code step is left `todo`. Remaining: S25 (live checks, owner), S29 (community launch, owner), S28 (recurring).
 
 ## Next session

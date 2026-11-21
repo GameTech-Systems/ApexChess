@@ -67,10 +67,10 @@ export async function smoke(base, opts = {}) {
     )
       throw new Error(`/assets/${name} is not the computer worker`);
   });
-  await check("info pages", async () => {
-    const html = await (await get("/how-to-play/")).text();
-    if (!html.includes('rel="canonical" href="https://apexchess.icu/how-to-play/"'))
-      throw new Error("/how-to-play/ is not its own page");
+  await check("pages", async () => {
+    // A page address serves the app (single-page fallback).
+    const html = await (await get("/rules/")).text();
+    if (!html.includes("<title>")) throw new Error("/rules/ does not serve the app");
   });
   await check("offline worker", async () => {
     const res = await get("/sw.js");
