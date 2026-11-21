@@ -16,6 +16,7 @@ import {
   type Move,
   type Side,
 } from "@apexchess/engine";
+import { About } from "./About";
 import { Account } from "./Account";
 import { BetaBadge } from "./beta";
 import { Board } from "./Board";
@@ -30,6 +31,7 @@ import { loadTicket, saveTicket } from "./online";
 import type { KeyValueStore } from "./savedSetups";
 import { Privacy } from "./Privacy";
 import { Replay } from "./Replay";
+import { ROUTE_PATHS, ROUTE_TITLES, routeOf, type Route } from "./routes";
 import { Rules } from "./Rules";
 import { copyText, gameLink, parseShare } from "./share";
 import { Leaderboard } from "./Leaderboard";
@@ -61,6 +63,16 @@ const store = (() => {
     return { getItem: () => null, setItem: () => undefined };
   }
 })();
+
+/** The site menu: page, label, and whether it needs a connection. */
+const NAV: [Route, string, boolean][] = [
+  ["rules", "Rules", false],
+  ["tournaments", "Tournaments", true],
+  ["stats", "Stats", true],
+  ["leaderboard", "Leaderboard", true],
+  ["account", "Account", true],
+  ["about", "About", false],
+];
 
 /** Public source repository and the build's third-party license file (see NOTICE). */
 const SOURCE_URL = "https://github.com/GameTech-Systems/ApexChess";
@@ -94,7 +106,10 @@ export function App({
   const [setupChoice, setSetupChoice] = useState<SetupChoice>(initialSetup);
   const [level, setLevel] = useState<Level>(DEFAULT_LEVEL);
   // Pages opened over the current view; closing one goes back to what was under it.
-  const [panels, setPanels] = useState<Panel[]>([]);
+  const [panels, setPanels] = useState<Panel[]>(() => {
+    const r = routeOf(typeof window === "undefined" ? "/" : window.location.pathname);
+    return r && r !== "tournaments" ? [r] : [];
+  });
   // Bumped by Home so everything below starts over.
   const [round, setRound] = useState(0);
   const busy = useRef<string>();
@@ -107,8 +122,10 @@ export function App({
   );
   // An event link (D20) opens its event page; `{}` is the tournaments start screen.
   const [events, setEvents] = useState<{ code?: string } | undefined>(() => {
-    const code = parseEventHash(typeof window === "undefined" ? "" : window.location.hash);
-    return code ? { code } : undefined;
+    if (typeof window === "undefined") return undefined;
+    const code = parseEventHash(window.location.hash);
+    if (code) return { code };
+    return routeOf(window.location.pathname) === "tournaments" ? {} : undefined;
   });
   const clearHash = () => {
     if (window.location.hash)
@@ -122,6 +139,31 @@ export function App({
   const close = () => setPanels((p) => p.slice(0, -1));
   const panel = panels.at(-1);
   const online = useOnline();
+
+  // Each page has its own address. The address follows what is on screen, and Back or Forward
+  // (popstate) puts the matching page on screen again.
+  const route: Route | undefined =
+    panel ?? (events && !shared && !mode ? "tournaments" : undefined);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const path = route ? ROUTE_PATHS[route] : "/";
+    if (window.location.pathname !== path)
+      history.pushState(null, "", path + window.location.search + window.location.hash);
+    const meta = ROUTE_TITLES[route ?? "home"];
+    document.title = meta.title;
+    if (meta.description)
+      document.querySelector('meta[name="description"]')?.setAttribute("content", meta.description);
+  }, [route]);
+  useEffect(() => {
+    const onPop = () => {
+      const r = routeOf(window.location.pathname);
+      setPanels(r && r !== "tournaments" ? [r] : []);
+      if (r === "tournaments") setEvents((e) => e ?? {});
+      else if (!parseEventHash(window.location.hash)) setEvents(undefined);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
   const goHome = (e?: MouseEvent) => {
     e?.preventDefault();
@@ -137,6 +179,19 @@ export function App({
     setPanels([]);
     setMode(undefined);
     setRound((n) => n + 1);
+  };
+
+  // Open a page from the site menu: it replaces whatever page is open, and leaves any game as is.
+  const go = (r: Route) => {
+    if (r === "tournaments") {
+      if (busy.current && !window.confirm(busy.current)) return;
+      busy.current = undefined;
+      setPanels([]);
+      setEvents({});
+      return;
+    }
+    setEvents(undefined);
+    setPanels([r]);
   };
 
   const view = shared ? `shared-${shared.kind}` : events ? "events" : (mode ?? "home");
@@ -229,6 +284,7 @@ export function App({
   if (panel === "rules") page = <Rules ruleset={ruleset} onClose={close} />;
   else if (panel === "privacy") page = <Privacy onClose={close} />;
   else if (panel === "terms") page = <Terms onClose={close} />;
+  else if (panel === "about") page = <About onClose={close} onOpen={open} />;
   else if (panel === "stats") page = <Stats onClose={close} current={current} />;
   else if (panel === "leaderboard") page = <Leaderboard onClose={close} />;
   else if (panel === "account")
@@ -244,14 +300,30 @@ export function App({
           <Logo size={34} />
           <span>Apex Chess</span>
         </a>
-        <BetaBadge current={current} />
+        <BetaBadge />
         <nav aria-label="Site">
-          <a href="/" onClick={goHome}>
+          <a href="/" onClick={goHome} aria-current={route || mode || shared ? undefined : "page"}>
             Home
           </a>
-          <button type="button" className="link" onClick={() => open("rules")}>
-            Rules
-          </button>
+          {NAV.map(([r, label, needsConnection]) =>
+            needsConnection && !online ? (
+              <span key={r} className="nav-off" title="Needs a connection.">
+                {label}
+              </span>
+            ) : (
+              <a
+                key={r}
+                href={ROUTE_PATHS[r]}
+                aria-current={route === r ? "page" : undefined}
+                onClick={(e) => {
+                  e.preventDefault();
+                  go(r);
+                }}
+              >
+                {label}
+              </a>
+            ),
+          )}
         </nav>
       </header>
       <div id="content" className="view" key={`${view}-${round}`} hidden={Boolean(page)}>
@@ -273,8 +345,9 @@ export function App({
           <button type="button" className="link" onClick={() => open("terms")}>
             Terms
           </button>
-          <a href="/how-to-play/">How to play</a>
-          <a href="/about/">About</a>
+          <button type="button" className="link" onClick={() => open("about")}>
+            About
+          </button>
           <a href={LICENSES_URL}>Third-party licenses</a>
           <a href={SOURCE_URL} rel="noopener noreferrer" target="_blank">
             Source code

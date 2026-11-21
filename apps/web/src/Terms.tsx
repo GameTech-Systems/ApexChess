@@ -10,6 +10,13 @@ export function Terms({ onClose }: { onClose: () => void }) {
         Apex Chess is free to play. You can play on one screen, against the computer, online, and in
         events without an account; accounts are optional.
       </p>
+      <h2>Offline play</h2>
+      <p>
+        After your first visit the site can run without a connection, using files your browser keeps
+        on your device. Games against the computer and on one screen work offline. Online games,
+        events, statistics, leaderboards, and accounts need a connection, and ratings change only in
+        rated online games.
+      </p>
       <h2>Who can have an account</h2>
       <p>You must be {MIN_AGE} or older to create an account. If you are not, play without one.</p>
       <h2>Handles</h2>

@@ -20,7 +20,6 @@ const FILES = {
   "index.html": "<html>1</html>",
   "assets/app-abc.js": "a",
   "assets/app-abc.js.map": "m",
-  "how-to-play/index.html": "<html>h</html>",
   "favicon.svg": "<svg/>",
   "version.json": "{}",
   _headers: "x",
@@ -29,13 +28,8 @@ const FILES = {
 };
 
 describe("service worker build", () => {
-  it("precaches the app, pages, and assets, but not the deploy check or crawler files", () => {
-    expect(precacheList(site(FILES))).toEqual([
-      "/",
-      "/assets/app-abc.js",
-      "/favicon.svg",
-      "/how-to-play/",
-    ]);
+  it("precaches the app and its assets, but not the deploy check or crawler files", () => {
+    expect(precacheList(site(FILES))).toEqual(["/", "/assets/app-abc.js", "/favicon.svg"]);
   });
   it("names its cache by content, so a new build replaces the old cache", () => {
     const name = (extra: string) => {
@@ -136,13 +130,11 @@ describe("service worker behavior", () => {
     );
     expect(sw.calls).toEqual([]);
   });
-  it("opens pages offline from the cache, falling back to the app for unknown paths", async () => {
+  it("opens pages offline from the cache, opening every page address from the app", async () => {
     const sw = run({ online: false });
     await sw.install();
-    expect(await (await sw.fetchEvent("/how-to-play/?x=1", { mode: "navigate" }))!.text()).toBe(
-      "cached /how-to-play/",
-    );
-    expect(await (await sw.fetchEvent("/somewhere", { mode: "navigate" }))!.text()).toBe(
+    // Every page address (/rules/, /about/, ...) is the one app, so it opens from "/".
+    expect(await (await sw.fetchEvent("/rules/?x=1", { mode: "navigate" }))!.text()).toBe(
       "cached /",
     );
   });
@@ -165,10 +157,10 @@ describe("service worker behavior", () => {
 });
 
 describe("wiring", () => {
-  it("the web build writes the worker after the info pages", () => {
+  it("the web build writes the worker last, after the app is built", () => {
     const build = JSON.parse(readFileSync(join(root, "apps/web/package.json"), "utf8")).scripts
       .build;
-    expect(build.indexOf("write-sw.mjs")).toBeGreaterThan(build.indexOf("info-pages.mjs"));
+    expect(build.indexOf("write-sw.mjs")).toBeGreaterThan(build.indexOf("vite build"));
   });
   it("the worker file is never cached by the browser or CDN", () => {
     expect(readFileSync(join(root, "apps/web/public/_headers"), "utf8")).toMatch(

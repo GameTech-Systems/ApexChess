@@ -93,7 +93,7 @@ export function Rules({ ruleset, onClose }: { ruleset: ResolvedRuleset; onClose:
   const known = new Set(PIECES.map((p) => p.id));
   return (
     <section aria-label="Rules" className="rules">
-      <h1>How to play Apex Chess</h1>
+      <h1>Rules</h1>
       <p className="lede">
         Apex Chess uses the ordinary chess pieces on an ordinary 8×8 board, turned 45°. If you have
         never played chess, start here: each side has 16 pieces, light moves first, and you take
