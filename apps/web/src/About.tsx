@@ -37,7 +37,11 @@ export function About({ onClose, onOpen }: { onClose: () => void; onOpen: (p: "r
         <a href={SOURCE_URL} rel="noopener noreferrer" target="_blank">
           Source code
         </a>
-        . Contact: <a href={`mailto:${CONTACT_EMAIL}`}>{CONTACT_EMAIL}</a>.
+        . Contact:{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`} target="_blank" rel="noopener noreferrer">
+          {CONTACT_EMAIL}
+        </a>
+        .
       </p>
       <button type="button" onClick={onClose}>
         Close

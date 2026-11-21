@@ -851,6 +851,6 @@ main.page > .event {
   border: 1px solid var(--line);
   border-radius: 999px;
   color: var(--muted);
-  margin-inline-end: auto;
+  margin-inline-start: auto;
   white-space: nowrap;
 }
