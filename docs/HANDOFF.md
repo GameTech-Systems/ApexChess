@@ -1,28 +1,28 @@
 # Handoff
 
-Updated 2026-11-20 by S28 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-11-23 by S28 (audit 2 triage; Opus 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
 - Product complete through UI1; launch prep S22 to S24, S26, S27, S27b done. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
-- S28 (third run) reviewed S27 and S27b: nothing real. Triage: `docs/reviews/2026-11-20-s28c-triage.md`. `docs/reviews/LAST` is now `35272d2`.
-- Site pages (post-S28): each page has its own address in the app (`apps/web/src/routes.ts`); static info pages removed, old ones redirect to `/rules/`; header badge is "Beta Testing".
-- No Code step is left `todo`. Remaining: S25 (live checks, owner), S29 (community launch, owner), S28 (recurring).
+- Audit 2 (ChatGPT, 2026-11-23) triaged: `docs/reviews/2026-11-23-audit2-triage.md`. Fixed here: Rules page shows the live ruleset version and status (D21); build writes `<page>/index.html` per address with its own tags; deploy reruns validate, lint, typecheck, test; rollback in `DEV-WORKFLOW.md`; engine property tests; README and launch-plan statuses.
+- New steps S30 to S33 and D25 in `docs/BUILD-PLAN.md` and the ledger (I17 to I22).
 
 ## Next session
-**S28 — Outside review (recurring)** · Sonnet 5.5 · effort medium
-Set: `/model sonnet` · `/effort medium`
-Why: Run only after the next code change; owner steps S25 and S29 come first.
-Start with: `/start-session S28`
+**S30 — Endpoint limits and abuse tests** · Sonnet 5.5 · effort high
+Set: `/model sonnet` · `/effort high`
+Why: I20, one /api limit for everything; must land before S29.
+Start with: `/start-session S30`
 
 ## Decisions in effect for the next step
-- D24: decided, both: web app first (done in S27), desktop download later (no step yet). D16: passkey + handle (decided). D17: Glicko-2 per ruleset id (default).
+- D16: passkey + handle (decided). Limit values are provisional, in `wrangler.jsonc`.
 
 ## Open questions for the owner
-- After deploy: `www` redirect, domain route (S3), Search Console sitemap, share previews, CSP reports; check `/sw.js` is live and installable.
-- D17 confirmation. Name check: a Steam game "Chess: Apex" is announced; a trademark search is advised. S25 live checks are yours.
+- D21: publish ruleset 1.0 or stay on draft 0.1 for the beta. D25 (PGN tags) before S33. D17 confirmation.
+- I22: Cloudflare alerts for Worker errors and 429 spikes; one D1 Time Travel restore drill (S25).
+- After deploy: `www` redirect, Search Console sitemap, share previews per page, `/sw.js` installable. Trademark search ("Chess: Apex").
 
 ## Notes for Claude
-- The review script clips its diff at 32k characters, so it can miss new files; pass `--focus` and check by hand. If `LAST` is not a known commit (rebase merge), pass `--since <commit>`.
-- Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`. `pnpm review:outside` overwrites `docs/reviews/*-<model>.md`; rename its output to `*-s28<x>.md` at once (last: `s28c`).
+- `packages/engine/src/properties.test.ts` takes about 25 s; lower `GAMES` before raising its timeout.
+- Page files come from the `apex-page-files` plugin in `apps/web/vite.config.ts`; titles live in `apps/web/src/routes.ts`.
+- Review script clips diffs at 32k characters; pass `--focus`. Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.
 - Search legality shortcut in `ai.ts` relies on attacks being rays that stop at the first piece.
-- `worker-bundle.test.ts` runs `vite build` into a temp folder (about 3 s) and shims `self` for Node.

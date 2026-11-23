@@ -57,6 +57,9 @@ Available: Claude Code cloud sessions reach NVIDIA's build API (`integrate.api.n
 - Only tracked files are sent, never `.env`, secrets, or lockfiles. Everything sent is code bound for this public repo.
 - Reports are unverified model output. Step S28 checks each finding against the code and files the real ones as ledger issues. It runs after each major update.
 
+## Deploy and rollback
+`deploy.yml` runs on every push to `main`: secrets check, validate, lint, typecheck, test, build, D1 migrations, `wrangler deploy`, then `scripts/smoke.mjs` against the live site and the pushed commit. If the smoke test fails, the previous Worker version is still kept by Cloudflare: the owner runs `pnpm dlx wrangler@4 rollback` (or picks a version under Workers, Deployments), then fixes forward in a PR. D1 migrations are not rolled back; write them to be additive. D1 Time Travel can restore the archive to a point in time.
+
 ## Repo hygiene
 
 Never put secrets, personal information, or unreleased art in this repository. `.claude/settings.json` blocks reading `.env` and private paths, and blocks force-pushes and direct pushes to `main`.

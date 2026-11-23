@@ -141,7 +141,7 @@ Opt-in leaderboards per ruleset id. Needs S19c and S19d (both done). Built as re
 
 ## Phase 8: Launch
 
-From the 2026-11-20 outside audit; the checklist is `docs/LAUNCH-PLAN.md`. Order: S22, S23, S24, S28, then S25 and S17, S26, S27, S27b, S28 again, S29.
+From the 2026-11-20 outside audit; the checklist is `docs/LAUNCH-PLAN.md`. Order: S22, S23, S24, S28, then S25 and S17, S26, S27, S27b, S28 again, S29. Audit 2 (2026-11-23) adds S30 before S29, then S31 to S33.
 
 ### S22 — Release hardening · Sonnet 5.5 · medium · `done`
 CI runs `pnpm build`. `deploy.yml` fails when `CLOUDFLARE_API_TOKEN` or another required secret is missing, instead of skipping. The deployed commit is visible (a version file or tag). After deploy, a smoke test checks the home page, the API, room create and join, and the WebSocket. Docs agree on what is live.
@@ -168,6 +168,22 @@ Done when: the new tests pass, and the smoke check passes against a built site.
 
 ### S28 — Outside review (recurring) · Sonnet 5.5 · medium · `todo`
 Run after each major update: a phase closes, or a step changes the engine, the server, or privacy. `pnpm review:outside` sends the changes since `docs/reviews/LAST` to open models on NVIDIA's build API and saves reports in `docs/reviews/`. Check each finding against the code; real ones become ledger issues (`newIssues`), the rest get one line in the report saying why not. The step stays `todo` so it can run again.
+
+### S30 — Endpoint limits and abuse tests · Sonnet 5.5 · high · `todo`
+From audit 2 (`docs/reviews/2026-11-23-audit2-triage.md`). Separate, tighter limits for account sign-up, passkey challenges, recovery-code attempts and room creation, beside the general `/api` limit; values provisional, in `wrangler.jsonc`. Tests: replayed and out-of-turn room messages, a reused or expired ticket, repeated wrong recovery codes, account deletion leaves no rows in any table.
+Done when: each limited endpoint answers 429 past its limit in tests, and the new abuse tests pass.
+
+### S31 — Pre-rendered page text · Sonnet 5.5 · medium · `todo`
+Each address already has its own title, description and canonical in its built file. Render the Rules and About text into those files at build time (React `renderToString`), so they read without JavaScript; the app then takes over. No new rules text.
+Done when: `dist/rules/index.html` holds the rules text and the app still starts on it, online and offline.
+
+### S32 — Interactive rules tutorial · Opus 5.5 · high · `todo`
+Five short lessons on a live board: the turned board and king corners, chords and rays, pawns (move, capture, far edge, promotion), check and checkmate, Player's Choice (build and validate a setup); then a game against the easiest computer. Teaches only what `rules/` and `docs/RULES.md` say; every lesson position is data.
+Done when: each lesson accepts only its legal answers in tests, and the tutorial is reachable from Home and Rules.
+
+### S33 — PGN export · Sonnet 5.5 · medium · `todo`
+Download a finished game as PGN text with standard coordinates; ruleset id and version and both setups go in tags (tag names provisional until the owner approves). Import later.
+Done when: an exported game replays to the same final position in the app.
 
 ### S29 — Community launch · Owner · `todo`
 Parts A to D and the 30-day targets in `docs/LAUNCH-PLAN.md`. No paid advertising yet.
@@ -202,6 +218,7 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D22 | Rated play, leaderboards, tournaments in the beta | Open; default: keep them on, marked Beta (applied in S24, provisional) | S24 |
 | D23 | Game archive retention | Open; default: say archived games are kept with no end date (as built) (applied in S24, provisional) | S24 |
 | D24 | Offline play | Decided: both; installable web app first (built in S27), desktop download later (no step yet) | S27 |
+| D25 | PGN tags for Apex games | Open; default: `Variant "Apex Chess"`, `Ruleset "<id> <version>"`, and both setup codes in `LightSetup` and `DarkSetup` (provisional) | S33 |
 
 ## Ledger sync format
 
