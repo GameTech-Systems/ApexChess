@@ -193,6 +193,73 @@ describe("moves", () => {
   });
 });
 
+describe("abuse (S30)", () => {
+  it("refuses a replayed move: the same message twice, or the first move again after replies", () => {
+    let room = started();
+    const mover = seatToMove(room);
+    const move = nextMove(room);
+    room = act(room, ruleset, mover, move);
+    expect(code(() => act(room, ruleset, mover, move))).toBe("turn");
+    room = act(room, ruleset, seatToMove(room), nextMove(room));
+    expect(code(() => act(room, ruleset, mover, move))).toBe("stale");
+    expect(room.record!.moves).toHaveLength(2);
+  });
+
+  it("refuses out-of-turn moves, with any ply, and leaves the room as it was", () => {
+    const room = started();
+    const other = (1 - seatToMove(room)) as Seat;
+    for (const ply of [0, 1, 2, -1, 1e9])
+      expect(code(() => act(room, ruleset, other, { type: "move", move: "a1-a2", ply }))).toBe(
+        "turn",
+      );
+    expect(room.record!.moves).toHaveLength(0);
+  });
+
+  it("ignores a second resign, an offer repeated by the offerer, and a decline of nothing", () => {
+    const room = started();
+    const offered = act(room, ruleset, 0, { type: "offerDraw" });
+    expect(act(offered, ruleset, 0, { type: "offerDraw" })).toEqual(offered);
+    expect(offered.end).toBeUndefined();
+    expect(act(offered, ruleset, 0, { type: "declineDraw" })).toEqual(offered);
+    const over = act(room, ruleset, 0, { type: "resign" });
+    for (const type of ["resign", "offerDraw", "declineDraw"] as const)
+      expect(
+        code(() => act(over, ruleset, 1, { type })),
+        type,
+      ).toBe("over");
+  });
+
+  it("takes a rematch only when the game is over, and one request per seat", () => {
+    const room = started();
+    expect(code(() => act(room, ruleset, 0, { type: "rematch" }))).toBe("notOver");
+    let over = act(room, ruleset, 0, { type: "resign" });
+    over = act(over, ruleset, 0, { type: "rematch" });
+    expect(act(over, ruleset, 0, { type: "rematch" }).game).toBe(0);
+    expect(act(over, ruleset, 1, { type: "rematch" }).game).toBe(1);
+  });
+
+  it("refuses a lock in a quick-match room, and a second lock after the start", () => {
+    expect(code(() => act(started(), ruleset, 0, { type: "lock", lock: lock(first) }))).toBe(
+      "over",
+    );
+    const room = createRoom("R", ruleset, lock(first), "t0");
+    expect(code(() => act(room, ruleset, 0, { type: "lock", lock: lock(second) }))).toBe("over");
+  });
+
+  it("seats only the tokens it issued: an old room's token, an empty one, or a near miss", () => {
+    const room = started();
+    const elsewhere = createRoom("OTHER2", ruleset, lock(first), "t0");
+    for (const token of ["", "t", "t00", "T0", " t0", "t0 ", "t0\n", "t1;t0"])
+      expect(seatOf(room, token), JSON.stringify(token)).toBeUndefined();
+    expect(seatOf(elsewhere, "t1")).toBeUndefined();
+    expect(seatOf(room, "t0")).toBe(0);
+  });
+
+  it("gives a joiner no second seat: a full room refuses even the creator's own token", () => {
+    expect(code(() => joinRoom(started(), ruleset, lock(second), "t0", coin(0)))).toBe("full");
+  });
+});
+
 describe("draws by agreement (D8)", () => {
   it("draws when the opponent offers back; a move or a decline clears the offer", () => {
     let room = act(started(), ruleset, 0, { type: "offerDraw" });
