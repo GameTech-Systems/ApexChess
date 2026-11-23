@@ -18,7 +18,6 @@ import {
 } from "@apexchess/engine";
 import { About } from "./About";
 import { Account } from "./Account";
-import { BetaBadge } from "./beta";
 import { Board } from "./Board";
 import { Events } from "./Event";
 import { parseEventHash } from "./event";
@@ -314,7 +313,6 @@ export function App({
             </a>
           ))}
         </nav>
-        <BetaBadge />
       </header>
       <div id="content" className="view" key={`${view}-${round}`} hidden={Boolean(page)}>
         {content}

@@ -1,16 +1,11 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { BETA_NOTE, BetaBadge } from "./beta";
+import { BETA_NOTE } from "./beta";
 import { EventHome } from "./Event";
 import { LeaderboardView } from "./Leaderboard";
 import { Privacy } from "./Privacy";
 
 describe("beta labels (D21, D22)", () => {
-  it("badge says Beta Testing and no longer shows a rules draft label", () => {
-    const html = renderToStaticMarkup(<BetaBadge />);
-    expect(html).toContain("Beta Testing");
-    expect(html).not.toMatch(/draft|v0\.1/);
-  });
   it("marks leaderboards and events as Beta", () => {
     expect(renderToStaticMarkup(<LeaderboardView boards={[]} />)).toContain(BETA_NOTE);
     const ev = renderToStaticMarkup(
