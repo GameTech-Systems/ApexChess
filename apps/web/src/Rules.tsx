@@ -94,6 +94,13 @@ export function Rules({ ruleset, onClose }: { ruleset: ResolvedRuleset; onClose:
   return (
     <section aria-label="Rules" className="rules">
       <h1>Rules</h1>
+      <p className="ruleset-label">
+        Rules version: {ruleset.name} {ruleset.version}
+        {ruleset.status === "draft"
+          ? " (draft: may change after beta testing)"
+          : ` (${ruleset.status})`}
+        . Every saved game records the version it was played under.
+      </p>
       <p className="lede">
         Apex Chess uses the ordinary chess pieces on an ordinary 8×8 board, turned 45°. If you have
         never played chess, start here: each side has 16 pieces, light moves first, and you take

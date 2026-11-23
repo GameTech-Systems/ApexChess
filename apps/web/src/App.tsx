@@ -30,6 +30,7 @@ import { loadTicket, saveTicket } from "./online";
 import type { KeyValueStore } from "./savedSetups";
 import { Privacy } from "./Privacy";
 import { Replay } from "./Replay";
+import { SITE } from "./pageHtml";
 import { ROUTE_PATHS, ROUTE_TITLES, routeOf, type Route } from "./routes";
 import { Rules } from "./Rules";
 import { copyText, gameLink, parseShare } from "./share";
@@ -146,8 +147,8 @@ export function App({
       history.pushState(null, "", path + window.location.search + window.location.hash);
     const meta = ROUTE_TITLES[route ?? "home"];
     document.title = meta.title;
-    if (meta.description)
-      document.querySelector('meta[name="description"]')?.setAttribute("content", meta.description);
+    document.querySelector('meta[name="description"]')?.setAttribute("content", meta.description);
+    document.querySelector('link[rel="canonical"]')?.setAttribute("href", SITE + path);
   }, [route]);
   useEffect(() => {
     const onPop = () => {
