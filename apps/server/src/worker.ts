@@ -49,8 +49,9 @@ import {
 } from "@apexchess/online";
 import { accountAction, cleanUpAccounts, sessionAccount } from "./accounts";
 import { insertGame } from "./archive";
+import { overLimit } from "./limits";
 import { leaderboards, rateGame } from "./ratings";
-import { bearerToken, clientKey, httpStatus, passkeyOrigin, roomCode, route } from "./routes";
+import { bearerToken, httpStatus, passkeyOrigin, roomCode, route } from "./routes";
 import { getStats, listStats, refreshStats } from "./stats";
 
 interface Env {
@@ -65,6 +66,11 @@ interface Env {
   ARCHIVE: D1Database;
   /** Requests per address per minute on /api (limit in wrangler.jsonc; provisional). */
   LIMITER: RateLimit;
+  /** Tighter limits for sign-up, passkeys, recovery attempts, and new rooms (S30; provisional). */
+  SIGNUP: RateLimit;
+  PASSKEY: RateLimit;
+  RECOVER: RateLimit;
+  NEWROOM: RateLimit;
 }
 
 /**
@@ -213,8 +219,8 @@ export default {
     const url = new URL(req.url);
     const r = route(req.method, url.pathname);
     if (!r) return json(fail("notFound", "No such address."), 404);
-    const { success } = await env.LIMITER.limit({ key: clientKey(req.headers) });
-    if (!success) return json(fail("busy", "Too many requests. Wait a minute and try again."), 429);
+    if (await overLimit(env, r, req.headers))
+      return json(fail("busy", "Too many requests. Wait a minute and try again."), 429);
     try {
       if (r.kind === "create") return json(await openRoom(env, await readLock(req)));
       if (r.kind === "join") return json(await enterRoom(env, r.room, await readLock(req)));

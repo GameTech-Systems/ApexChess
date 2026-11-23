@@ -26,9 +26,14 @@
   ],
   // Daily public setup statistics (S19b): rebuilt shortly after midnight UTC.
   "triggers": { "crons": ["7 0 * * *"] },
-  // Rate limit on /api: 60 requests per address per minute (provisional).
+  // Rate limits per address, all provisional (S30, I20): 60 a minute on all of /api, and tighter
+  // limits that also apply to sign-up, passkey steps, recovery-code attempts, and new rooms/events.
   "ratelimits": [
     { "name": "LIMITER", "namespace_id": "1001", "simple": { "limit": 60, "period": 60 } },
+    { "name": "SIGNUP", "namespace_id": "1002", "simple": { "limit": 6, "period": 60 } },
+    { "name": "PASSKEY", "namespace_id": "1003", "simple": { "limit": 20, "period": 60 } },
+    { "name": "RECOVER", "namespace_id": "1004", "simple": { "limit": 5, "period": 60 } },
+    { "name": "NEWROOM", "namespace_id": "1005", "simple": { "limit": 10, "period": 60 } },
   ],
   "migrations": [
     { "tag": "v1", "new_sqlite_classes": ["Room", "Lobby"] },
