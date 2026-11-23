@@ -169,7 +169,7 @@ Done when: the new tests pass, and the smoke check passes against a built site.
 ### S28 — Outside review (recurring) · Sonnet 5.5 · medium · `todo`
 Run after each major update: a phase closes, or a step changes the engine, the server, or privacy. `pnpm review:outside` sends the changes since `docs/reviews/LAST` to open models on NVIDIA's build API and saves reports in `docs/reviews/`. Check each finding against the code; real ones become ledger issues (`newIssues`), the rest get one line in the report saying why not. The step stays `todo` so it can run again.
 
-### S30 — Endpoint limits and abuse tests · Sonnet 5.5 · high · `todo`
+### S30 — Endpoint limits and abuse tests · Sonnet 5.5 · high · `done`
 From audit 2 (`docs/reviews/2026-11-23-audit2-triage.md`). Separate, tighter limits for account sign-up, passkey challenges, recovery-code attempts and room creation, beside the general `/api` limit; values provisional, in `wrangler.jsonc`. Tests: replayed and out-of-turn room messages, a reused or expired ticket, repeated wrong recovery codes, account deletion leaves no rows in any table.
 Done when: each limited endpoint answers 429 past its limit in tests, and the new abuse tests pass.
 
