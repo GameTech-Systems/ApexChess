@@ -1,17 +1,19 @@
 # Handoff
 
-Updated 2026-11-23 by S30 (Sonnet 5.5 · high). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-11-23 by S28 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
 - Product complete through UI1; launch prep S22 to S24, S26 to S28, S30, S31 done. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
 - S30: sign-up, passkey, recovery, and new room/event requests also count against their own per-address limits (`apps/server/src/limits.ts`; bindings `SIGNUP`, `PASSKEY`, `RECOVER`, `NEWROOM` in `wrangler.jsonc`, provisional). Account deletion now drops pending challenges. Abuse tests in `accounts.test.ts`, `room.test.ts`, `limits.test.ts`.
-- Not done: S32, S33; S29 is the owner's. S28 (outside review) is due: S30 changed the server.
+- S28 reviewed S30: no real findings (`docs/reviews/2026-11-23-s28d-triage.md`). S28 stays `todo` for reruns.
+- Not done: S32, S33; S29 is the owner's.
 
 ## Next session
-**S28 — Outside review** · Sonnet 5.5 · effort medium
-Set: `/model sonnet` · `/effort medium`
-Why: S30 changed the server; review before S29.
-Start with: `/start-session S28`
+**S32 — Interactive rules tutorial** · Opus 5.5 · effort high
+Set: `/model opus` · `/effort high`
+Why: Design-heavy new UI; S28 review of S30 is clean.
+Start with: `/start-session S32`
+Tip: Opus; start in a fresh usage window.
 
 ## Decisions in effect for the next step
 - D16: passkey + handle (decided). Limit values are provisional, in `wrangler.jsonc`.
