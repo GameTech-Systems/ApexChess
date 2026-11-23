@@ -1,11 +1,11 @@
 # Handoff
 
-Updated 2026-11-23 by S28 (audit 2 triage; Opus 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-11-23 by S31 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
-- Product complete through UI1; launch prep S22 to S24, S26, S27, S27b done. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
-- Audit 2 (ChatGPT, 2026-11-23) triaged: `docs/reviews/2026-11-23-audit2-triage.md`. Fixed here: Rules page shows the live ruleset version and status (D21); build writes `<page>/index.html` per address with its own tags; deploy reruns validate, lint, typecheck, test; rollback in `DEV-WORKFLOW.md`; engine property tests; README and launch-plan statuses.
-- New steps S30 to S33 and D25 in `docs/BUILD-PLAN.md` and the ledger (I17 to I22).
+- Product complete through UI1; launch prep S22 to S24, S26 to S28, S31 done. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
+- S31: `dist/rules/index.html` and `dist/about/index.html` hold the page text (`apps/web/src/prerender.tsx`, run from the `apex-page-files` plugin); the app replaces it on start. Rules and About take optional `onClose`/`onOpen`, so static output has no dead buttons. Smoke checks the rules text.
+- Not done: S30 (still before S29), S32, S33.
 
 ## Next session
 **S30 — Endpoint limits and abuse tests** · Sonnet 5.5 · effort high
@@ -23,6 +23,5 @@ Start with: `/start-session S30`
 
 ## Notes for Claude
 - `packages/engine/src/properties.test.ts` takes about 25 s; lower `GAMES` before raising its timeout.
-- Page files come from the `apex-page-files` plugin in `apps/web/vite.config.ts`; titles live in `apps/web/src/routes.ts`.
+- Page titles live in `apps/web/src/routes.ts`; only Rules and About are pre-rendered. Add a page by extending `prerender()`.
 - Review script clips diffs at 32k characters; pass `--focus`. Never `pkill -f wrangler`; use `pkill -f "[w]rangler"`.
-- Search legality shortcut in `ai.ts` relies on attacks being rays that stop at the first piece.

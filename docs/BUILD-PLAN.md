@@ -173,7 +173,7 @@ Run after each major update: a phase closes, or a step changes the engine, the s
 From audit 2 (`docs/reviews/2026-11-23-audit2-triage.md`). Separate, tighter limits for account sign-up, passkey challenges, recovery-code attempts and room creation, beside the general `/api` limit; values provisional, in `wrangler.jsonc`. Tests: replayed and out-of-turn room messages, a reused or expired ticket, repeated wrong recovery codes, account deletion leaves no rows in any table.
 Done when: each limited endpoint answers 429 past its limit in tests, and the new abuse tests pass.
 
-### S31 — Pre-rendered page text · Sonnet 5.5 · medium · `todo`
+### S31 — Pre-rendered page text · Sonnet 5.5 · medium · `done`
 Each address already has its own title, description and canonical in its built file. Render the Rules and About text into those files at build time (React `renderToString`), so they read without JavaScript; the app then takes over. No new rules text.
 Done when: `dist/rules/index.html` holds the rules text and the app still starts on it, online and offline.
 
