@@ -71,6 +71,9 @@ export async function smoke(base, opts = {}) {
     // A page address serves the app (single-page fallback).
     const html = await (await get("/rules/")).text();
     if (!html.includes("<title>")) throw new Error("/rules/ does not serve the app");
+    // Each page file carries its own canonical link (built by apps/web/vite.config.ts).
+    if (!html.includes('rel="canonical" href="https://apexchess.icu/rules/"'))
+      throw new Error("/rules/ is missing its own canonical link");
   });
   await check("offline worker", async () => {
     const res = await get("/sw.js");

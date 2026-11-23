@@ -33,6 +33,11 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      # The same checks as CI, on the exact commit being deployed.
+      - run: pnpm validate:rules
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
       - run: pnpm build
       - name: Apply game archive migrations (D1)
         run: pnpm dlx wrangler@4 d1 migrations apply apexchess-archive --remote

@@ -40,7 +40,11 @@ function fakes(bad: string[] = [], commit = SHA) {
         ? ok("<html>", 200)
         : new Response("self.onmessage=1", { headers: { "content-type": "text/javascript" } });
     if (path === "/rules/")
-      return bad.includes("pages") ? ok("", 404) : ok("<title>Apex Chess</title>");
+      return bad.includes("pages")
+        ? ok("", 404)
+        : bad.includes("meta")
+          ? ok('<title>Apex Chess</title><link rel="canonical" href="https://apexchess.icu/" />')
+          : ok('<title>Rules</title><link rel="canonical" href="https://apexchess.icu/rules/" />');
     if (path === "/sw.js")
       return bad.includes("sw")
         ? ok("<html>", 200)
@@ -71,7 +75,7 @@ describe("smoke test", () => {
     const r = await smoke("https://x.test", { expectCommit: SHA, ...fakes() });
     expect(r.failures).toEqual([]);
   });
-  it.each(["home", "pages", "worker", "sw", "api", "create", "socket"])(
+  it.each(["home", "pages", "meta", "worker", "sw", "api", "create", "socket"])(
     "fails when %s is broken",
     async (what) => {
       const r = await smoke("https://x.test", { expectCommit: SHA, ...fakes([what]) });
@@ -101,6 +105,19 @@ describe("workflows", () => {
       deploy.indexOf("wrangler@4 deploy"),
     );
     expect(deploy).toMatch(/github\.sha/);
+  });
+  it("deploy runs the checks and the build before migrating or deploying", () => {
+    const before = deploy.indexOf("d1 migrations apply");
+    for (const step of [
+      "pnpm validate:rules",
+      "pnpm lint",
+      "pnpm typecheck",
+      "pnpm test",
+      "pnpm build",
+    ]) {
+      expect(deploy.indexOf(`run: ${step}`)).toBeGreaterThan(-1);
+      expect(deploy.indexOf(`run: ${step}`)).toBeLessThan(before);
+    }
   });
   it("the web build writes the version file", () => {
     expect(read("apps/web/package.json")).toMatch(/write-version\.mjs/);
