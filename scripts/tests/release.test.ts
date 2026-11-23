@@ -44,7 +44,9 @@ function fakes(bad: string[] = [], commit = SHA) {
         ? ok("", 404)
         : bad.includes("meta")
           ? ok('<title>Apex Chess</title><link rel="canonical" href="https://apexchess.icu/" />')
-          : ok('<title>Rules</title><link rel="canonical" href="https://apexchess.icu/rules/" />');
+          : ok(
+              '<title>Rules</title>The Elbow Room<link rel="canonical" href="https://apexchess.icu/rules/" />',
+            );
     if (path === "/sw.js")
       return bad.includes("sw")
         ? ok("<html>", 200)

@@ -2,7 +2,13 @@ import { CONTACT_EMAIL } from "./contact";
 
 const SOURCE_URL = "https://github.com/GameTech-Systems/ApexChess";
 
-export function About({ onClose, onOpen }: { onClose: () => void; onOpen: (p: "rules") => void }) {
+export function About({
+  onClose,
+  onOpen,
+}: {
+  onClose?: () => void;
+  onOpen?: (p: "rules") => void;
+}) {
   return (
     <section aria-label="About" className="rules">
       <h1>About Apex Chess</h1>
@@ -15,9 +21,13 @@ export function About({ onClose, onOpen }: { onClose: () => void; onOpen: (p: "r
         Play the default setup, or bring your own arrangement (Player&apos;s Choice). Online, you
         see your opponent&apos;s arrangement only when the game begins. Play the computer, a friend
         on one screen, or an opponent online.{" "}
-        <button type="button" className="link" onClick={() => onOpen("rules")}>
-          Read the rules
-        </button>
+        {onOpen ? (
+          <button type="button" className="link" onClick={() => onOpen("rules")}>
+            Read the rules
+          </button>
+        ) : (
+          <a href="/rules/">Read the rules</a>
+        )}
       </p>
       <h2>Play offline</h2>
       <p>
@@ -43,9 +53,11 @@ export function About({ onClose, onOpen }: { onClose: () => void; onOpen: (p: "r
         </a>
         .
       </p>
-      <button type="button" onClick={onClose}>
-        Close
-      </button>
+      {onClose && (
+        <button type="button" onClick={onClose}>
+          Close
+        </button>
+      )}
     </section>
   );
 }

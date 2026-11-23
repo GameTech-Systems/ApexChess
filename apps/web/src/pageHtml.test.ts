@@ -30,6 +30,12 @@ describe("built page files", () => {
     );
     expect(() => pageHtml("<title>x</title>", "/x/", { title: "t", description: "d" })).toThrow();
   });
+  it("puts pre-rendered text in the root and drops the duplicate no-script heading", () => {
+    const html = pageHtml(index, "/rules/", ROUTE_TITLES.rules, "<main><h1>Rules</h1></main>");
+    expect(html).toContain('<div id="root"><main><h1>Rules</h1></main></div>');
+    expect(html).not.toContain("<noscript>\n      <h1>");
+    expect(html).toContain("needs JavaScript to play");
+  });
   it("home keeps the source page's text", () => {
     const html = pageHtml(index, "/", ROUTE_TITLES.home);
     expect(html).toContain(`<link rel="canonical" href="${SITE}/" />`);

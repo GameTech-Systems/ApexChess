@@ -80,7 +80,7 @@ interface Ctx {
 }
 
 /** The rules in brief; the full text is docs/RULES.md. */
-export function Rules({ ruleset, onClose }: { ruleset: ResolvedRuleset; onClose: () => void }) {
+export function Rules({ ruleset, onClose }: { ruleset: ResolvedRuleset; onClose?: () => void }) {
   const { board, setup } = ruleset;
   const light = board.sides.light.corner;
   const dark = board.sides.dark.corner;
@@ -192,9 +192,11 @@ export function Rules({ ruleset, onClose }: { ruleset: ResolvedRuleset; onClose:
         games played with special or altered rules, keep a printout or a written copy of the rule
         set at the table.
       </p>
-      <button type="button" onClick={onClose}>
-        Close
-      </button>
+      {onClose && (
+        <button type="button" onClick={onClose}>
+          Close
+        </button>
+      )}
     </section>
   );
 }
