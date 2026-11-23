@@ -40,3 +40,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-11-20 | S27 | Sonnet 5.5 · high | done | (see PR) | Offline play: generated service worker, offline-aware Home, smoke check; D24 default |
 | 2026-11-20 | S27b | Sonnet 5.5 · high | done | (see PR) | Worker fallback logs, yields, caps nodes; built worker tested; smoke checks worker file |
 | 2026-11-20 | S28 | Sonnet 5.5 · medium | done | (see PR) | Outside review of S27+S27b: no real findings; triage s28c |
+| 2026-11-23 | S28 | Opus 5.5 · medium | done | (see PR) | Audit 2 triage: ruleset label, page files, deploy checks, property tests; S30-S33 |

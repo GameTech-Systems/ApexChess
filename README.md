@@ -21,7 +21,7 @@ Play at **[apexchess.icu](https://apexchess.icu)**. This repository holds the ga
 - **Player's Choice.** Arrange your own pieces under two rules: your king starts in your light corner, and only one piece may start beyond your front chord (d1 to h5 for light, e8 to a4 for dark). Online, you see your opponent's arrangement only when the game begins, and a coin flip decides who plays light and moves first.
 - No castling and no en passant.
 
-The full rules, including the default setup, are in [docs/RULES.md](docs/RULES.md). The rules are settled; the site carries a Beta Testing badge until enough players have confirmed that everything works.
+The full rules, including the default setup, are in [docs/RULES.md](docs/RULES.md). The live rules are ruleset `standard` 0.1.0, still a draft during beta testing; the Rules page shows the version, and every saved game records it. Ratings, leaderboards and events are marked Beta.
 
 ## The Elbow Room
 

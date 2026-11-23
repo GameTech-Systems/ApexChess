@@ -1,16 +1,20 @@
 # Launch plan
 
-From the outside audit of 2026-11-20 (controlled beta recommended), checked against the code. Step ids are in `docs/BUILD-PLAN.md`, Phase 8. No advertising and no analytics during the beta: feedback is voluntary.
+From the outside audits of 2026-11-20 and 2026-11-23 (both: controlled beta recommended), checked against the code; triage of the second: `docs/reviews/2026-11-23-audit2-triage.md`. Step ids are in `docs/BUILD-PLAN.md`, Phase 8. No advertising and no analytics during the beta: feedback is voluntary.
 
 ## Before the public beta
 | Item | Step | Status |
 |---|---|---|
-| Label the live ruleset version, or publish ruleset 1.0 (D21) | S24 | todo |
-| Rated play, leaderboards, tournaments: marked Beta or off (D22) | S24 | todo |
+| Label the live ruleset version, or publish ruleset 1.0 (D21) | S24 | done |
+| Rated play, leaderboards, tournaments: marked Beta or off (D22) | S24 | done |
 | Contact address on Privacy, Terms, footer, security.txt | — | done |
-| Archive retention stated in Privacy (D23); check the "cannot be linked" claim against unique game records | S24 | todo |
-| CI runs `pnpm build`; deploy fails without its secrets; deployed commit visible; smoke test after deploy | S22 | todo |
+| Archive retention stated in Privacy (D23); check the "cannot be linked" claim against unique game records | S24 | done |
+| CI runs `pnpm build`; deploy fails without its secrets; deployed commit visible; smoke test after deploy | S22 | done |
 | Live checks: two devices on two networks, quick match, invites, reconnect, disconnect, clocks, passkey sign-up, sign-in, recovery, account deletion, D1 migrations, scheduled stats | S25 | todo |
+| Deploy also runs validate, lint, typecheck, test; rollback written down | — | done |
+| Engine property tests over every parameter option | — | done |
+| Endpoint limits for sign-up, passkey challenges, recovery, room create; abuse tests | S30 | todo |
+| Monitoring: alerts on Worker errors and 429s; D1 restore drill | S25 | todo |
 | 20 to 30 outside testers, serious problems fixed | S17 | doing |
 
 ## Before wider promotion
@@ -18,7 +22,9 @@ From the outside audit of 2026-11-20 (controlled beta recommended), checked agai
 |---|---|
 | AI: search check evasions at the horizon, score mate and stalemate there, full-state repetition key, horizon tests | S23 |
 | Current mobile and desktop browsers | S25 |
-| Crawlable pages: How to Play, Rules, 45-Degree Chess, Custom Setups, About; sitemap | S26 |
+| Crawlable pages: each address has its own title, description and canonical (done); full page text pre-rendered | S26, S31 |
+| Interactive rules tutorial | S32 |
+| PGN export | S33 |
 | Name and trademark search (I1) | Owner |
 | Outside review after each major update | S28 |
 | Offline play, hot-seat and computer only (D24) | S27 |
