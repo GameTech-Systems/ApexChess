@@ -72,6 +72,7 @@ export async function smoke(base, opts = {}) {
     const html = await (await get("/rules/")).text();
     if (!html.includes("<title>")) throw new Error("/rules/ does not serve the app");
     // Each page file carries its own canonical link (built by apps/web/vite.config.ts).
+    if (!html.includes("The Elbow Room")) throw new Error("/rules/ has no pre-rendered rules text");
     if (!html.includes('rel="canonical" href="https://apexchess.icu/rules/"'))
       throw new Error("/rules/ is missing its own canonical link");
   });
