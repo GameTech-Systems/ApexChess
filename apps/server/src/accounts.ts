@@ -406,7 +406,13 @@ export async function accountAction(
       await db.batch(
         ["passkeys", "recovery_codes", "sessions", "ratings"]
           .map((t) => db.prepare(`DELETE FROM ${t} WHERE account_id = ?`).bind(account.id))
-          .concat(db.prepare("DELETE FROM accounts WHERE id = ?").bind(account.id)),
+          // A pending passkey challenge keeps the account id in its purpose JSON.
+          .concat(
+            db
+              .prepare("DELETE FROM challenges WHERE json_extract(purpose, '$.accountId') = ?")
+              .bind(account.id),
+            db.prepare("DELETE FROM accounts WHERE id = ?").bind(account.id),
+          ),
       );
       return {};
     }

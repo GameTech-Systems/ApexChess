@@ -8,6 +8,7 @@ import {
   accountAction,
   cleanUpAccounts,
   sessionAccount,
+  SESSION_MS,
   sha256,
   type AccountDeps,
 } from "./accounts";
@@ -363,6 +364,96 @@ describe("deleting an account", () => {
     });
     nextCredential = "cred-3";
     expect((await signUp("RookLover")).handle).toBe("RookLover");
+  });
+});
+
+describe("abuse (S30)", () => {
+  const recover = (handle: string, c: string) =>
+    accountAction("recover", { handle, code: c }, undefined, deps) as Promise<{ token: string }>;
+
+  it("repeated wrong recovery codes never sign in, burn a real code, or say whether the handle exists", async () => {
+    const { codes } = await signUp();
+    const wrong = ["AAAA-AAAA-AAAA-AAAA", "2222-2222-2222-2222", "not a code", ""];
+    for (let i = 0; i < 25; i++) {
+      for (const handle of ["RookLover", "NoSuchHandle"])
+        expect(["signIn", "bad"]).toContain(await code(recover(handle, wrong[i % wrong.length]!)));
+    }
+    expect(rows("recovery_codes")).toHaveLength(RECOVERY_CODES);
+    expect(rows("sessions")).toHaveLength(1);
+    const messages = new Set<string>();
+    for (const handle of ["RookLover", "NoSuchHandle"])
+      try {
+        await recover(handle, "AAAA-AAAA-AAAA-AAAA");
+      } catch (e) {
+        messages.add((e as Error).message);
+      }
+    expect(messages.size).toBe(1);
+    expect((await recover("RookLover", codes[0]!)).token).toBeTruthy();
+  });
+
+  it("a recovery code works once, even asked twice at the same moment", async () => {
+    const { codes } = await signUp();
+    const results = await Promise.all([
+      code(recover("RookLover", codes[1]!)),
+      code(recover("RookLover", codes[1]!)),
+    ]);
+    expect(results.filter((r) => r === undefined)).toHaveLength(1);
+    expect(rows("sessions")).toHaveLength(2);
+  });
+
+  it("replays a sign-in answer once only, and an answer made for another kind of challenge never", async () => {
+    await signUp();
+    const { challengeId } = await start("signIn", {});
+    const finish = () =>
+      accountAction("signInFinish", { challengeId, response: response() }, undefined, deps);
+    expect(((await finish()) as { handle: string }).handle).toBe("RookLover");
+    expect(await code(finish())).toBe("stale");
+    const reg = await start("register", {
+      handle: "Other",
+      ageConfirmed: true,
+      termsAccepted: true,
+    });
+    expect(
+      await code(
+        accountAction(
+          "signInFinish",
+          { challengeId: reg.challengeId, response: response() },
+          undefined,
+          deps,
+        ),
+      ),
+    ).toBe("stale");
+    expect(rows("challenges")).toHaveLength(0);
+  });
+
+  it("refuses a session at its expiry moment, and a token that was never issued", async () => {
+    const { token } = await signUp();
+    deps.now = T0 + SESSION_MS - 1;
+    expect(await accountAction("view", undefined, token, deps)).toMatchObject({
+      handle: "RookLover",
+    });
+    deps.now = T0 + SESSION_MS;
+    expect(await code(accountAction("view", undefined, token, deps))).toBe("signIn");
+    expect(await code(accountAction("view", undefined, "never-issued", deps))).toBe("signIn");
+  });
+
+  it("deletes the account's pending challenges too: no table keeps a row that names it", async () => {
+    const { token } = await signUp();
+    const id = rows("accounts")[0]!.id as string;
+    await start("passkey", undefined, token);
+    expect(JSON.stringify(rows("challenges"))).toContain(id);
+    await accountAction("delete", undefined, token, deps);
+    const tables = rows("sqlite_master")
+      .filter((t) => t.type === "table")
+      .map((t) => t.name as string);
+    expect(tables).toEqual(
+      expect.arrayContaining(["accounts", "passkeys", "recovery_codes", "sessions", "challenges"]),
+    );
+    const sessionHash = await sha256(token);
+    for (const t of tables)
+      expect(JSON.stringify(rows(t)), t).not.toMatch(
+        new RegExp(`${id}|RookLover|cred-1|${sessionHash}`),
+      );
   });
 });
 
