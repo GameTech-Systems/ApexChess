@@ -43,3 +43,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-11-23 | S28 | Opus 5.5 · medium | done | (see PR) | Audit 2 triage: ruleset label, page files, deploy checks, property tests; S30-S33 |
 | 2026-11-23 | S31 | Sonnet 5.5 · medium | done | (see PR) | Rules and About text pre-rendered into built pages; reuses components, no new pages |
 | 2026-11-23 | S30 | Sonnet 5.5 · high | done | (see PR) | Per-endpoint limits (sign-up, passkey, recovery, rooms); abuse tests; deletion drops challenges |
+| 2026-11-23 | S28 | Sonnet 5.5 · medium | done | (see PR) | Outside review of S30: no real findings; triage s28d |
