@@ -30,8 +30,17 @@ describe("share links", () => {
     const rec = played(6);
     const link = gameLink(ruleset, rec);
     const got = parseShare(ruleset, link);
-    expect(got).toEqual({ kind: "game", record: rec });
+    expect(got).toEqual({ kind: "game", record: rec, ruleset });
     expect(rec.moves).toHaveLength(6);
+  });
+  it("still opens a game recorded under a retired ruleset version, with that version's rules", () => {
+    const old = resolveRuleset(catalog, "standard", "0.1.0");
+    expect(old.status).toBe("retired");
+    let rec = newRecord(old, d, d);
+    for (let i = 0; i < 4; i++)
+      rec = addMove(old, rec, legalMoves(old, replay(old, rec).position)[0]!);
+    const got = parseShare(ruleset, gameLink(old, rec));
+    expect(got).toEqual({ kind: "game", record: rec, ruleset: old });
   });
   it("carries no names, tokens, or room codes", () => {
     expect(gameLink(ruleset, played(2))).toMatch(/^#game=[A-Za-z0-9_.~-]+$/);
