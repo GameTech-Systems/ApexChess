@@ -214,7 +214,7 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D18 | Public setup statistics | Open; default (provisional): aggregates only, N ≥ 30, from anonymous archived games (0006) | S19a |
 | D19 | Time controls | Decided 2026-10-22: all options offered (untimed, Fischer, fixed time per move, abandonment only), default 10+0; presets in `rules/timeControls.json` (Claude's choice, provisional); running out of time loses unless the opponent has insufficient material (0007) | S20a |
 | D20 | Tournaments | Open; default (provisional): private events by link; round robin up to 8 players, Swiss above; sides set by pairing (0007) | S20c |
-| D21 | Launch ruleset label | Open; default: launch as a beta on rules draft 0.1, labelled in the app (applied in S24, provisional) | S24 |
+| D21 | Launch ruleset label | Decided 2026-11-26: publish ruleset `standard` 1.0.0 (official; the same rules as draft 0.1.0) for the beta. 0.1.0 is retired: it still replays recorded games, but starts no new rooms or events | S24 |
 | D22 | Rated play, leaderboards, tournaments in the beta | Open; default: keep them on, marked Beta (applied in S24, provisional) | S24 |
 | D23 | Game archive retention | Open; default: say archived games are kept with no end date (as built) (applied in S24, provisional) | S24 |
 | D24 | Offline play | Decided: both; installable web app first (built in S27), desktop download later (no step yet) | S27 |

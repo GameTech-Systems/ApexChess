@@ -14,6 +14,17 @@ function pngSize(path: string): [number, number] {
 }
 
 describe("launch files (apps/web)", () => {
+  it("every page asks browsers to stay on HTTPS", () => {
+    expect(read("public/_headers")).toMatch(/^ {2}Strict-Transport-Security: max-age=31536000$/m);
+  });
+
+  it("the post-deploy smoke test locks the live ruleset version", async () => {
+    const { catalog, resolveRuleset } = await import("../../packages/engine/src/index");
+    const live = resolveRuleset(catalog, "standard");
+    const smoke = readFileSync(join(__dirname, "..", "smoke.mjs"), "utf8");
+    expect(smoke).toContain(`ruleset: { id: "standard", version: "${live.version}" }`);
+  });
+
   const html = read("index.html");
 
   it("index.html carries the canonical link and share tags", () => {

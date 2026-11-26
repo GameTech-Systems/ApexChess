@@ -5,7 +5,7 @@ From the outside audits of 2026-11-20 and 2026-11-23 (both: controlled beta reco
 ## Before the public beta
 | Item | Step | Status |
 |---|---|---|
-| Label the live ruleset version, or publish ruleset 1.0 (D21) | S24 | done |
+| Label the live ruleset version, or publish ruleset 1.0 (D21) | S24 | done: `standard` 1.0.0 official (2026-11-26) |
 | Rated play, leaderboards, tournaments: marked Beta or off (D22) | S24 | done |
 | Contact address on Privacy, Terms, footer, security.txt | — | done |
 | Archive retention stated in Privacy (D23); check the "cannot be linked" claim against unique game records | S24 | done |
@@ -13,7 +13,8 @@ From the outside audits of 2026-11-20 and 2026-11-23 (both: controlled beta reco
 | Live checks: two devices on two networks, quick match, invites, reconnect, disconnect, clocks, passkey sign-up, sign-in, recovery, account deletion, D1 migrations, scheduled stats | S25 | todo |
 | Deploy also runs validate, lint, typecheck, test; rollback written down | — | done |
 | Engine property tests over every parameter option | — | done |
-| Endpoint limits for sign-up, passkey challenges, recovery, room create; abuse tests | S30 | todo |
+| Endpoint limits for sign-up, passkey challenges, recovery, room create; abuse tests | S30 | done |
+| In-app feedback route (About page and footer), HSTS header | — | done |
 | Monitoring: alerts on Worker errors and 429s; D1 restore drill | S25 | todo |
 | 20 to 30 outside testers, serious problems fixed | S17 | doing |
 
@@ -40,3 +41,15 @@ Difficulty names are not strength claims until human testers have played each le
 Positioning: "Chess, shifted 45°." A variant for variant players, not a replacement for mainstream chess sites.
 
 First 30 days (targets, not forecasts): 20 to 30 testers, 100 first-time players, 50+ completed games, 20+ returning players, 10+ friend invites, 2 to 4 community events. Count by hand or from server totals already kept; add no tracking without a Privacy update first.
+
+## Beta gates
+
+The full strategy (phases, channels, messaging, risks) is kept outside the repo; these are its gates.
+
+| Gate | Passes when |
+|---|---|
+| 0. Pre-flight → closed beta | S25 live checks pass on two devices and two networks; alerts set; one D1 restore drill done; `www` redirects |
+| 1. Closed beta → open beta | 15+ testers finished all four tasks; no open serious bug for 7 days; the top three "first confusing thing" answers have a fix or an issue; S32 shipped |
+| 2. Open beta → wider promotion | 30-day targets above mostly met; S33 shipped; name and trademark search done; ratings-reset policy for the end of beta announced |
+
+Ruleset 1.0.0 is immutable. Balance or clarity findings during the beta are collected (issues, `pnpm sim`, the Stats page at N ≥ 30) and ship together as 1.1.0, not as edits to 1.0.0. Ratings are one pool per ruleset id, so a new version keeps everyone's rating.

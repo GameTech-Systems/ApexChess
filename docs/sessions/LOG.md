@@ -44,3 +44,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-11-23 | S31 | Sonnet 5.5 · medium | done | (see PR) | Rules and About text pre-rendered into built pages; reuses components, no new pages |
 | 2026-11-23 | S30 | Sonnet 5.5 · high | done | (see PR) | Per-endpoint limits (sign-up, passkey, recovery, rooms); abuse tests; deletion drops challenges |
 | 2026-11-23 | S28 | Sonnet 5.5 · medium | done | (see PR) | Outside review of S30: no real findings; triage s28d |
+| 2026-11-26 | Launch prep | Opus 5.5 | done | (see PR) | D21: ruleset 1.0.0 official, 0.1.0 retired; beta feedback links, HSTS, beta gates |

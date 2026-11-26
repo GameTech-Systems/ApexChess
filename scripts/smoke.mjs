@@ -9,7 +9,7 @@ const setupFile = new URL("../rules/setups/default.json", import.meta.url);
 function lock() {
   const setup = JSON.parse(readFileSync(setupFile, "utf8"));
   // protocol 2 (packages/online PROTOCOL); the standard ruleset and the default setup.
-  return { protocol: 2, ruleset: { id: "standard", version: "0.1.0" }, setup: setup.pieces };
+  return { protocol: 2, ruleset: { id: "standard", version: "1.0.0" }, setup: setup.pieces };
 }
 
 /** Opens the room socket and resolves once the first message arrives. */

@@ -1,12 +1,12 @@
 # Handoff
 
-Updated 2026-11-23 by S28 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-11-26 by the launch-prep session (Opus 5.5). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
 - Product complete through UI1; launch prep S22 to S24, S26 to S28, S30, S31 done. Phase 8 plan: `docs/LAUNCH-PLAN.md`.
-- S30: sign-up, passkey, recovery, and new room/event requests also count against their own per-address limits (`apps/server/src/limits.ts`; bindings `SIGNUP`, `PASSKEY`, `RECOVER`, `NEWROOM` in `wrangler.jsonc`, provisional). Account deletion now drops pending challenges. Abuse tests in `accounts.test.ts`, `room.test.ts`, `limits.test.ts`.
-- S28 reviewed S30: no real findings (`docs/reviews/2026-11-23-s28d-triage.md`). S28 stays `todo` for reruns.
-- Not done: S32, S33; S29 is the owner's.
+- S30: per-endpoint limits (`apps/server/src/limits.ts`; bindings in `wrangler.jsonc`, provisional); abuse tests. S28 review of S30 clean (`docs/reviews/2026-11-23-s28d-triage.md`).
+- 2026-11-26: D21 decided. Ruleset `standard` 1.0.0 is official (same rules as 0.1.0, now retired: still replays, starts no new rooms or events, `checkLive` in `packages/online/src/room.ts`). About page and footer link beta feedback; HSTS header; release notes `docs/releases/v1.0.0-beta.1.md`; beta gates in `LAUNCH-PLAN.md`.
+- Not done: S32, S33; S25, S29 are the owner's.
 
 ## Next session
 **S32 — Interactive rules tutorial** · Opus 5.5 · effort high
@@ -19,7 +19,7 @@ Tip: Opus; start in a fresh usage window.
 - D16: passkey + handle (decided). Limit values are provisional, in `wrangler.jsonc`.
 
 ## Open questions for the owner
-- D21: publish ruleset 1.0 or stay on draft 0.1 for the beta. D25 (PGN tags) before S33. D17 confirmation.
+- D25 (PGN tags) before S33. D17 confirmation. Discussion templates say feedback is a Contribution under `CLA.md`, which is still an unreviewed draft.
 - Recovery attempts are limited per address only, not per handle; a per-handle lockout would need a table. Default: leave as is.
 - `handle_reports` rows are kept when the reported account is deleted (reports are others' data). Default: keep.
 - I22: Cloudflare alerts for Worker errors and 429 spikes; one D1 Time Travel restore drill (S25).
