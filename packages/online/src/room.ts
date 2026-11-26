@@ -102,6 +102,18 @@ function checkLock(
   }
 }
 
+/**
+ * New rooms and events start only on a live ruleset. A retired version still resolves, so games
+ * recorded under it replay and rooms made before it retired finish (D21).
+ */
+export function checkLive(ruleset: ResolvedRuleset): void {
+  if (ruleset.status === "retired")
+    throw new RoomError(
+      "ruleset",
+      `Rules ${ruleset.id}@${ruleset.version} are retired. Reload to play the current rules.`,
+    );
+}
+
 /** The lock's time control, or the default when it names none. */
 export function lockTimeControl(lock: Lock): TimeControl {
   const tc = timeControl(lock.timeControl ?? DEFAULT_TIME_CONTROL);
@@ -117,6 +129,7 @@ export function createRoom(
   lock: Lock,
   token: string,
 ): RoomData {
+  checkLive(ruleset);
   checkLock(ruleset, lock);
   return {
     id,

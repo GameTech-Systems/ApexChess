@@ -213,3 +213,13 @@ describe("parsing event requests", () => {
     expect(parseEventRequest(null)).toBeUndefined();
   });
 });
+
+describe("retired rulesets", () => {
+  it("starts no new event on a retired ruleset", () => {
+    const retired = resolveRuleset(catalog, "standard", "0.1.0");
+    const old = { id: retired.id, version: retired.version };
+    expect(code(() => createEvent("E", retired, req("Ann", { ruleset: old }), "t0"))).toBe(
+      "ruleset",
+    );
+  });
+});
