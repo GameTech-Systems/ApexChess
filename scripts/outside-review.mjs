@@ -34,6 +34,13 @@ export function provider(name) {
   };
 }
 
+/** What to do when a provider refuses the key: it is missing here, not a model problem. */
+export function authHint(name, message) {
+  if (!/\b401\b|unauthori[sz]ed|authentication/i.test(message)) return "";
+  const { envKey } = provider(name);
+  return `${envKey} is missing or invalid in this environment. Set it (or run where the proxy adds it) and retry.`;
+}
+
 const LIMIT = /\b429\b|rate.?limit|quota|too many requests|limit exceeded/i;
 export const shouldFallBack = (errors) =>
   errors.length > 0 && errors.every((e) => LIMIT.test(e.message));
@@ -90,6 +97,26 @@ export function buildMessages({ focus, files, diff, cap = CAP }) {
   ];
 }
 
+/**
+ * Order changed paths so code comes before docs and rules data: the diff is cut at the budget, and
+ * an alphabetical diff let README and docs crowd the server and engine changes out.
+ */
+export function reviewOrder(paths) {
+  const rank = (p) =>
+    /^(packages|apps\/server)\//.test(p) && !p.includes(".test.")
+      ? 0
+      : /^apps\//.test(p) && !p.includes(".test.")
+        ? 1
+        : /^(scripts|\.github)\//.test(p) && !p.includes(".test.")
+          ? 2
+          : p.includes(".test.")
+            ? 3
+            : /^rules\//.test(p)
+              ? 5
+              : 4;
+  return [...paths].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+}
+
 const git = (...args) => execFileSync("git", args, { encoding: "utf8", maxBuffer: 64 << 20 });
 
 function gather(since) {
@@ -105,7 +132,10 @@ function gather(since) {
   if (since) {
     const changed = git("diff", "--name-only", `${since}..HEAD`).split("\n").filter(Boolean);
     const safe = changed.filter((p) => !NEVER.test(p) && !/lock\.yaml$|\.png$|\.ico$/.test(p));
-    if (safe.length) diff = git("diff", `${since}..HEAD`, "--", ...safe);
+    // One diff per file, in review order, so the most important changes survive the cap.
+    diff = reviewOrder(safe)
+      .map((f) => git("diff", `${since}..HEAD`, "--", f))
+      .join("");
   } else {
     paths = [
       ...CORE,
@@ -204,7 +234,8 @@ async function main() {
       const model = models[i];
       if (r.status === "rejected") {
         errors.push(r.reason);
-        return console.error(`Skipped ${model}: ${r.reason.message}`);
+        const hint = authHint(model, r.reason.message);
+        return console.error(`Skipped ${model}: ${r.reason.message}${hint ? `\n  ${hint}` : ""}`);
       }
       const path = reportPath(date, model);
       const head1 = `# Outside review: ${model}\n\n${date} · ${scope}${opts.focus ? ` · focus: ${opts.focus}` : ""}`;

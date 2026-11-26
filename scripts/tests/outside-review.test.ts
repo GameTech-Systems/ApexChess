@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
+  authHint,
+  reviewOrder,
   buildMessages,
   parseArgs,
   provider,
@@ -80,5 +82,37 @@ describe("outside review", () => {
     expect(shouldFallBack([new Error("daily quota exceeded"), new Error("rate limit")])).toBe(true);
     expect(shouldFallBack([new Error("429"), new Error("upstream request timeout")])).toBe(false);
     expect(shouldFallBack([])).toBe(false);
+  });
+  it("puts code before tests, docs and rules data, so a cut diff keeps the code", () => {
+    expect(
+      reviewOrder([
+        "README.md",
+        "rules/rulesets/standard-1.0.0.json",
+        "docs/HANDOFF.md",
+        "apps/web/src/share.ts",
+        "packages/online/src/room.test.ts",
+        "scripts/smoke.mjs",
+        "packages/online/src/room.ts",
+        "apps/server/src/worker.ts",
+      ]),
+    ).toEqual([
+      "apps/server/src/worker.ts",
+      "packages/online/src/room.ts",
+      "apps/web/src/share.ts",
+      "scripts/smoke.mjs",
+      "packages/online/src/room.test.ts",
+      "docs/HANDOFF.md",
+      "README.md",
+      "rules/rulesets/standard-1.0.0.json",
+    ]);
+  });
+  it("names the missing key on a 401, and stays quiet on other errors", () => {
+    expect(authHint("nvidia/x", '{"status":401,"title":"Unauthorized"}')).toContain(
+      "NVIDIA_API_KEY",
+    );
+    expect(authHint("openrouter:a/b:free", "Missing Authentication header")).toContain(
+      "OPENROUTER_API_KEY",
+    );
+    expect(authHint("nvidia/x", "429 Too Many Requests")).toBe("");
   });
 });
