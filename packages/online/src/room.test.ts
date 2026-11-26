@@ -91,6 +91,18 @@ describe("locking setups", () => {
     );
   });
 
+  it("starts no new room on a retired ruleset, but a room made before it retired still plays", () => {
+    const retired = resolveRuleset(catalog, "standard", "0.1.0");
+    expect(retired.status).toBe("retired");
+    const old = { id: retired.id, version: retired.version };
+    expect(code(() => createRoom("R", retired, lock(first, { ruleset: old }), "t0"))).toBe(
+      "ruleset",
+    );
+    const before: RoomData = { ...createRoom("R", ruleset, lock(first), "t0"), ruleset: old };
+    const room = joinRoom(before, retired, lock(second, { ruleset: old }), "t1", coin(0));
+    expect(room.seats).toHaveLength(2);
+  });
+
   it("rejects a third player and a joiner on another ruleset version", () => {
     const room = createRoom("R", ruleset, lock(first), "t0");
     expect(

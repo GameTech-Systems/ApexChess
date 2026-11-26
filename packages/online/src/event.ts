@@ -17,7 +17,7 @@ import {
   type Played,
 } from "./pairing";
 import { PROTOCOL, type EventRef, type RulesetRef, type Ticket } from "./protocol";
-import { RoomError } from "./room";
+import { RoomError, checkLive } from "./room";
 import { standings, type Standing } from "./standings";
 
 /** D20: 4 to 32 players; round robin up to 8. */
@@ -131,6 +131,7 @@ export function createEvent(
   req: EventRequest,
   token: string,
 ): EventData {
+  checkLive(ruleset);
   const name = checkRequest(ruleset, req);
   const tc = timeControl(req.timeControl ?? DEFAULT_TIME_CONTROL);
   if (!tc || !EVENT_CONTROLS.some((c) => c.id === tc.id))
