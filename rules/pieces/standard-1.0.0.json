@@ -1,7 +1,7 @@
 {
   "id": "standard",
-  "version": "0.1.0",
-  "status": "draft",
+  "version": "1.0.0",
+  "status": "official",
   "name": "Apex Chess pieces",
   "pieces": {
     "king": {
@@ -131,6 +131,6 @@
       "promotesTo": ["queen", "rook", "bishop", "knight"]
     }
   },
-  "source": "docs/RULES.md section 5; pawns per owner decisions D1 (ray step, edge-sharing captures), D2 (far-edge square is move and capture), D3 (two-square first move as an option), 2026-10-21.",
+  "source": "docs/RULES.md section 5; pawns per owner decisions D1 (ray step, edge-sharing captures), D2 (far-edge square is move and capture), D3 (two-square first move as an option), 2026-10-21; published as official 1.0.0 with ruleset standard 1.0.0 (D21, 2026-11-26).",
   "notes": "Steps are [file, rank] written for light; the board's mirror maps them for dark. No range means the piece slides to the board edge. No castling, no en passant. royal: may never be left attacked; checkmating it wins. resetsMoveRule: its moves reset the fifty-move count, as captures do."
 }

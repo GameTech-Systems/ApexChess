@@ -1,7 +1,7 @@
 {
   "id": "standard",
-  "version": "0.1.0",
-  "status": "draft",
+  "version": "1.0.0",
+  "status": "official",
   "name": "Standard 8x8, turned 45 degrees",
   "files": 8,
   "ranks": 8,
@@ -21,5 +21,5 @@
       "mirror": "rotate180"
     }
   },
-  "source": "docs/RULES.md sections 1, 2 and 5; corners per owner decision D4 (2026-10-21)."
+  "source": "docs/RULES.md sections 1, 2 and 5; corners per owner decision D4 (2026-10-21); published as official 1.0.0 with ruleset standard 1.0.0 (D21, 2026-11-26)."
 }

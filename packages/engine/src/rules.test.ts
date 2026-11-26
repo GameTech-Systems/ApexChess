@@ -5,7 +5,7 @@ import { parseSquare } from "./setup";
 
 const withRuleset = (patch: (r: RulesCatalog["rulesets"][number]) => void): RulesCatalog => {
   const copy = structuredClone(catalog);
-  patch(copy.rulesets[0]!);
+  patch(copy.rulesets.at(-1)!);
   return copy;
 };
 
@@ -22,6 +22,33 @@ describe("resolveRuleset", () => {
     expect(r.board.id).toBe("standard");
     expect(r.setup.default.id).toBe("default");
     expect(r.parameters).toEqual({ pawnFirstMove: "one", firstMoveCaptures: "allowed" });
+  });
+
+  it("resolves the official 1.0.0 by default; retired 0.1.0 still resolves with the same rules (D21)", () => {
+    const live = resolveRuleset(catalog, "standard");
+    const old = resolveRuleset(catalog, "standard", "0.1.0");
+    expect([live.version, live.status, old.status]).toEqual(["1.0.0", "official", "retired"]);
+    const rules = (r: typeof live) => ({
+      ...r,
+      version: undefined,
+      status: undefined,
+      board: {
+        ...r.board,
+        version: undefined,
+        status: undefined,
+        source: undefined,
+        notes: undefined,
+      },
+      pieces: {
+        ...r.pieces,
+        version: undefined,
+        status: undefined,
+        source: undefined,
+        notes: undefined,
+      },
+    });
+    expect(rules(old)).toEqual(rules(live));
+    expect([live.board.status, live.pieces.status]).toEqual(["official", "official"]);
   });
 
   it("refuses an undecided (null) parameter", () => {
@@ -66,10 +93,10 @@ describe("resolveRuleset", () => {
     const army = withRuleset((r) => (r.army.dragon = 1));
     expect(() => resolveRuleset(army, "standard")).toThrow(/dragon/);
     const promo = structuredClone(catalog);
-    promo.pieces[0]!.pieces.pawn!.promotesTo = ["dragon"];
+    promo.pieces.at(-1)!.pieces.pawn!.promotesTo = ["dragon"];
     expect(() => resolveRuleset(promo, "standard")).toThrow(/dragon/);
     const when = structuredClone(catalog);
-    when.pieces[0]!.pieces.pawn!.moves[1]!.when = { pawnFirstMove: "three" };
+    when.pieces.at(-1)!.pieces.pawn!.moves[1]!.when = { pawnFirstMove: "three" };
     expect(() => resolveRuleset(when, "standard")).toThrow(/three/);
     expect(() =>
       resolveRuleset(

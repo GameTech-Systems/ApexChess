@@ -34,10 +34,15 @@ describe("game record", () => {
 
   it("plays the full sample game to its recorded result", () => {
     const rec = sample as unknown as GameRecord & { result: Result };
-    const game = replay(ruleset, rec);
+    // The sample was recorded under 0.1.0 (now retired): replay it under the version it records.
+    const played = resolveRuleset(catalog, rec.ruleset.id, rec.ruleset.version);
+    const game = replay(played, rec);
     expect(game.position.ply).toBe(rec.moves.length);
-    expect(result(ruleset, game)).toEqual(rec.result);
+    expect(result(played, game)).toEqual(rec.result);
     expect(rec.result.status).toBe("checkmate");
-    expect(rec.ruleset).toEqual({ id: ruleset.id, version: ruleset.version });
+    expect(rec.ruleset).toEqual({ id: "standard", version: "0.1.0" });
+    // The same moves replay under 1.0.0, the same rules.
+    const relabelled = { ...rec, ruleset: { id: ruleset.id, version: ruleset.version } };
+    expect(result(ruleset, replay(ruleset, relabelled))).toEqual(rec.result);
   });
 });
