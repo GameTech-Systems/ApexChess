@@ -1,6 +1,6 @@
-# Apex Chess rules (draft 0.1)
+# Apex Chess rules (1.0)
 
-Status: **draft**. Lines marked *(Dn)* follow an owner decision; lines marked *(provisional, Dn)* follow a default the owner has not confirmed yet. The "Decision defaults" table in [BUILD-PLAN.md](BUILD-PLAN.md) lists both. Everything else is the owner's rule as written.
+Status: **official, version 1.0** (ruleset `standard` 1.0.0, published 2026-11-26 for beta testing by owner decision D21). These are the same rules as draft 0.1, now fixed: any change ships as a new version, and every saved game records the version it was played under. The rules of play in sections 1 to 6 are settled. Lines marked *(Dn)* follow an owner decision; lines marked *(provisional, Dn)* follow a default the owner has not confirmed yet. The "Decision defaults" table in [BUILD-PLAN.md](BUILD-PLAN.md) lists both. Everything else is the owner's rule as written.
 
 ## 1. The board
 

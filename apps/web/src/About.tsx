@@ -1,3 +1,4 @@
+import { FEEDBACK_QUESTION, FEEDBACK_URL } from "./beta";
 import { CONTACT_EMAIL } from "./contact";
 
 const SOURCE_URL = "https://github.com/GameTech-Systems/ApexChess";
@@ -39,6 +40,24 @@ export function About({
       <p>
         New setups, presets, and rule sets can be added without rewriting the game. Every saved game
         records the ruleset and both setups it was played with.
+      </p>
+      <h2>Beta testing and feedback</h2>
+      <p>
+        Apex Chess is in beta. The rules are set at version 1.0; ratings, leaderboards and events
+        are still being tested and may be reset. Your feedback shapes what comes next. The one
+        question we most want answered: {FEEDBACK_QUESTION}
+      </p>
+      <p>
+        Post in{" "}
+        <a href={FEEDBACK_URL} rel="noopener noreferrer" target="_blank">
+          GitHub Discussions
+        </a>{" "}
+        (playtest feedback, bugs, rule ideas), or write to{" "}
+        <a href={`mailto:${CONTACT_EMAIL}?subject=Apex%20Chess%20beta%20feedback`}>
+          {CONTACT_EMAIL}
+        </a>{" "}
+        if you would rather keep it private. Mention the rules version and, for a bug, your browser
+        and device.
       </p>
       <h2>Source and contact</h2>
       <p>
