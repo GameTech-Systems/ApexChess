@@ -1,7 +1,9 @@
 import {
+  catalog,
   decodeSetup,
   encodeSetup,
   replay,
+  resolveRuleset,
   checkSetup,
   type GameRecord,
   type Pieces,
@@ -12,7 +14,9 @@ import {
  * Share links live in the URL fragment, which the browser never sends to a server. They hold a
  * ruleset id and version, setups, and moves only: no names, tokens, or room codes.
  */
-export type Shared = { kind: "setup"; pieces: Pieces } | { kind: "game"; record: GameRecord };
+export type Shared =
+  | { kind: "setup"; pieces: Pieces }
+  | { kind: "game"; record: GameRecord; ruleset: ResolvedRuleset };
 
 const b64 = {
   to: (text: string) => btoa(text).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, ""),
@@ -35,7 +39,11 @@ export function gameLink(ruleset: ResolvedRuleset, record: GameRecord): string {
   return "#game=" + b64.to(text);
 }
 
-/** What a link fragment holds, or undefined if it is not a valid, playable share for `ruleset`. */
+/**
+ * What a link fragment holds, or undefined if it is not valid and playable. Setups are read under
+ * `ruleset` (the live one); a game under the version it records, so links made before a version
+ * retired still open (D21).
+ */
 export function parseShare(ruleset: ResolvedRuleset, hash: string): Shared | undefined {
   try {
     if (hash.startsWith("#setup=")) {
@@ -46,13 +54,14 @@ export function parseShare(ruleset: ResolvedRuleset, hash: string): Shared | und
       const parts = b64.from(hash.slice(6)).split("|");
       if (parts.length !== 5) return undefined;
       const [id, version, light, dark, moves] = parts as [string, string, string, string, string];
+      const played = resolveRuleset(catalog, id, version); // throws on an unknown id or version
       const record: GameRecord = {
         ruleset: { id, version },
-        setups: { light: decodeSetup(ruleset, light), dark: decodeSetup(ruleset, dark) },
+        setups: { light: decodeSetup(played, light), dark: decodeSetup(played, dark) },
         moves: moves ? moves.split(" ") : [],
       };
-      replay(ruleset, record); // throws on a version mismatch or an illegal move
-      return { kind: "game", record };
+      replay(played, record); // throws on an illegal move
+      return { kind: "game", record, ruleset: played };
     }
   } catch {
     return undefined;

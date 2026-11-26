@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
 import { CONTACT_EMAIL } from "./contact";
+import { FEEDBACK_URL } from "./beta";
 import {
   addMove,
   catalog,
@@ -200,7 +201,7 @@ export function App({
   if (shared?.kind === "game")
     content = (
       <main>
-        <Replay ruleset={ruleset} record={shared.record} onClose={closeShared} />
+        <Replay ruleset={shared.ruleset} record={shared.record} onClose={closeShared} />
       </main>
     );
   else if (shared?.kind === "setup")
@@ -340,6 +341,9 @@ export function App({
           <button type="button" className="link" onClick={() => open("about")}>
             About
           </button>
+          <a href={FEEDBACK_URL} rel="noopener noreferrer" target="_blank">
+            Beta feedback
+          </a>
           <a href={LICENSES_URL}>Third-party licenses</a>
           <a href={SOURCE_URL} rel="noopener noreferrer" target="_blank">
             Source code

@@ -98,7 +98,9 @@ export function Rules({ ruleset, onClose }: { ruleset: ResolvedRuleset; onClose?
         Rules version: {ruleset.name} {ruleset.version}
         {ruleset.status === "draft"
           ? " (draft: may change after beta testing)"
-          : ` (${ruleset.status})`}
+          : ruleset.status === "official"
+            ? " (official, set for beta testing)"
+            : ` (${ruleset.status})`}
         . Every saved game records the version it was played under.
       </p>
       <p className="lede">
