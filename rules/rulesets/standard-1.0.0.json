@@ -1,15 +1,15 @@
 {
   "id": "standard",
-  "version": "0.1.0",
-  "status": "draft",
+  "version": "1.0.0",
+  "status": "official",
   "name": "Apex Chess",
   "board": {
     "id": "standard",
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "pieces": {
     "id": "standard",
-    "version": "0.1.0"
+    "version": "1.0.0"
   },
   "army": {
     "king": 1,
@@ -53,6 +53,6 @@
       }
     ]
   },
-  "source": "docs/RULES.md draft 0.1; setup rules per owner decisions D5 (next chord only) and D6 (same-color bishops allowed), 2026-10-21; draws per owner decision D8 (2026-10-21), with the standard chess thresholds and insufficient-material cases.",
-  "notes": "Draft; movement data added in S7, check and draws in S8. Draws are automatic, not claimed (provisional default). Becomes official as 1.0.0 after owner review."
+  "source": "docs/RULES.md 1.0; published as official 1.0.0 by owner decision D21 (2026-11-26), the same rules as draft 0.1.0. Setup rules per owner decisions D5 (next chord only) and D6 (same-color bishops allowed), 2026-10-21; draws per owner decision D8 (2026-10-21), with the standard chess thresholds and insufficient-material cases.",
+  "notes": "Official and immutable: any change ships as a new version. Draws are automatic, not claimed. Ruleset 1.0.0 is the rules for the beta (D21)."
 }

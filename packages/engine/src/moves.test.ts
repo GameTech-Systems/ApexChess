@@ -21,7 +21,7 @@ const fixtures = (fixtureData as unknown as { positions: Fixture[] }).positions;
 
 function rulesetWith(parameters: Record<string, string> = {}) {
   const c = structuredClone(catalog);
-  Object.assign(c.rulesets[0]!.parameters, parameters);
+  Object.assign(c.rulesets.at(-1)!.parameters, parameters);
   return resolveRuleset(c, "standard");
 }
 
