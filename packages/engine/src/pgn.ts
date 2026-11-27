@@ -55,7 +55,9 @@ export function parsePgn(ruleset: ResolvedRuleset, text: string): GameRecord {
   const [id, version] = need("Ruleset").split(" ");
   if (!id || !version) throw new Error("bad Ruleset tag");
   if (id !== ruleset.id || version !== ruleset.version)
-    throw new Error(`PGN is for ${id}@${version}, not ${ruleset.id}@${ruleset.version} (version mismatch)`);
+    throw new Error(
+      `PGN is for ${id}@${version}, not ${ruleset.id}@${ruleset.version} (version mismatch)`,
+    );
   const moves = text
     .replace(/^\[.*\]\s*$/gm, "")
     .split(/\s+/)
@@ -73,7 +75,10 @@ export function parsePgn(ruleset: ResolvedRuleset, text: string): GameRecord {
 }
 
 /** Parse under the catalog's own copy of the ruleset the PGN names. */
-export function parsePgnFromCatalog(text: string): { record: GameRecord; ruleset: ResolvedRuleset } {
+export function parsePgnFromCatalog(text: string): {
+  record: GameRecord;
+  ruleset: ResolvedRuleset;
+} {
   const m = /^\[Ruleset "(\S+) (\S+)"\]/m.exec(text);
   if (!m) throw new Error("PGN has no Ruleset tag");
   const ruleset = resolveRuleset(catalog, m[1]!, m[2]!);

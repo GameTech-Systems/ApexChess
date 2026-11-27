@@ -3,6 +3,7 @@ import {
   decodeSetup,
   encodeSetup,
   replay,
+  toPgn,
   resolveRuleset,
   checkSetup,
   type GameRecord,
@@ -77,4 +78,16 @@ export async function copyText(text: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+/** Save a finished or ongoing game as a .pgn file (tag names are provisional, D25). */
+export function downloadPgn(ruleset: ResolvedRuleset, record: GameRecord): void {
+  const url = URL.createObjectURL(
+    new Blob([toPgn(ruleset, record)], { type: "application/x-chess-pgn" }),
+  );
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = "apex-chess-game.pgn";
+  link.click();
+  URL.revokeObjectURL(url);
 }

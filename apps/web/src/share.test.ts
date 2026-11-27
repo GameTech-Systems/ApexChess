@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
   addMove,
   catalog,
@@ -8,7 +8,7 @@ import {
   resolveRuleset,
   type GameRecord,
 } from "@apexchess/engine";
-import { gameLink, parseShare, setupLink } from "./share";
+import { downloadPgn, gameLink, parseShare, setupLink } from "./share";
 
 const ruleset = resolveRuleset(catalog, "standard");
 const d = ruleset.setup.default.pieces;
@@ -54,5 +54,20 @@ describe("share links", () => {
     expect(parseShare(ruleset, gameLink(ruleset, other))).toBeUndefined();
     const bad = { ...rec, moves: ["a1-a8"] };
     expect(parseShare(ruleset, gameLink(ruleset, bad))).toBeUndefined();
+  });
+});
+
+describe("downloadPgn", () => {
+  it("saves the game as a .pgn file", async () => {
+    let blob: Blob | undefined;
+    const link = { href: "", download: "", click: vi.fn() };
+    vi.stubGlobal("document", { createElement: () => link });
+    vi.spyOn(URL, "createObjectURL").mockImplementation((b) => ((blob = b as Blob), "blob:x"));
+    vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
+    downloadPgn(ruleset, played(2));
+    expect(link.click).toHaveBeenCalledOnce();
+    expect(link.download).toBe("apex-chess-game.pgn");
+    expect(await blob!.text()).toContain('[Variant "Apex Chess"]');
+    vi.unstubAllGlobals();
   });
 });
