@@ -34,7 +34,7 @@ import { Replay } from "./Replay";
 import { SITE } from "./pageHtml";
 import { ROUTE_PATHS, ROUTE_TITLES, routeOf, type Route } from "./routes";
 import { Rules } from "./Rules";
-import { copyText, gameLink, parseShare } from "./share";
+import { copyText, downloadPgn, gameLink, parseShare } from "./share";
 import { Leaderboard } from "./Leaderboard";
 import { Stats } from "./Stats";
 import { Terms } from "./Terms";
@@ -671,6 +671,13 @@ export function Game({
             }}
           >
             {copied ? "Link copied" : "Copy game link"}
+          </button>
+          <button
+            type="button"
+            disabled={!record.moves.length}
+            onClick={() => downloadPgn(ruleset, record)}
+          >
+            Download PGN
           </button>
         </div>
         <div className="controls toggles">

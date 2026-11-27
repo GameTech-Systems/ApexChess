@@ -2,7 +2,6 @@ import { describe, expect, it } from "vitest";
 import sample from "../test/fixtures/sample-game.json";
 import { catalog } from "./catalog";
 import { legalMoves, result } from "./game";
-import { moveText } from "./moves";
 import { parsePgn, toPgn } from "./pgn";
 import { addMove, newRecord, replay, type GameRecord } from "./record";
 import { resolveRuleset } from "./rules";
@@ -44,7 +43,14 @@ describe("PGN export", () => {
     const played = resolveRuleset(catalog, rec.ruleset.id, rec.ruleset.version);
     const text = toPgn(played, rec);
     const res = result(played, replay(played, rec));
-    const tag = res.status === "checkmate" ? (res.winner === "light" ? "1-0" : "0-1") : res.status === "draw" ? "1/2-1/2" : "*";
+    const tag =
+      res.status === "checkmate"
+        ? res.winner === "light"
+          ? "1-0"
+          : "0-1"
+        : res.status === "draw"
+          ? "1/2-1/2"
+          : "*";
     expect(text).toContain(`[Result "${tag}"]`);
     expect(text.trim().endsWith(tag)).toBe(true);
     expect(parsePgn(played, text).moves).toEqual(rec.moves);
@@ -60,6 +66,8 @@ describe("PGN export", () => {
     expect(() => parsePgn(ruleset, "1. e4 e5")).toThrow();
     const text = toPgn(ruleset, play(2)).replace(ruleset.version, "9.9.9");
     expect(() => parsePgn(ruleset, text)).toThrow(/version/);
-    expect(() => parsePgn(ruleset, toPgn(ruleset, play(2)).replace(/1\. \S+/, "1. a1-a1"))).toThrow();
+    expect(() =>
+      parsePgn(ruleset, toPgn(ruleset, play(2)).replace(/1\. \S+/, "1. a1-a1")),
+    ).toThrow();
   });
 });

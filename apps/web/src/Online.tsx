@@ -19,7 +19,7 @@ import {
 } from "@apexchess/online";
 import { Board } from "./Board";
 import { MoveList } from "./MoveList";
-import { copyText, gameLink } from "./share";
+import { copyText, downloadPgn, gameLink } from "./share";
 import { SetupBuilder, type Preset } from "./SetupBuilder";
 import { promotionChoices, targetsFrom } from "./hotseat";
 import {
@@ -653,6 +653,13 @@ export function OnlineGame({
           }
         >
           {copied ? "Link copied" : "Copy game link"}
+        </button>
+        <button
+          type="button"
+          disabled={!record.moves.length}
+          onClick={() => downloadPgn(ruleset, record)}
+        >
+          Download PGN
         </button>
         <button type="button" onClick={onLeave}>
           {view.event ? "Back to the event" : "Leave room"}
