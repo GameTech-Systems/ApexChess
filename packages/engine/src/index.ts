@@ -7,5 +7,6 @@ export { catalog } from "./catalog";
 export * from "./moves";
 export * from "./game";
 export * from "./record";
+export * from "./pgn";
 export * from "./setupcode";
 export * from "./ai";
