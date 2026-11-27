@@ -248,6 +248,7 @@ export function App({
           }}
           onOpen={open}
           onEvents={() => setEvents({})}
+          onImport={setShared}
           online={online}
         />
       </main>

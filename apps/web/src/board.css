@@ -367,6 +367,34 @@ input[type="radio"] {
 .more li span {
   color: var(--muted);
 }
+.pgn-item details {
+  flex: 1 1 100%;
+}
+.pgn-item summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+.pgn-import {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.6rem 0;
+  max-width: 36rem;
+}
+.pgn-import label {
+  display: grid;
+  gap: 0.25rem;
+}
+.pgn-import textarea {
+  width: 100%;
+  font-family: ui-monospace, monospace;
+}
+.pgn-import button {
+  justify-self: start;
+}
+.pgn-error {
+  margin: 0;
+  color: var(--danger, #b00020);
+}
 @media (min-width: 760px) {
   .hero {
     grid-template-columns: 1.1fr 1fr;
