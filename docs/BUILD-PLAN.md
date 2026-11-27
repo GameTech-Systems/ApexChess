@@ -181,7 +181,7 @@ Done when: `dist/rules/index.html` holds the rules text and the app still starts
 Five short lessons on a live board: the turned board and king corners, chords and rays, pawns (move, capture, far edge, promotion), check and checkmate, Player's Choice (build and validate a setup); then a game against the easiest computer. Teaches only what `rules/` and `docs/RULES.md` say; every lesson position is data.
 Done when: each lesson accepts only its legal answers in tests, and the tutorial is reachable from Home and Rules.
 
-### S33 — PGN export · Sonnet 5.5 · medium · `todo`
+### S33 — PGN export · Sonnet 5.5 · medium · `done`
 Download a finished game as PGN text with standard coordinates; ruleset id and version and both setups go in tags (tag names provisional until the owner approves). Import later.
 Done when: an exported game replays to the same final position in the app.
 
