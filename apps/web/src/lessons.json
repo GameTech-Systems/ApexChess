@@ -1,0 +1,194 @@
+{
+  "ruleset": { "id": "standard", "version": "1.0.0" },
+  "source": "docs/RULES.md 1.0, sections 1 to 6. Every position is written in ordinary a1 to h8 squares; answers are checked against the engine in tutorial.test.ts.",
+  "lessons": [
+    {
+      "id": "board",
+      "title": "The turned board",
+      "text": [
+        "Apex Chess uses a standard 8×8 board with the usual coordinates, files a to h and ranks 1 to 8, turned 45° so the long light diagonal from a8 to h1 runs from one player to the other.",
+        "Each king starts in its own light corner: light's king on h1, dark's king on a8. Light moves first."
+      ],
+      "tasks": [
+        {
+          "id": "light-corner",
+          "kind": "square",
+          "prompt": "Click light's king corner.",
+          "position": "default",
+          "answers": ["h1"],
+          "hint": "Light's corner is the light corner at the bottom of the board, nearest you.",
+          "done": "Right: h1 is light's corner."
+        },
+        {
+          "id": "dark-corner",
+          "kind": "square",
+          "prompt": "Now click dark's king corner.",
+          "position": "default",
+          "answers": ["a8"],
+          "hint": "Dark's corner is the light corner at the top, straight across from h1.",
+          "done": "Right: a8. The kings face each other down the middle of the board."
+        }
+      ]
+    },
+    {
+      "id": "lines",
+      "title": "Chords and rays",
+      "text": [
+        "A chord is a side-to-side line across the turned board: a diagonal running parallel to a1 to h8. Every chord is a single color.",
+        "A ray is a forward-and-back line: a diagonal running parallel to a8 to h1. The central ray, h1 to a8, joins the two kings.",
+        "Bishops travel along chords and rays, straight across and straight ahead or back. Rooks travel along files and ranks, which run on the slant."
+      ],
+      "tasks": [
+        {
+          "id": "bishop-chord",
+          "kind": "move",
+          "prompt": "Move the bishop along its chord, straight across.",
+          "position": { "light": { "h1": "king", "e3": "bishop" }, "dark": { "a8": "king" } },
+          "turn": "light",
+          "answers": ["e3-f4", "e3-g5", "e3-h6", "e3-d2", "e3-c1"],
+          "hint": "A chord runs side to side: pick a square on the line from c1 to h6.",
+          "done": "Right: that is the bishop's chord. It stays on squares of one color."
+        },
+        {
+          "id": "bishop-ray",
+          "kind": "move",
+          "prompt": "Now move the bishop straight ahead along its ray, toward dark's corner.",
+          "position": { "light": { "h1": "king", "e3": "bishop" }, "dark": { "a8": "king" } },
+          "turn": "light",
+          "answers": ["e3-d4", "e3-c5", "e3-b6", "e3-a7"],
+          "hint": "Straight ahead is toward a8: pick a square on the line from e3 to a7.",
+          "done": "Right: the ray runs forward and back."
+        },
+        {
+          "id": "rook-file",
+          "kind": "move",
+          "prompt": "Capture the dark pawn with the rook. Rooks travel along files and ranks, on the slant.",
+          "position": { "light": { "h1": "king", "d4": "rook" }, "dark": { "a8": "king", "d7": "pawn" } },
+          "turn": "light",
+          "answers": ["d4-d7"],
+          "hint": "The pawn is on the d file, the same file as the rook.",
+          "done": "Right: the rook went up the d file and captured on d7."
+        }
+      ]
+    },
+    {
+      "id": "pawns",
+      "title": "Pawns",
+      "text": [
+        "Forward means toward the opposing king's corner: for light, toward a8.",
+        "A pawn moves one square straight ahead along its ray. It never captures that way.",
+        "It captures one square forward and to the side, onto a square that shares an edge with its own.",
+        "On a far edge (file a or rank 8 for light) the pawn walks along the edge toward the opposing corner. It promotes only on that corner, a8 for light, into a queen, rook, bishop, or knight. There is no castling and no en passant."
+      ],
+      "tasks": [
+        {
+          "id": "pawn-step",
+          "kind": "move",
+          "prompt": "Move the pawn one square straight ahead.",
+          "position": { "light": { "h1": "king", "h5": "pawn" }, "dark": { "a8": "king" } },
+          "turn": "light",
+          "answers": ["h5-g6"],
+          "hint": "Straight ahead from h5 is g6, on the ray toward a8.",
+          "done": "Right: h5 to g6, one square along its ray."
+        },
+        {
+          "id": "pawn-capture",
+          "kind": "move",
+          "prompt": "Capture with the pawn. It cannot take the pawn straight ahead of it.",
+          "position": {
+            "light": { "h1": "king", "h5": "pawn" },
+            "dark": { "a8": "king", "g6": "pawn", "h6": "knight" }
+          },
+          "turn": "light",
+          "answers": ["h5-h6"],
+          "hint": "A pawn captures forward and to the side, onto a square that shares an edge with it.",
+          "done": "Right: the pawn captured on h6. The dark pawn on g6 blocks it but cannot be taken head-on."
+        },
+        {
+          "id": "pawn-edge",
+          "kind": "move",
+          "prompt": "This pawn is on the far edge, rank 8. Move it along the edge toward a8.",
+          "position": { "light": { "h1": "king", "d8": "pawn" }, "dark": { "a8": "king" } },
+          "turn": "light",
+          "answers": ["d8-c8"],
+          "hint": "Along rank 8, the next square toward a8 is c8.",
+          "done": "Right: on a far edge the pawn walks along it, one square at a time."
+        },
+        {
+          "id": "pawn-promote",
+          "kind": "move",
+          "prompt": "Move the pawn onto a8 and choose what it becomes.",
+          "position": { "light": { "h1": "king", "b8": "pawn" }, "dark": { "e5": "king" } },
+          "turn": "light",
+          "answers": ["b8-a8"],
+          "hint": "From b8, the corner a8 is the next square along the edge.",
+          "done": "Right: a pawn promotes on the far corner, whether or not any piece has been captured."
+        }
+      ]
+    },
+    {
+      "id": "check",
+      "title": "Check and checkmate",
+      "text": [
+        "A king that is attacked is in check. Its player must end the check on the very next move: move the king, block the attack, or capture the attacker. No move may leave your own king in check.",
+        "If there is no way out, that is checkmate, and the checkmating player wins. A player may also resign.",
+        "Stalemate, threefold repetition, the fifty-move rule, insufficient material, and agreement are draws."
+      ],
+      "tasks": [
+        {
+          "id": "give-check",
+          "kind": "move",
+          "prompt": "Give check: move the rook to attack the dark king.",
+          "position": { "light": { "h1": "king", "d4": "rook" }, "dark": { "a8": "king", "b7": "pawn" } },
+          "turn": "light",
+          "answers": ["d4-a4", "d4-d8"],
+          "hint": "The king is on a8: put the rook on its file or its rank.",
+          "done": "Check. Dark must now get the king out of the attack."
+        },
+        {
+          "id": "mate-in-one",
+          "kind": "move",
+          "prompt": "Checkmate in one move.",
+          "position": {
+            "light": { "h1": "king", "b1": "queen", "d6": "knight" },
+            "dark": { "a8": "king" }
+          },
+          "turn": "light",
+          "answers": ["b1-b7"],
+          "hint": "Put the queen next to the king where the knight guards it.",
+          "done": "Checkmate. The king is attacked, the knight guards the queen, and every escape square is covered."
+        }
+      ]
+    },
+    {
+      "id": "setup",
+      "title": "Player's Choice",
+      "text": [
+        "You may arrange the same 16 pieces your own way, under two rules.",
+        "First, your king starts in your light corner: h1 for light, a8 for dark.",
+        "Second, only one piece starts beyond the front chord. For light the front chord is d1 to h5. It and the squares behind it hold exactly 15 squares, so they are always full, and one piece, anything but the king, starts on the next chord, c1 to h6.",
+        "Bishops may start on the same color. Online, you see your opponent's arrangement only when the game begins."
+      ],
+      "tasks": [
+        {
+          "id": "pick-setup",
+          "kind": "choice",
+          "prompt": "Which of these arrangements follows both rules?",
+          "options": [
+            { "label": "A", "setup": "B/KR/RQB/PPPP/PPNPP/5N" },
+            { "label": "B", "setup": "K/BR/RQB/PPPP/PPN1P/4PN" },
+            { "label": "C", "setup": "K/RB/BQR/PPPP/PNPNP/2P3" }
+          ],
+          "answer": 2,
+          "done": "Right: the king is on h1 and only one piece, a pawn, is beyond the front chord."
+        },
+        {
+          "id": "build-setup",
+          "kind": "setup",
+          "prompt": "Now build your own. Pick a piece from the tray, then a square; the builder keeps your king in its corner.",
+          "done": "That arrangement is legal. You can save it and use it in a game."
+        }
+      ]
+    }
+  ]
+}
