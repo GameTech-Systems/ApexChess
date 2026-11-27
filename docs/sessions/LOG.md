@@ -48,3 +48,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-11-26 | S28 attempt | Opus 5.5 | blocked | (see PR) | No review keys in session; review script orders diff code-first, names missing key |
 | 2026-11-27 | S32 | Opus 5.5 · high | done | (see PR) | Tutorial: 5 data-driven lessons judged by the engine, /tutorial/ from Home and Rules |
 | 2026-11-27 | S28 | Sonnet 5.5 · medium | done | (see PR) | Outside review of PR #48 and S32: no real findings; triage s28e |
+| 2026-11-27 | S33 | Sonnet 5.5 · medium | done | (see PR) | PGN export/parse in engine, Download PGN button; D25 default tags |
