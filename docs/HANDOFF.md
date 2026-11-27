@@ -1,18 +1,16 @@
 # Handoff
 
-Updated 2026-11-27 by S33 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
+Updated 2026-11-27 by S28 (Sonnet 5.5 · medium). `/end-session` rewrites this file; keep it under 30 lines.
 
 ## State
 - Phase 8 (launch prep). Product complete through UI1; S22 to S24, S26 to S28, S30 to S33 done. Plan: `docs/LAUNCH-PLAN.md`.
 - S33: PGN export. `packages/engine/src/pgn.ts` (`toPgn`, `parsePgn`, `parsePgnFromCatalog`); "Download PGN" button in hot-seat (`App.tsx`) and online (`Online.tsx`) games via `downloadPgn` in `share.ts`. Tags per D25 default (provisional): `Variant`, `Ruleset`, `LightSetup`, `DarkSetup`, `Result`. Moves use the record's own text (`e2-e4`), not SAN. Import is parse-only; no UI yet.
 - S32 tutorial at `/tutorial/` (`apps/web/src/Tutorial.tsx`, data in `lessons.json`).
-- Not done: S28 (next, review of S33); S25, S29 are the owner's.
+- S28 (review of S33, triage `docs/reviews/2026-11-27-s28f-triage.md`): one low finding fixed (`downloadPgn` revokes its URL after 1 s). Not done: S25, S29 are the owner's.
 
 ## Next session
-**S28 — Outside review** · Sonnet 5.5 · effort medium
+No Code step is left. S25 and S29 are the owner's; run `/start-session S28` again after the next engine, server, or privacy change.
 Set: `/model sonnet` · `/effort medium`
-Why: S33 added an engine module; review it, then launch steps are the owner's.
-Start with: `/start-session S28 --focus packages/engine/src/pgn.ts`
 
 ## Decisions in effect for the next step
 - D21: ruleset `standard` 1.0.0 official (decided). D16: passkey + handle (decided).
