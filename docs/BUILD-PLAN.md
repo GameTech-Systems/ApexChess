@@ -177,7 +177,7 @@ Done when: each limited endpoint answers 429 past its limit in tests, and the ne
 Each address already has its own title, description and canonical in its built file. Render the Rules and About text into those files at build time (React `renderToString`), so they read without JavaScript; the app then takes over. No new rules text.
 Done when: `dist/rules/index.html` holds the rules text and the app still starts on it, online and offline.
 
-### S32 — Interactive rules tutorial · Opus 5.5 · high · `todo`
+### S32 — Interactive rules tutorial · Opus 5.5 · high · `done`
 Five short lessons on a live board: the turned board and king corners, chords and rays, pawns (move, capture, far edge, promotion), check and checkmate, Player's Choice (build and validate a setup); then a game against the easiest computer. Teaches only what `rules/` and `docs/RULES.md` say; every lesson position is data.
 Done when: each lesson accepts only its legal answers in tests, and the tutorial is reachable from Home and Rules.
 
