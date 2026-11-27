@@ -2,11 +2,13 @@ import { useState } from "react";
 import { startPosition, type ResolvedRuleset } from "@apexchess/engine";
 import { Board } from "./Board";
 import { DEFAULT_LEVEL, levels, type Level } from "./computer";
+import { ROUTE_PATHS } from "./routes";
 import { chordSpan } from "./setupBuilder";
 
 export type Opponent = "hotseat" | "computer" | "online";
 export type SetupChoice = "default" | "custom";
-export type Panel = "rules" | "about" | "privacy" | "terms" | "stats" | "leaderboard" | "account";
+export type Panel =
+  "rules" | "tutorial" | "about" | "privacy" | "terms" | "stats" | "leaderboard" | "account";
 
 const OPPONENTS: { id: Opponent; label: string; note: string }[] = [
   { id: "computer", label: "Play the computer", note: "Pick how strong it plays." },
@@ -112,6 +114,19 @@ export function Home({
             </select>
           </label>
         )}
+        <p className="tutorial-link">
+          New to Apex Chess?{" "}
+          <a
+            href={ROUTE_PATHS.tutorial}
+            onClick={(e) => {
+              e.preventDefault();
+              onOpen("tutorial");
+            }}
+          >
+            Take the tutorial
+          </a>
+          : five short lessons on a live board, then a game against the computer.
+        </p>
         <div className="setup-choice">
           <button
             type="button"

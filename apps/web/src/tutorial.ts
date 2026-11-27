@@ -75,7 +75,12 @@ export function lessonPosition(ruleset: ResolvedRuleset, task: SquareTask | Move
   const squares: Position["squares"] = {};
   for (const side of ["light", "dark"] as const)
     for (const [sq, piece] of Object.entries(task.position[side])) squares[sq] = { side, piece };
-  return { squares, turn: task.kind === "move" ? task.turn : ruleset.firstToMove, ply: 2, unmoved: [] };
+  return {
+    squares,
+    turn: task.kind === "move" ? task.turn : ruleset.firstToMove,
+    ply: 2,
+    unmoved: [],
+  };
 }
 
 export function judgeSquare(task: SquareTask, square: string): boolean {

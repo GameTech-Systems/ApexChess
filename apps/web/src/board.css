@@ -842,3 +842,58 @@ main.page > .event {
     animation: none;
   }
 }
+
+/* Tutorial */
+.tutorial .board {
+  max-width: 30rem;
+  margin: 0 auto;
+}
+.lesson-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  padding: 0;
+  margin: 1rem 0;
+  list-style: none;
+}
+.lesson-list [aria-current="step"] {
+  font-weight: 700;
+  text-decoration: none;
+}
+.lesson-count {
+  color: var(--muted);
+  margin: 0;
+}
+.lesson h2 {
+  margin-top: 0.25rem;
+}
+.lesson .prompt {
+  font-weight: 600;
+  font-size: 1.1rem;
+}
+.feedback {
+  min-height: 1.5em;
+  font-weight: 600;
+}
+.feedback.right {
+  color: #1d6b3a;
+}
+.choices {
+  list-style: none;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: 1rem;
+}
+.choices li {
+  display: grid;
+  gap: 0.5rem;
+  justify-items: center;
+}
+.choices li.picked .board {
+  outline: 3px solid var(--board-blue);
+  outline-offset: 2px;
+}
+.tutorial-link {
+  margin: 0 0 0.75rem;
+}
