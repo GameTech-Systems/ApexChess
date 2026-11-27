@@ -4,7 +4,7 @@ Updated 2026-11-27 by S34 (Sonnet 5.5 · medium). `/end-session` rewrites this f
 
 ## State
 - Phase 8 (launch prep). Product complete through UI1; S22 to S24, S26 to S28, S30 to S34 done. Plan: `docs/LAUNCH-PLAN.md`.
-- S34: PGN import UI (D26). Home "More" has "Open a PGN game" (`PgnImport.tsx`): file picker or paste, opens `Replay` through `importPgn` / `openPgnFile` in `share.ts` (reads under the ruleset version the PGN names; cap `PGN_MAX_CHARS` 200k; errors in plain words). Replay only: no play-on, nothing saved or uploaded; works offline.
+- S34: PGN import UI (D26). Home "More" has "Open a PGN game" (`PgnImport.tsx`): file picker or paste, opens `Replay` through `importPgn` / `openPgnFile` in `share.ts` (reads under the ruleset version the PGN names; cap `PGN_MAX_CHARS` 200k; errors in plain words). Replay offers "Play on from here" (`playOn.ts`: `canPlayOn`, `resumeFrom`; `Game` takes `resume`) for live-version, unfinished games, also for share links; retired versions replay only. Nothing saved or uploaded; works offline.
 - S33 PGN export (`packages/engine/src/pgn.ts`, tags per D25 default, provisional). S32 tutorial at `/tutorial/`.
 - Not done: S25, S29 are the owner's. Web only changed this session, so no S28 review is due.
 
@@ -16,7 +16,7 @@ Set: `/model sonnet` · `/effort medium`
 - D21: ruleset `standard` 1.0.0 official (decided). D16: passkey + handle (decided).
 
 ## Open questions for the owner
-- D26 (PGN import): replay only, 200 KB cap; want "play on from here" or import on the Replay page too? Default: leave as is.
+- D26 (PGN import): 200 KB cap; play-on built (two players or computer). Import on the Replay page too? Default: leave as is.
 - D25 (PGN tags): confirm names or change them. D17 confirmation. `CLA.md` is still an unreviewed draft.
 - Recovery attempts limited per address only. Default: leave as is. `handle_reports` kept after account deletion. Default: keep.
 - Not changed: CSP exists; HSTS preload/`includeSubDomains` is the owner's call.

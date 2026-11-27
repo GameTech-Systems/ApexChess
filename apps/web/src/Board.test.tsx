@@ -1,8 +1,17 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { catalog, resolveRuleset, startPosition } from "@apexchess/engine";
+import {
+  addMove,
+  catalog,
+  legalMoves,
+  newRecord,
+  replay,
+  resolveRuleset,
+  startPosition,
+} from "@apexchess/engine";
 import { App, Game } from "./App";
 import { Board } from "./Board";
+import { resumeFrom } from "./playOn";
 
 const ruleset = resolveRuleset(catalog, "standard");
 const setup = ruleset.setup.default.pieces;
@@ -134,5 +143,18 @@ describe("Game", () => {
       <Game setups={[setup, setup]} onChangeSetups={() => {}} computer="easy" />,
     );
     expect(html).toContain("You play light, the computer (Easy) plays dark.");
+  });
+
+  it("carries on a replayed game: its moves, whose turn, and the chosen side", () => {
+    let rec = newRecord(ruleset, setup, setup);
+    for (let i = 0; i < 3; i++)
+      rec = addMove(ruleset, rec, legalMoves(ruleset, replay(ruleset, rec).position)[0]!);
+    const resume = resumeFrom(rec, 3, "dark");
+    const html = renderToStaticMarkup(
+      <Game setups={resume.setups} resume={resume} onChangeSetups={() => {}} computer="easy" />,
+    );
+    expect(html).toContain("dark to move");
+    expect(html).toContain("You play dark, the computer (Easy) plays light.");
+    for (const m of rec.moves) expect(html).toContain(m);
   });
 });

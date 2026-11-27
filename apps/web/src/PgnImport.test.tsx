@@ -31,4 +31,19 @@ describe("PgnImport", () => {
     expect(more).toContain("Open a PGN game");
     expect(more).not.toMatch(/Open a PGN game[\s\S]{0,300}disabled/);
   });
+  it("sits after Account, which follows Leaderboards", () => {
+    const ruleset = resolveRuleset(catalog, "standard");
+    const home = renderToStaticMarkup(
+      <Home
+        ruleset={ruleset}
+        onStart={() => {}}
+        onOpen={() => {}}
+        onEvents={() => {}}
+        onImport={() => {}}
+      />,
+    );
+    const at = (text: string) => home.indexOf(text, home.indexOf('aria-labelledby="more-title"'));
+    expect(at("Leaderboards")).toBeLessThan(at("Account"));
+    expect(at("Account")).toBeLessThan(at("Open a PGN game"));
+  });
 });
