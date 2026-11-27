@@ -38,6 +38,8 @@ import { copyText, gameLink, parseShare } from "./share";
 import { Leaderboard } from "./Leaderboard";
 import { Stats } from "./Stats";
 import { Terms } from "./Terms";
+import { Tutorial } from "./Tutorial";
+import { EASIEST_LEVEL } from "./tutorial";
 import { piecesInDanger, playSound, undoMoves } from "./playAids";
 import { SetupBuilder } from "./SetupBuilder";
 import { DEFAULT_LEVEL, levels, thinkMove, type Level } from "./computer";
@@ -278,7 +280,28 @@ export function App({
       );
 
   let page;
-  if (panel === "rules") page = <Rules ruleset={ruleset} onClose={close} />;
+  // The tutorial ends in a game against the easiest computer, both sides in the default setup.
+  const playFromTutorial = () => {
+    const warning =
+      mode === "online" && loadTicket(storage)
+        ? "Your online game keeps going while you are away. Start a computer game? You can rejoin from Play online."
+        : busy.current;
+    if (warning && !window.confirm(warning)) return;
+    clearHash();
+    busy.current = undefined;
+    setShared(undefined);
+    setEvents(undefined);
+    setPanels([]);
+    setSetupChoice("default");
+    setLevel(EASIEST_LEVEL);
+    setMode("computer");
+    setRound((n) => n + 1);
+  };
+
+  if (panel === "rules")
+    page = <Rules ruleset={ruleset} onClose={close} onTutorial={() => open("tutorial")} />;
+  else if (panel === "tutorial")
+    page = <Tutorial ruleset={ruleset} store={storage} onClose={close} onPlay={playFromTutorial} />;
   else if (panel === "privacy") page = <Privacy onClose={close} />;
   else if (panel === "terms") page = <Terms onClose={close} />;
   else if (panel === "about") page = <About onClose={close} onOpen={open} />;

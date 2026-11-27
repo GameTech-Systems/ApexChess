@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import type { ResolvedRuleset } from "@apexchess/engine";
 import { Board } from "./Board";
 import { pieceDiagram } from "./pieceDiagrams";
+import { ROUTE_PATHS } from "./routes";
 import { chordSpan } from "./setupBuilder";
 
 /** How each piece moves, for players new to chess. The squares in each diagram come from the engine. */
@@ -80,7 +81,16 @@ interface Ctx {
 }
 
 /** The rules in brief; the full text is docs/RULES.md. */
-export function Rules({ ruleset, onClose }: { ruleset: ResolvedRuleset; onClose?: () => void }) {
+export function Rules({
+  ruleset,
+  onClose,
+  onTutorial,
+}: {
+  ruleset: ResolvedRuleset;
+  onClose?: () => void;
+  /** Opens the tutorial in the app. Without it, a page with Close (inside a game) shows no link. */
+  onTutorial?: () => void;
+}) {
   const { board, setup } = ruleset;
   const light = board.sides.light.corner;
   const dark = board.sides.dark.corner;
@@ -108,6 +118,22 @@ export function Rules({ ruleset, onClose }: { ruleset: ResolvedRuleset; onClose?
         never played chess, start here: each side has 16 pieces, light moves first, and you take
         turns moving one piece at a time. You win by trapping the opposing king.
       </p>
+      {(onTutorial || !onClose) && (
+        <p>
+          Prefer to learn by playing?{" "}
+          <a
+            href={ROUTE_PATHS.tutorial}
+            onClick={(e) => {
+              if (!onTutorial) return;
+              e.preventDefault();
+              onTutorial();
+            }}
+          >
+            Take the interactive tutorial
+          </a>
+          .
+        </p>
+      )}
 
       <h2>The board</h2>
       <p>

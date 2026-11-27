@@ -63,7 +63,10 @@
           "id": "rook-file",
           "kind": "move",
           "prompt": "Capture the dark pawn with the rook. Rooks travel along files and ranks, on the slant.",
-          "position": { "light": { "h1": "king", "d4": "rook" }, "dark": { "a8": "king", "d7": "pawn" } },
+          "position": {
+            "light": { "h1": "king", "d4": "rook" },
+            "dark": { "a8": "king", "d7": "pawn" }
+          },
           "turn": "light",
           "answers": ["d4-d7"],
           "hint": "The pawn is on the d file, the same file as the rook.",
@@ -139,7 +142,10 @@
           "id": "give-check",
           "kind": "move",
           "prompt": "Give check: move the rook to attack the dark king.",
-          "position": { "light": { "h1": "king", "d4": "rook" }, "dark": { "a8": "king", "b7": "pawn" } },
+          "position": {
+            "light": { "h1": "king", "d4": "rook" },
+            "dark": { "a8": "king", "b7": "pawn" }
+          },
           "turn": "light",
           "answers": ["d4-a4", "d4-d8"],
           "hint": "The king is on a8: put the rook on its file or its rank.",
@@ -186,7 +192,7 @@
           "id": "build-setup",
           "kind": "setup",
           "prompt": "Now build your own. Pick a piece from the tray, then a square; the builder keeps your king in its corner.",
-          "done": "That arrangement is legal. You can save it and use it in a game."
+          "done": "That arrangement is legal. Save it in the builder to use it in a game."
         }
       ]
     }

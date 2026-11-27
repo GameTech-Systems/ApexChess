@@ -7,6 +7,7 @@
     <priority>1.0</priority>
   </url>
   <url><loc>https://apexchess.icu/rules/</loc></url>
+  <url><loc>https://apexchess.icu/tutorial/</loc></url>
   <url><loc>https://apexchess.icu/tournaments/</loc></url>
   <url><loc>https://apexchess.icu/stats/</loc></url>
   <url><loc>https://apexchess.icu/leaderboard/</loc></url>

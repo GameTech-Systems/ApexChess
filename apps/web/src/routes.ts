@@ -5,6 +5,7 @@ export type Route = Panel | "tournaments";
 
 export const ROUTE_PATHS: Record<Route, string> = {
   rules: "/rules/",
+  tutorial: "/tutorial/",
   about: "/about/",
   tournaments: "/tournaments/",
   stats: "/stats/",
@@ -35,6 +36,11 @@ export const ROUTE_TITLES: Record<Route | "home", { title: string; description: 
     title: "Rules | Apex Chess",
     description:
       "The full rules of Apex Chess: the turned board, chords and rays, setups, Player's Choice, how each piece moves, and how a game ends.",
+  },
+  tutorial: {
+    title: "Tutorial | Apex Chess",
+    description:
+      "Learn Apex Chess in five short lessons on a live board: the turned board, chords and rays, pawns, check and checkmate, and Player's Choice.",
   },
   about: {
     title: "About | Apex Chess",
