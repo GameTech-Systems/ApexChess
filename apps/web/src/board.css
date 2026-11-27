@@ -370,6 +370,27 @@ input[type="radio"] {
 .pgn-item details {
   flex: 1 1 100%;
 }
+@media (min-width: 760px) {
+  /* Under the Leaderboards and Account pair, across both columns. */
+  .more .pgn-item {
+    grid-column: 1 / -1;
+  }
+}
+.play-on {
+  margin: 1rem 0;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.5rem;
+}
+.play-on h3 {
+  margin: 0 0 0.25rem;
+}
+.play-on-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.5rem;
+  margin-top: 0.6rem;
+}
 .pgn-item summary {
   cursor: pointer;
   font-weight: 600;

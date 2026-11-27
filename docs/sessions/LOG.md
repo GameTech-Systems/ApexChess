@@ -51,3 +51,4 @@ One line per session, appended by `/end-session`. Usage is the owner's `/usage` 
 | 2026-11-27 | S33 | Sonnet 5.5 · medium | done | (see PR) | PGN export/parse in engine, Download PGN button; D25 default tags |
 | 2026-11-27 | S28 | Sonnet 5.5 · medium | done | (see PR) | Review of S33 PGN: revoke URL late in downloadPgn; rest not bugs; triage s28f |
 | 2026-11-27 | S34 | Sonnet 5.5 · medium | done | (see PR) | PGN import UI: file or paste on Home opens Replay; D26 default |
+| 2026-11-27 | S34 | Sonnet 5.5 · medium | done | (see PR) | Play on from here after PGN import; More menu order fixed |

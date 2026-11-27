@@ -30,6 +30,7 @@ import { Online } from "./Online";
 import { loadTicket, saveTicket } from "./online";
 import type { KeyValueStore } from "./savedSetups";
 import { Privacy } from "./Privacy";
+import { type Resume } from "./playOn";
 import { Replay } from "./Replay";
 import { SITE } from "./pageHtml";
 import { ROUTE_PATHS, ROUTE_TITLES, routeOf, type Route } from "./routes";
@@ -104,6 +105,8 @@ export function App({
   );
   const [setupChoice, setSetupChoice] = useState<SetupChoice>(initialSetup);
   const [level, setLevel] = useState<Level>(DEFAULT_LEVEL);
+  // A game carried on from a replay (D26); used by the computer and two-player screens until cleared.
+  const [resume, setResume] = useState<Resume>();
   // Pages opened over the current view; closing one goes back to what was under it.
   const [panels, setPanels] = useState<Panel[]>(() => {
     const r = routeOf(typeof window === "undefined" ? "/" : window.location.pathname);
@@ -177,6 +180,7 @@ export function App({
     setEvents(undefined);
     setPanels([]);
     setMode(undefined);
+    setResume(undefined);
     setRound((n) => n + 1);
   };
 
@@ -203,7 +207,24 @@ export function App({
   if (shared?.kind === "game")
     content = (
       <main>
-        <Replay ruleset={shared.ruleset} record={shared.record} onClose={closeShared} />
+        <Replay
+          ruleset={shared.ruleset}
+          record={shared.record}
+          onClose={closeShared}
+          playOn={{
+            live: ruleset,
+            start: (r, opponent, lvl) => {
+              clearHash();
+              setShared(undefined);
+              setEvents(undefined);
+              setPanels([]);
+              setResume(r);
+              setSetupChoice("custom");
+              setLevel(lvl);
+              setMode(opponent);
+            },
+          }}
+        />
       </main>
     );
   else if (shared?.kind === "setup")
@@ -242,6 +263,7 @@ export function App({
           ruleset={ruleset}
           initialLevel={level}
           onStart={(opponent, setup, lvl) => {
+            setResume(undefined);
             setSetupChoice(setup);
             setLevel(lvl);
             setMode(opponent);
@@ -273,11 +295,12 @@ export function App({
         <VsComputer
           level={level}
           useDefault={setupChoice === "default"}
+          resume={resume}
           onChangeSetups={() => setMode(undefined)}
           onBusy={setBusy}
         />
       ) : (
-        <HotSeat useDefault={setupChoice === "default"} onBusy={setBusy} />
+        <HotSeat useDefault={setupChoice === "default"} resume={resume} onBusy={setBusy} />
       );
 
   let page;
@@ -293,6 +316,7 @@ export function App({
     setShared(undefined);
     setEvents(undefined);
     setPanels([]);
+    setResume(undefined);
     setSetupChoice("default");
     setLevel(EASIEST_LEVEL);
     setMode("computer");
@@ -390,11 +414,13 @@ export function App({
 function VsComputer({
   level,
   useDefault,
+  resume: resumeFrom,
   onChangeSetups,
   onBusy,
 }: {
   level: Level;
   useDefault?: boolean;
+  resume?: Resume;
   onChangeSetups: () => void;
   onBusy?: (why: string | undefined) => void;
 }) {
@@ -404,8 +430,10 @@ function VsComputer({
       presets.map((p) => p.pieces),
       newRandom(),
     );
+  // Changing setups ends the carried-on game: later games start fresh.
+  const [resume, setResume] = useState(resumeFrom);
   const [setups, setSetups] = useState<[Pieces, Pieces] | undefined>(() =>
-    useDefault ? [defaultSetup, computerSetup()] : undefined,
+    resume ? resume.setups : useDefault ? [defaultSetup, computerSetup()] : undefined,
   );
   if (!setups) {
     return (
@@ -425,7 +453,15 @@ function VsComputer({
   return (
     <Game
       setups={setups}
-      onChangeSetups={useDefault ? () => setSetups(undefined) : onChangeSetups}
+      onChangeSetups={
+        useDefault || resume
+          ? () => {
+              setResume(undefined);
+              setSetups(undefined);
+            }
+          : onChangeSetups
+      }
+      resume={resume}
       computer={level}
       onBusy={onBusy}
     />
@@ -435,13 +471,16 @@ function VsComputer({
 /** D14: each player builds a setup from their own seat while the other looks away; both are revealed at the start. */
 function HotSeat({
   useDefault,
+  resume: resumeFrom,
   onBusy,
 }: {
   useDefault?: boolean;
+  resume?: Resume;
   onBusy?: (why: string | undefined) => void;
 }) {
+  const [resume, setResume] = useState(resumeFrom);
   const [built, setBuilt] = useState<Pieces[]>(() =>
-    useDefault ? [defaultSetup, defaultSetup] : [],
+    resume ? resume.setups : useDefault ? [defaultSetup, defaultSetup] : [],
   );
   if (built.length < 2) {
     const player = built.length as 0 | 1;
@@ -463,7 +502,15 @@ function HotSeat({
     );
   }
   return (
-    <Game setups={[built[0]!, built[1]!]} onChangeSetups={() => setBuilt([])} onBusy={onBusy} />
+    <Game
+      setups={[built[0]!, built[1]!]}
+      resume={resume}
+      onChangeSetups={() => {
+        setResume(undefined);
+        setBuilt([]);
+      }}
+      onBusy={onBusy}
+    />
   );
 }
 
@@ -472,21 +519,24 @@ export function Game({
   setups,
   onChangeSetups,
   computer,
+  resume,
   onBusy,
 }: {
   setups: readonly [Pieces, Pieces];
   onChangeSetups: () => void;
+  /** Carry on a replayed game: its moves so far, and the game number that seats player 1 (D26). */
+  resume?: Resume;
   computer?: Level;
   /** Told when leaving would lose a game in progress (a reason), and when it would not. */
   onBusy?: (why: string | undefined) => void;
 }) {
   // D15: players alternate sides on rematch; `games` counts finished-or-abandoned games.
-  const [games, setGames] = useState(0);
+  const [games, setGames] = useState(resume?.game ?? 0);
   const start = (n: number) => {
     const { light, dark } = setupsForGame(setups, n);
     return newRecord(ruleset, light, dark);
   };
-  const [record, setRecord] = useState<GameRecord>(() => start(0));
+  const [record, setRecord] = useState<GameRecord>(() => resume?.record ?? start(games));
   const [selected, setSelected] = useState<string>();
   const [pending, setPending] = useState<{ from: string; to: string; choices: string[] }>();
   const [dark, setDark] = useState<DarkSquareColor>(DEFAULT_DARK_SQUARE);

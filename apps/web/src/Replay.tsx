@@ -7,19 +7,29 @@ import {
   type Side,
 } from "@apexchess/engine";
 import { Board } from "./Board";
+import { DEFAULT_LEVEL, levels, type Level } from "./computer";
 import { MoveList } from "./MoveList";
+import { canPlayOn, resumeFrom, type Resume } from "./playOn";
 
 /** Steps through a finished or shared game, move by move. */
 export function Replay({
   ruleset,
   record,
   onClose,
+  playOn,
 }: {
   ruleset: ResolvedRuleset;
   record: GameRecord;
   onClose: () => void;
+  /** With this, an imported or shared game can be carried on from the move shown (live ruleset only). */
+  playOn?: {
+    live: ResolvedRuleset;
+    start: (resume: Resume, opponent: "hotseat" | "computer", level: Level) => void;
+  };
 }) {
   const [step, setStep] = useState(0);
+  const [side, setSide] = useState<Side>("light");
+  const [level, setLevel] = useState<Level>(DEFAULT_LEVEL);
   const [view, setView] = useState<Side>("light");
   const total = record.moves.length;
   const shown = useMemo(
@@ -63,6 +73,48 @@ export function Replay({
           Close
         </button>
       </div>
+      {playOn && canPlayOn(playOn.live, record, step) && (
+        <section className="play-on" aria-label="Play on from here">
+          <h3>Play on from here</h3>
+          <p>
+            Carry on from move {step}, with both players keeping their setups. This does not change
+            the game you opened.
+          </p>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => playOn.start(resumeFrom(record, step, side), "hotseat", level)}
+          >
+            Two players, one screen
+          </button>{" "}
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => playOn.start(resumeFrom(record, step, side), "computer", level)}
+          >
+            Play the computer
+          </button>
+          <div className="play-on-options">
+            <label>
+              Against the computer, you play{" "}
+              <select value={side} onChange={(e) => setSide(e.target.value as Side)}>
+                <option value="light">light</option>
+                <option value="dark">dark</option>
+              </select>
+            </label>{" "}
+            <label>
+              Computer strength{" "}
+              <select value={level} onChange={(e) => setLevel(e.target.value as Level)}>
+                {Object.entries(levels).map(([id, l]) => (
+                  <option key={id} value={id}>
+                    {l.label}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </section>
+      )}
       <MoveList
         moves={record.moves}
         first={ruleset.firstToMove}

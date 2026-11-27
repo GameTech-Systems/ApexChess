@@ -212,13 +212,6 @@ export function Home({
             </button>
             <span>{online ? "Ratings of players who chose to be listed." : NEEDS_CONNECTION}</span>
           </li>
-          <li className="pgn-item">
-            <details>
-              <summary>Open a PGN game</summary>
-              <PgnImport onOpen={onImport} />
-            </details>
-            <span>Replay a game saved with Download PGN. Works offline.</span>
-          </li>
           <li>
             <button
               type="button"
@@ -231,6 +224,13 @@ export function Home({
             <span>
               {online ? "Optional. Sign in with a passkey for rated games." : NEEDS_CONNECTION}
             </span>
+          </li>
+          <li className="pgn-item">
+            <details>
+              <summary>Open a PGN game</summary>
+              <PgnImport onOpen={onImport} />
+            </details>
+            <span>Replay a game saved with Download PGN. Works offline.</span>
           </li>
         </ul>
       </section>

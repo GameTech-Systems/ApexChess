@@ -186,8 +186,8 @@ Download a finished game as PGN text with standard coordinates; ruleset id and v
 Done when: an exported game replays to the same final position in the app.
 
 ### S34 — PGN import UI · Sonnet 5.5 · medium · `done`
-Per D26. Home ("More") gets "Open a PGN game": choose a `.pgn` file or paste text; a valid Apex Chess PGN opens in the existing Replay (works offline), an invalid one shows a plain reason and changes nothing. Uses `parsePgnFromCatalog` (so retired ruleset versions still open). Text over a size cap is refused. Nothing is uploaded or saved.
-Done when: an exported PGN opens in Replay at its final position in tests; junk, a wrong ruleset version, an illegal move, and oversize text each show an error.
+Per D26. Home ("More") gets "Open a PGN game": choose a `.pgn` file or paste text; a valid Apex Chess PGN opens in the existing Replay (works offline), an invalid one shows a plain reason and changes nothing. Uses `parsePgnFromCatalog` (so retired ruleset versions still open). Text over a size cap is refused. Nothing is uploaded or saved. A replay of a live-version game that is not over also offers "Play on from here" (two players, or the computer with a chosen side and strength) from the move shown; retired versions replay only (D21).
+Done when: an exported PGN opens in Replay at its final position in tests; play-on resumes the moves, setups, and side in tests; junk, a wrong ruleset version, an illegal move, and oversize text each show an error.
 
 ### S29 — Community launch · Owner · `todo`
 Parts A to D and the 30-day targets in `docs/LAUNCH-PLAN.md`. No paid advertising yet.
@@ -223,7 +223,7 @@ The owner decides in the ledger. Until a decision is made, its default applies w
 | D23 | Game archive retention | Open; default: say archived games are kept with no end date (as built) (applied in S24, provisional) | S24 |
 | D24 | Offline play | Decided: both; installable web app first (built in S27), desktop download later (no step yet) | S27 |
 | D25 | PGN tags for Apex games | Open; default: `Variant "Apex Chess"`, `Ruleset "<id> <version>"`, and both setup codes in `LightSetup` and `DarkSetup` (provisional) | S33 |
-| D26 | PGN import UI | Open; default (provisional): a file picker and a paste box under Home "More", opening the game in Replay only (no play-on from an imported game, nothing saved); cap 200 KB | S34 |
+| D26 | PGN import UI | Open; default (provisional): a file picker and a paste box under Home "More", opening the game in Replay, from which it can be played on (live ruleset version only); nothing saved; cap 200 KB | S34 |
 
 ## Ledger sync format
 
