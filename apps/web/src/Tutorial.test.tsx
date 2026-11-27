@@ -60,6 +60,7 @@ describe("tutorial is reachable", () => {
         onStart={() => undefined}
         onOpen={() => undefined}
         onEvents={() => undefined}
+        onImport={() => undefined}
       />,
     );
     expect(html).toContain('href="/tutorial/"');

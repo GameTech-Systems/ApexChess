@@ -2,7 +2,9 @@ import { useState } from "react";
 import { startPosition, type ResolvedRuleset } from "@apexchess/engine";
 import { Board } from "./Board";
 import { DEFAULT_LEVEL, levels, type Level } from "./computer";
+import { PgnImport } from "./PgnImport";
 import { ROUTE_PATHS } from "./routes";
+import type { Shared } from "./share";
 import { chordSpan } from "./setupBuilder";
 
 export type Opponent = "hotseat" | "computer" | "online";
@@ -24,6 +26,7 @@ export function Home({
   onStart,
   onOpen,
   onEvents,
+  onImport,
   initialLevel = DEFAULT_LEVEL,
   online = true,
 }: {
@@ -31,6 +34,8 @@ export function Home({
   onStart: (opponent: Opponent, setup: SetupChoice, level: Level) => void;
   onOpen: (panel: Panel) => void;
   onEvents: () => void;
+  /** A game opened from a PGN (D26); the app shows it in the replay. */
+  onImport: (shared: Shared) => void;
   initialLevel?: Level;
   /** False while the device has no connection: online-only choices are disabled (D24). */
   online?: boolean;
@@ -206,6 +211,13 @@ export function Home({
               Leaderboards
             </button>
             <span>{online ? "Ratings of players who chose to be listed." : NEEDS_CONNECTION}</span>
+          </li>
+          <li className="pgn-item">
+            <details>
+              <summary>Open a PGN game</summary>
+              <PgnImport onOpen={onImport} />
+            </details>
+            <span>Replay a game saved with Download PGN. Works offline.</span>
           </li>
           <li>
             <button

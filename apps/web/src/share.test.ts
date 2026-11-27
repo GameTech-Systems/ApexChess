@@ -6,9 +6,18 @@ import {
   newRecord,
   replay,
   resolveRuleset,
+  toPgn,
   type GameRecord,
 } from "@apexchess/engine";
-import { downloadPgn, gameLink, parseShare, setupLink } from "./share";
+import {
+  PGN_MAX_CHARS,
+  downloadPgn,
+  gameLink,
+  importPgn,
+  openPgnFile,
+  parseShare,
+  setupLink,
+} from "./share";
 
 const ruleset = resolveRuleset(catalog, "standard");
 const d = ruleset.setup.default.pieces;
@@ -54,6 +63,65 @@ describe("share links", () => {
     expect(parseShare(ruleset, gameLink(ruleset, other))).toBeUndefined();
     const bad = { ...rec, moves: ["a1-a8"] };
     expect(parseShare(ruleset, gameLink(ruleset, bad))).toBeUndefined();
+  });
+});
+
+describe("importPgn", () => {
+  it("opens an exported game at the same record and ruleset", () => {
+    const rec = played(6);
+    expect(importPgn(toPgn(ruleset, rec))).toEqual({
+      ok: true,
+      shared: { kind: "game", record: rec, ruleset },
+    });
+  });
+  it("opens a game from a retired ruleset version", () => {
+    const old = resolveRuleset(catalog, "standard", "0.1.0");
+    let rec = newRecord(old, d, d);
+    for (let i = 0; i < 3; i++)
+      rec = addMove(old, rec, legalMoves(old, replay(old, rec).position)[0]!);
+    const got = importPgn(toPgn(old, rec));
+    expect(got).toMatchObject({ ok: true, shared: { kind: "game", record: rec } });
+  });
+  it("gives a plain reason for junk, a missing tag, an unknown version, and an illegal move", () => {
+    const pgn = toPgn(ruleset, played(2));
+    const bad = (text: string) => {
+      const got = importPgn(text);
+      expect(got.ok).toBe(false);
+      return got.ok ? "" : got.error;
+    };
+    expect(bad("hello")).toMatch(/Apex Chess/);
+    expect(bad("")).toMatch(/empty|Paste|choose/i);
+    expect(bad(pgn.replace(/^\[DarkSetup.*\n/m, ""))).toMatch(/DarkSetup/);
+    expect(bad(pgn.replace(/standard \S+"/, 'standard 9.9.9"'))).toMatch(/version|ruleset/i);
+    const move = played(2).moves[0]!;
+    expect(bad(pgn.replace(move, "a1-a8"))).toMatch(/illegal|move/i);
+  });
+  it("refuses text over the size cap before parsing it", () => {
+    const got = importPgn("x".repeat(PGN_MAX_CHARS + 1));
+    expect(got).toEqual({ ok: false, error: expect.stringMatching(/too large/i) });
+  });
+});
+
+describe("openPgnFile", () => {
+  it("reads a chosen file's text", async () => {
+    const text = toPgn(ruleset, played(3));
+    const got = await openPgnFile({ size: text.length, text: async () => text });
+    expect(got).toMatchObject({ ok: true, shared: { kind: "game" } });
+  });
+  it("refuses an oversize file without reading it", async () => {
+    const read = vi.fn(async () => "");
+    const got = await openPgnFile({ size: PGN_MAX_CHARS * 4 + 1, text: read });
+    expect(got).toMatchObject({ ok: false, error: expect.stringMatching(/too large/i) });
+    expect(read).not.toHaveBeenCalled();
+  });
+  it("reports a file the browser cannot read", async () => {
+    const got = await openPgnFile({
+      size: 10,
+      text: async () => {
+        throw new Error("denied");
+      },
+    });
+    expect(got).toMatchObject({ ok: false, error: expect.stringMatching(/could not be read/i) });
   });
 });
 

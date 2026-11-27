@@ -12,6 +12,7 @@ const home = (online?: boolean) =>
       onStart={() => undefined}
       onOpen={() => undefined}
       onEvents={() => undefined}
+      onImport={() => undefined}
       online={online}
     />,
   );
