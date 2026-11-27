@@ -70,4 +70,18 @@ describe("downloadPgn", () => {
     expect(await blob!.text()).toContain('[Variant "Apex Chess"]');
     vi.unstubAllGlobals();
   });
+
+  it("revokes the object URL only after the click has been handled", () => {
+    vi.useFakeTimers();
+    const link = { href: "", download: "", click: vi.fn() };
+    vi.stubGlobal("document", { createElement: () => link });
+    vi.spyOn(URL, "createObjectURL").mockImplementation(() => "blob:x");
+    const revoke = vi.spyOn(URL, "revokeObjectURL").mockImplementation(() => {});
+    downloadPgn(ruleset, played(2));
+    expect(revoke).not.toHaveBeenCalled();
+    vi.runAllTimers();
+    expect(revoke).toHaveBeenCalledWith("blob:x");
+    vi.useRealTimers();
+    vi.unstubAllGlobals();
+  });
 });

@@ -89,5 +89,6 @@ export function downloadPgn(ruleset: ResolvedRuleset, record: GameRecord): void 
   link.href = url;
   link.download = "apex-chess-game.pgn";
   link.click();
-  URL.revokeObjectURL(url);
+  // Revoking at once can cancel the download in some browsers (Safari).
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
